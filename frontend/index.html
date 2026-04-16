@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Intelligence · v4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="config.js"></script>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-mark">⚡</div>
+    <div class="sb-logo-text">
+      <div class="sb-logo-name">CRM Engine</div>
+      <div class="sb-logo-ver">v4.0 · Adaptive Intelligence</div>
+    </div>
+  </div>
+  <nav class="sb-nav" id="sbNav">
+    <div class="sb-section">Workspace</div>
+    <div class="nav-item active" data-view="upload" onclick="showView('upload')">
+      <span class="ni-icon">📁</span> Import File
+    </div>
+    <div class="sb-section">Analysis</div>
+    <div class="nav-item" data-view="dashboard" onclick="showView('dashboard')">
+      <span class="ni-icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" data-view="analytics" onclick="showView('analytics')">
+      <span class="ni-icon">📈</span> Analytics
+    </div>
+    <div class="nav-item" data-view="table" onclick="showView('table')">
+      <span class="ni-icon">📋</span> Data Table
+    </div>
+    <div class="nav-item" data-view="quality" onclick="showView('quality')">
+      <span class="ni-icon">🔍</span> Data Quality
+    </div>
+    <div class="nav-item" data-view="dedup" onclick="showView('dedup')">
+      <span class="ni-icon">🧹</span> Deduplication
+    </div>
+    <div class="sb-section">Export</div>
+    <div class="nav-item" onclick="downloadExcel()">
+      <span class="ni-icon">⬇</span> Export Excel
+    </div>
+    <div class="nav-item" onclick="downloadPDF()">
+      <span class="ni-icon">📄</span> Export PDF
+    </div>
+  </nav>
+  <div id="sbFileCard" class="sb-file-card hidden">
+    <div class="fc-label">Loaded File</div>
+    <div class="fc-name" id="sbFileName">—</div>
+    <div class="fc-meta" id="sbFileMeta">—</div>
+  </div>
+  <div class="sb-bottom">CRM Intelligence · Gujarat B2B Data</div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div>
+      <div class="topbar-title" id="topTitle">Import a File to Begin</div>
+      <div class="topbar-sub" id="topSub">Supports .xlsx · .xls · .csv · .txt · .pdf — any column structure</div>
+    </div>
+    <div class="topbar-actions" id="topActions" style="display:none">
+      <button class="btn btn-secondary btn-sm" onclick="resetApp()">↩ New File</button>
+      <button class="btn btn-success btn-sm" onclick="downloadExcel()">⬇ Excel</button>
+      <button class="btn btn-warning btn-sm" id="btnPDF" onclick="downloadPDF()">📄 PDF</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <div class="view active" id="view-upload">
+      <div class="upload-outer">
+        <div class="upload-heading">Your B2B Data,<br><span>Instantly Organized.</span></div>
+        <div class="upload-desc">
+          Drop any industrial directory file — GIDC, chamber, trade contact, lead data, or PDF.
+          The engine auto-detects all column types, cleans the data, and builds a full CRM dashboard. No template needed.
+        </div>
+        <div id="uploadError" class="alert-banner alert-error hidden" style="margin-bottom:16px"></div>
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+          <div class="drop-circle">📊</div>
+          <div class="drop-title">Drop your file here, or click to browse</div>
+          <div class="drop-desc">
+            Works with ANY column structure — messy headers, multiple phones in one cell, unnamed columns.<br>
+            Handles Gujarat GIDC, Bombay CAMA, chamber directories, scraped leads, and PDFs.
+          </div>
+          <button class="btn btn-primary" id="chooseFileBtn" onclick="event.stopPropagation();document.getElementById('fileInput').click()">
+            Choose File
+          </button>
+          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.txt,.pdf" style="display:none" onchange="handleFile(this.files[0])">
+          <div class="ft-chips">
+            <span class="ft-chip">📗 .xlsx</span>
+            <span class="ft-chip">📘 .xls</span>
+            <span class="ft-chip">📄 .csv</span>
+            <span class="ft-chip">📝 .txt</span>
+            <span class="ft-chip">📑 .pdf</span>
+          </div>
+        </div>
+        <div class="upload-grid">
+          <div class="ugrid-card"><div class="ugrid-icon">🏭</div><div><div class="ugrid-title">GIDC / Industrial</div><div class="ugrid-desc">Chhatral, Vatva, Waghodia, Sarigam estate data</div></div></div>
+          <div class="ugrid-card"><div class="ugrid-icon">🧪</div><div><div class="ugrid-title">Trade Directories</div><div class="ugrid-desc">Chemicals, dyes, plastics — CAMA, chamber</div></div></div>
+          <div class="ugrid-card"><div class="ugrid-icon">📞</div><div><div class="ugrid-title">Lead / Scraped Data</div><div class="ugrid-desc">Khambhat, manpower, security leads</div></div></div>
+          <div class="ugrid-card"><div class="ugrid-icon">🏢</div><div><div class="ugrid-title">Chamber Contacts</div><div class="ugrid-desc">Gujarat Chamber of Commerce 3,305 records</div></div></div>
+          <div class="ugrid-card"><div class="ugrid-icon">📦</div><div><div class="ugrid-title">Product Catalogues</div><div class="ugrid-desc">Products, services, industry categories</div></div></div>
+          <div class="ugrid-card"><div class="ugrid-icon">📑</div><div><div class="ugrid-title">PDF Directories</div><div class="ugrid-desc">Scanned or digital PDF files with table data</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-mapping">
+      <div class="map-head">
+        <div>
+          <div class="sec-title">Field Detection & Mapping</div>
+          <div class="sec-sub" id="mappingSub"></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary" onclick="showView('upload')">← Back</button>
+          <button class="btn btn-primary" onclick="startProcessing()">✓ Confirm & Build Dashboard →</button>
+        </div>
+      </div>
+      <div class="alert-banner alert-info" id="mappingAlert">🤖 Auto-detecting field types…</div>
+      <div class="map-stats-row" id="mapStatsRow"></div>
+      <div class="map-table">
+        <div class="mt-head">
+          <div>Original Column</div><div></div><div>Mapped Field Type</div>
+          <div style="text-align:center">Confidence</div>
+          <div style="text-align:center">Include</div>
+        </div>
+        <div id="mappingRows"></div>
+      </div>
+      <div style="margin-top:16px;display:flex;justify-content:flex-end">
+        <button class="btn btn-primary btn-lg" onclick="startProcessing()">✓ Confirm & Build Dashboard →</button>
+      </div>
+    </div>
+
+    <div class="view" id="view-processing">
+      <div class="proc-wrap">
+        <div class="proc-ring"></div>
+        <div class="proc-title">Building Your Dashboard</div>
+        <div class="proc-sub" id="procSub">Initializing...</div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progFill" style="width:0%"></div>
+        </div>
+        <div class="proc-steps" id="procSteps"></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-dashboard">
+      <div class="section">
+        <div class="sec-hd">
+          <div>
+            <div class="sec-title">Overview</div>
+            <div class="sec-sub" id="dashUpdated"></div>
+          </div>
+        </div>
+        <div class="kpi-grid" id="kpiGrid"></div>
+      </div>
+      <div class="section" id="insightSection">
+        <div class="section-label">Intelligent Insights</div>
+        <div class="insight-grid" id="insightGrid"></div>
+      </div>
+      <div class="section" id="dashCharts1">
+        <div class="section-label">Distribution Analysis</div>
+        <div class="chart-grid-2" id="chartsRow1"></div>
+      </div>
+      <div class="section" id="dashCharts2">
+        <div class="section-label">Contact Reachability</div>
+        <div class="chart-grid-2" id="chartsRow2"></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-analytics">
+      <div class="sec-hd"><div class="sec-title">Deep Analytics</div></div>
+      <div class="tab-pills" id="analyticsTabs"></div>
+      <div id="analyticsContent"></div>
+    </div>
+
+    <div class="view" id="view-table">
+      <div class="sec-hd">
+        <div class="sec-title">Data Table</div>
+        <div style="font-size:12.5px;color:var(--text-3)" id="tblMeta"></div>
+      </div>
+      <div class="tbl-toolbar">
+        <input class="tbl-search" id="searchBox" placeholder="🔍 Search all fields..." oninput="filterTable()">
+        <select class="tbl-select" id="colFilter" onchange="onColFilterChange()">
+          <option value="">Filter by column…</option>
+        </select>
+        <select class="tbl-select" id="valFilter" onchange="filterTable()">
+          <option value="">All values</option>
+        </select>
+        <select class="tbl-select" id="pgSize" onchange="S.pageSize=+this.value;S.page=1;renderTable()">
+          <option value="25">25 / page</option>
+          <option value="50" selected>50 / page</option>
+          <option value="100">100 / page</option>
+        </select>
+        <span style="font-size:12.5px;color:var(--text-3)" id="tblCount"></span>
+      </div>
+      <div class="tbl-wrap">
+        <table><thead id="tHead"></thead><tbody id="tBody"></tbody></table>
+      </div>
+      <div class="pag" id="pagDiv"></div>
+    </div>
+
+    <div class="view" id="view-quality">
+      <div class="sec-hd"><div class="sec-title">Data Quality Report</div></div>
+      <div id="qualityContent"></div>
+    </div>
+
+    <div class="view" id="view-dedup">
+      <div class="sec-hd">
+        <div>
+          <div class="sec-title">Deduplication</div>
+          <div class="sec-sub">Review and merge duplicate company records</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="dedupCount" style="font-size:13px;color:var(--text-3)"></span>
+          <button class="btn btn-danger btn-sm" onclick="removeAllDupes()">Remove All Duplicates</button>
+        </div>
+      </div>
+      <div id="dedupContent"></div>
+    </div>
+
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
