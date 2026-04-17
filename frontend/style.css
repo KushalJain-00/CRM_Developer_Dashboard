@@ -86,14 +86,14 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--text);min-height
 .sb-collapsed .nav-item .ni-icon { transform:scale(1.2); }
 .sb-collapsed .sb-toggle-btn { position:static; margin-left:auto; margin-right:-8px; }
 
-.main{margin-left:var(--sb-w);min-height:100vh;display:flex;flex-direction:column;transition:margin-left .3s cubic-bezier(.4,0,.2,1)}
+.main{margin-left:var(--sb-w);transition:margin-left .3s cubic-bezier(.4,0,.2,1);min-height:100vh}
 .topbar{background:var(--surf);border-bottom:1px solid var(--border);padding:14px 30px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:var(--sh-sm)}
 .topbar-title{font-family:var(--font-d);font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.02em}
 .topbar-sep{color:var(--border-2);font-size:18px}
 .topbar-sub{font-size:12.5px;color:var(--text-3);font-weight:400}
 .topbar-right{margin-left:auto;display:flex;gap:12px;align-items:center}
 .topbar-actions{display:flex;gap:8px;align-items:center}
-.content{padding:28px 30px;flex:1}
+.content{padding:28px 30px}
 
 .view{display:none}
 .view.active{display:block;animation:fadeIn .2s ease}
