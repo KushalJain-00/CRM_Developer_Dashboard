@@ -23,36 +23,36 @@
   </div>
   <nav class="sb-nav" id="sbNav">
     <div class="sb-section">Workspace</div>
-    <div class="nav-item active" data-view="upload" onclick="showView('upload')">
+    <div class="nav-item active" data-view="upload" onclick="showView('upload'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">📁</span> Import File
     </div>
     <div class="sb-section">Analysis</div>
-    <div class="nav-item" data-view="dashboard" onclick="showView('dashboard')">
+    <div class="nav-item" data-view="dashboard" onclick="showView('dashboard'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">📊</span> Dashboard
     </div>
-    <div class="nav-item" data-view="analytics" onclick="showView('analytics')">
+    <div class="nav-item" data-view="analytics" onclick="showView('analytics'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">📈</span> Analytics
     </div>
-    <div class="nav-item" data-view="table" onclick="showView('table')">
+    <div class="nav-item" data-view="table" onclick="showView('table'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">📋</span> Data Table
     </div>
-    <div class="nav-item" data-view="quality" onclick="showView('quality')">
+    <div class="nav-item" data-view="quality" onclick="showView('quality'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">🔍</span> Data Quality
     </div>
-    <div class="nav-item" data-view="dedup" onclick="showView('dedup')">
+    <div class="nav-item" data-view="dedup" onclick="showView('dedup'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">🧹</span> Deduplication
     </div>
     <div class="sb-section">Export</div>
-    <div class="nav-item" onclick="saveToCRM()">
+    <div class="nav-item" onclick="saveToCRM(); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">💾</span> Save to CRM
     </div>
-    <div class="nav-item" onclick="downloadExcel()">
+    <div class="nav-item" onclick="downloadExcel(); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">⬇</span> Export Excel
     </div>
-    <div class="nav-item" onclick="downloadPDF()">
+    <div class="nav-item" onclick="downloadPDF(); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">📄</span> Export PDF
     </div>
-    <div class="nav-item" onclick="downloadVCF()">
+    <div class="nav-item" onclick="downloadVCF(); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">📱</span> Export .VCF
     </div>
   </nav>
@@ -63,9 +63,11 @@
   </div>
   <div class="sb-bottom">CRM Intelligence · Gujarat B2B Data</div>
 </aside>
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
 
 <div class="main">
   <header class="topbar">
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()">☰</button>
     <div>
       <div class="topbar-title" id="topTitle">Import a File to Begin</div>
       <div class="topbar-sub" id="topSub">Supports .xlsx · .xls · .csv · .txt · .pdf — any column structure</div>
@@ -77,6 +79,7 @@
       <button class="btn btn-warning btn-sm" id="btnPDF" onclick="downloadPDF()">📄 PDF</button>
       <button class="btn btn-secondary btn-sm" onclick="downloadVCF()">📱 VCF</button>
     </div>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
   </header>
 
   <div class="content">
@@ -91,15 +94,16 @@
         <div id="uploadError" class="alert-banner alert-error hidden" style="margin-bottom:16px"></div>
         <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
           <div class="drop-circle">📊</div>
-          <div class="drop-title">Drop your file here, or click to browse</div>
+          <div class="drop-title">Drop your files here, or click to browse</div>
           <div class="drop-desc">
-            Works with ANY column structure — messy headers, multiple phones in one cell, unnamed columns.<br>
-            Handles Gujarat GIDC, Bombay CAMA, chamber directories, scraped leads, and PDFs.
+            Drop multiple files at once — they'll be merged automatically into a single dataset.<br>
+            Works with ANY column structure — messy headers, multiple phones in one cell, unnamed columns.
+          </div>
           </div>
           <button class="btn btn-primary" id="chooseFileBtn" onclick="event.stopPropagation();document.getElementById('fileInput').click()">
             Choose File
           </button>
-          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.txt,.pdf" style="display:none" onchange="handleFile(this.files[0])">
+          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.txt,.pdf" multiple style="display:none" onchange="handleMultipleFiles(this.files)">
           <div class="ft-chips">
             <span class="ft-chip">📗 .xlsx</span>
             <span class="ft-chip">📘 .xls</span>

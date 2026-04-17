@@ -112,8 +112,44 @@ document.addEventListener('DOMContentLoaded', () => {
   const dz = document.getElementById('dropZone');
   dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
   dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
-  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); handleFile(e.dataTransfer.files[0]); });
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); handleMultipleFiles(e.dataTransfer.files); });
+
+  // Initialize theme
+  const savedTheme = localStorage.getItem('crm-theme');
+  if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.getElementById('themeToggle').textContent = '☀️';
+  }
 });
+
+/* ── UI Toggles ─────────────────────────────────────────────────────── */
+function toggleTheme() {
+  const root = document.documentElement;
+  const isDark = root.getAttribute('data-theme') === 'dark';
+  if (isDark) {
+    root.removeAttribute('data-theme');
+    localStorage.setItem('crm-theme', 'light');
+    document.getElementById('themeToggle').textContent = '🌙';
+  } else {
+    root.setAttribute('data-theme', 'dark');
+    localStorage.setItem('crm-theme', 'dark');
+    document.getElementById('themeToggle').textContent = '☀️';
+  }
+  
+  // Re-render charts if they exist so they pick up new colors
+  if (S.charts && S.charts.length) {
+    killCharts();
+    if (S.currentView === 'dashboard') buildKPIs();
+    if (S.currentView === 'analytics') showAnalytics();
+  }
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sbOverlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('open');
+}
 
 async function handleFile(file) {
   if (!file) return;
@@ -195,6 +231,99 @@ async function handleFile(file) {
   }
 
   showError(`Unsupported file type: .${ext}`);
+}
+
+/* ── Multi-File Handler ────────────────────────────────────────────── */
+async function handleMultipleFiles(fileList) {
+  const files = Array.from(fileList).filter(f => /\.(xlsx|xls|csv|txt|pdf)$/i.test(f.name));
+  if (!files.length) { showError('No supported files found. Drop .xlsx, .xls, .csv, .txt, or .pdf files.'); return; }
+
+  // If only 1 file, use normal flow
+  if (files.length === 1) { handleFile(files[0]); return; }
+
+  // Multiple files — merge them all
+  let mergedRaw = [], mergedHeaders = [], fileNames = [];
+
+  for (const file of files) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    fileNames.push(file.name);
+
+    try {
+      if (ext === 'xlsx') {
+        const data = await readFileAsArrayBuffer(file);
+        const wb = XLSX.read(data, {type:'array', cellDates:true});
+        const validSheets = getValidSheets(wb);
+        validSheets.forEach(sn => {
+          const ws = wb.Sheets[sn];
+          const json = XLSX.utils.sheet_to_json(ws, {defval:null, raw:false});
+          if (!json.length) return;
+          const keys = Object.keys(json[0]);
+          const merged = mergeUnnamedCols(keys, json);
+          merged.forEach(h => {
+            if (!mergedHeaders.includes(h)) {
+              const vals = json.map(r=>r[h]).filter(v=>v!=null&&v!=='');
+              if (vals.length > 0 && !String(h).startsWith('__EMPTY')) mergedHeaders.push(h);
+            }
+          });
+          mergedRaw = mergedRaw.concat(json);
+        });
+      } else if (ext === 'csv') {
+        const text = await readFileAsText(file);
+        const lines = text.split('\n').filter(l=>l.trim());
+        if (lines.length < 2) continue;
+        const headers = lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+        headers.forEach(h => { if (!mergedHeaders.includes(h)) mergedHeaders.push(h); });
+        const rows = lines.slice(1).map(line => {
+          const vals = line.split(',').map(v=>v.trim().replace(/^"|"$/g,''));
+          const obj = {};
+          headers.forEach((h,i) => obj[h] = vals[i] || '');
+          return obj;
+        }).filter(r => Object.values(r).some(v=>v));
+        mergedRaw = mergedRaw.concat(rows);
+      } else if (ext === 'xls' || ext === 'pdf') {
+        // These need backend parsing — handle one at a time via API
+        if (API_BASE) {
+          const fd = new FormData();
+          fd.append('file', file);
+          const res = await fetch(`${API_BASE}/api/parse`, { method:'POST', headers:{'x-api-key':API_KEY}, body:fd });
+          if (res.ok) {
+            const result = await res.json();
+            if (result.headers) result.headers.forEach(h => { if (!mergedHeaders.includes(h)) mergedHeaders.push(h); });
+            if (result.rows) mergedRaw = mergedRaw.concat(result.rows);
+          }
+        }
+      }
+    } catch(err) {
+      console.warn(`Failed to parse ${file.name}:`, err);
+    }
+  }
+
+  if (!mergedRaw.length) { showError('No data could be extracted from the dropped files.'); return; }
+
+  S.fileName = fileNames.length <= 3 ? fileNames.join(' + ') : `${fileNames.length} files merged`;
+  S.sheetName = `${fileNames.length} files`;
+  S.rawData = mergedRaw;
+  S.headers = mergedHeaders;
+  buildMapping();
+  showNotification(`📂 Merged ${mergedRaw.length} records from ${fileNames.length} files`, 'success');
+}
+
+function readFileAsArrayBuffer(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result);
+    r.onerror = reject;
+    r.readAsArrayBuffer(file);
+  });
+}
+
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result);
+    r.onerror = reject;
+    r.readAsText(file);
+  });
 }
 
 async function handleViaBackend(file, ext) {
