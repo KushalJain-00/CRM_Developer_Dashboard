@@ -142,10 +142,15 @@ function toggleTheme() {
   }, 150);
   
   // Re-render charts if they exist so they pick up new colors
-  if (S.charts && S.charts.length) {
+  if (S.clean && S.clean.length) {
     killCharts();
-    if (S.currentView === 'dashboard') buildKPIs();
-    if (S.currentView === 'analytics') showAnalytics();
+    buildMainCharts();
+    if (document.getElementById('analyticsTabs')) {
+      const activeTab = document.querySelector('.tab-pill.on');
+      if (activeTab) switchTab(activeTab.textContent.trim() === '🏆 Top Records' ? 'top' : activeTab.textContent.trim().includes('Distribution') ? 'dist' : activeTab.textContent.trim().includes('Reachability') ? 'reach' : activeTab.textContent.trim().includes('Industry') ? 'seg' : 'geo', activeTab);
+      // Wait, buildAnalytics automatically rebuilds the current tab!
+      buildAnalytics();
+    }
   }
 }
 
