@@ -126,15 +126,20 @@ document.addEventListener('DOMContentLoaded', () => {
 function toggleTheme() {
   const root = document.documentElement;
   const isDark = root.getAttribute('data-theme') === 'dark';
-  if (isDark) {
-    root.removeAttribute('data-theme');
-    localStorage.setItem('crm-theme', 'light');
-    document.getElementById('themeToggle').textContent = '🌙';
-  } else {
-    root.setAttribute('data-theme', 'dark');
-    localStorage.setItem('crm-theme', 'dark');
-    document.getElementById('themeToggle').textContent = '☀️';
-  }
+  const btn = document.getElementById('themeToggle');
+  btn.style.transform = 'scale(0.8) rotate(180deg)';
+  setTimeout(() => {
+    if (isDark) {
+      root.removeAttribute('data-theme');
+      localStorage.setItem('crm-theme', 'light');
+      btn.textContent = '🌙';
+    } else {
+      root.setAttribute('data-theme', 'dark');
+      localStorage.setItem('crm-theme', 'dark');
+      btn.textContent = '☀️';
+    }
+    btn.style.transform = 'scale(1) rotate(0deg)';
+  }, 150);
   
   // Re-render charts if they exist so they pick up new colors
   if (S.charts && S.charts.length) {
@@ -447,8 +452,8 @@ function buildMapping() {
         </div>
         <div class="sample-txt">${samples}</div>
       </div>
-      <div class="arr-icon">→</div>
-      <select class="map-sel" data-col="${h}" onchange="S.mapping['${h}'].type=this.value;S.mapping['${h}'].keep=this.value!=='skip'">${opts}</select>
+      <div class="arr-icon" style="opacity:${m.confidence < 65 ? '1' : '0.4'}">→</div>
+      <select class="map-sel" style="${m.confidence < 65 ? 'border-color:var(--amber);box-shadow:0 0 0 2px rgba(245,158,11,0.15)' : ''}" data-col="${h}" onchange="S.mapping['${h}'].type=this.value;S.mapping['${h}'].keep=this.value!=='skip';this.style.borderColor='';this.style.boxShadow='';">${opts}</select>
       <div class="conf-num" style="color:${confColor}">${m.confidence}%</div>
       <div><input type="checkbox" class="incl-chk" ${m.keep?'checked':''} onchange="S.mapping['${h}'].keep=this.checked"></div>
     `;
@@ -735,6 +740,12 @@ function buildMainCharts() {
   }
   const webCols=colsByType('website');
   if (webCols.length) { const total=S.clean.length,withWeb=countWithAny(webCols); addDonutChart(r2,'Website Presence',['Has Website','No Website'],[withWeb,total-withWeb],'h260',['#10B981','#E2E8F0']); }
+
+  // Hide empty chart sections to prevent massive gap UI bugs
+  const sect1 = document.getElementById('dashCharts1');
+  const sect2 = document.getElementById('dashCharts2');
+  if (sect1) sect1.style.display = r1.hasChildNodes() ? 'block' : 'none';
+  if (sect2) sect2.style.display = r2.hasChildNodes() ? 'block' : 'none';
 }
 
 function buildAnalytics() {
@@ -883,7 +894,7 @@ function buildDedup() {
     const rows=group.map(idx=>S.clean[idx]);
     const companyName=cc?rows[0][cc]:`Group ${gi+1}`;
     const card=document.createElement('div'); card.className='dedup-card'; card.id=`dg-${gi}`;
-    card.innerHTML=`<div class="dedup-header"><div><div class="dedup-title">🏢 ${companyName}</div><div class="dedup-meta">${rows.length} similar records</div></div><div style="display:flex;gap:8px"><button class="btn btn-danger btn-sm" onclick="keepFirst(${gi})">Keep First, Remove Others</button></div></div><div class="dedup-rows">${rows.map((row,ri)=>{const phone=phoneCols.length?row[phoneCols[0]]||'—':'—';const email=emailCols.length?row[emailCols[0]]||'—':'—';return `<div class="dedup-row-item ${ri===0?'primary':'dupe'}"><span class="dedup-label ${ri===0?'label-keep':'label-dupe'}">${ri===0?'KEEP':'DUPE'}</span><span style="flex:1;font-weight:${ri===0?700:400}">${cc?row[cc]||'—':'Row '+(ri+1)}</span><span style="color:var(--text-3);font-size:11px;min-width:120px">📞 ${phone}</span><span style="color:var(--text-3);font-size:11px;min-width:160px">📧 ${email}</span></div>`;}).join('')}</div>`;
+    card.innerHTML=`<div class="dedup-header"><div><div class="dedup-title">🏢 ${companyName}</div><div class="dedup-meta">${rows.length} similar records</div></div><div style="display:flex;gap:8px"><button class="btn btn-danger btn-sm" onclick="keepFirst(${gi})">Keep First, Remove Others</button></div></div><div class="dedup-rows">${rows.map((row,ri)=>{const phone=phoneCols.length?row[phoneCols[0]]||'—':'—';const email=emailCols.length?row[emailCols[0]]||'—':'—';return `<div class="dedup-row-item ${ri===0?'primary':'dupe'}"><span class="badge ${ri===0?'b-blue':'b-rose'}" style="width:54px;justify-content:center">${ri===0?'KEEP':'DUPE'}</span><span style="flex:1;font-weight:${ri===0?700:400}">${cc?row[cc]||'—':'Row '+(ri+1)}</span><span style="color:var(--text-3);font-size:11px;min-width:120px">📞 ${phone}</span><span style="color:var(--text-3);font-size:11px;min-width:160px">📧 ${email}</span></div>`;}).join('')}</div>`;
     c.appendChild(card);
   });
 }
@@ -977,7 +988,11 @@ function addBarChart(parent, title, labels, data, color, hClass='h260', horizont
   card.innerHTML=`<div class="chart-card-title">${title}</div><div class="chart-wrap ${hClass}"><canvas></canvas></div>`;
   parent.appendChild(card);
   const ctx=card.querySelector('canvas').getContext('2d');
-  const ch=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:color+'22',borderColor:color,borderWidth:1.5,borderRadius:5,borderSkipped:false,hoverBackgroundColor:color+'44'}]},options:{indexAxis:horizontal?'y':'x',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`Count: ${ctx.parsed[horizontal?'x':'y']}`}}},scales:{x:{grid:{color:'rgba(226,232,240,.6)',drawBorder:false},ticks:{color:'#94A3B8',font:{size:10,family:'DM Sans'},maxRotation:38,autoSkipPadding:8}},y:{grid:{color:'rgba(226,232,240,.6)',drawBorder:false},ticks:{color:'#94A3B8',font:{size:10,family:'DM Sans'}}}}}});
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  const textColor=isDark?'#CBD5E1':'#94A3B8';
+  const gridColor=isDark?'rgba(51,65,85,.5)':'rgba(226,232,240,.6)';
+  
+  const ch=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:color+'22',borderColor:color,borderWidth:1.5,borderRadius:5,borderSkipped:false,hoverBackgroundColor:color+'44'}]},options:{indexAxis:horizontal?'y':'x',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`Count: ${ctx.parsed[horizontal?'x':'y']}`}}},scales:{x:{grid:{color:gridColor,drawBorder:false},ticks:{color:textColor,font:{size:10,family:'DM Sans'},maxRotation:38,autoSkipPadding:8}},y:{grid:{color:gridColor,drawBorder:false},ticks:{color:textColor,font:{size:10,family:'DM Sans'}}}}}});
   S.charts.push(ch);
 }
 
@@ -987,7 +1002,12 @@ function addDonutChart(parent, title, labels, data, hClass='h260', colors) {
   card.innerHTML=`<div class="chart-card-title">${title}</div><div class="chart-wrap ${hClass}" style="position:relative"><canvas></canvas><div class="donut-center"><div class="dc-val">${total.toLocaleString()}</div><div class="dc-lbl">Total</div></div></div>`;
   parent.appendChild(card);
   const ctx=card.querySelector('canvas').getContext('2d');
-  const ch=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:cols.slice(0,data.length),borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'64%',plugins:{legend:{position:'right',labels:{color:'#64748B',font:{size:11,family:'DM Sans'},boxWidth:12,padding:8,usePointStyle:true}},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw.toLocaleString()} (${Math.round(ctx.raw/total*100)}%)`}}}}});
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  const textColor=isDark?'#94A3B8':'#64748B';
+  const borderWidth=isDark?1:0;
+  const borderColor=isDark?'#1E293B':'#ffffff';
+
+  const ch=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:cols.slice(0,data.length),borderColor:borderColor,borderWidth:borderWidth,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'64%',plugins:{legend:{position:'right',labels:{color:textColor,font:{size:11,family:'DM Sans'},boxWidth:12,padding:8,usePointStyle:true}},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw.toLocaleString()} (${Math.round(ctx.raw/total*100)}%)`}}}}});
   S.charts.push(ch);
 }
 
