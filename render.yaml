@@ -8,8 +8,8 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.8
       - key: ALLOWED_ORIGINS
-        value: "http://localhost:3000" # Remember to change this to your Vercel URL!
+        value: "*" # Remember to change this to your Vercel URL!
       - key: API_KEY
         generateValue: true # Render will automatically generate a secure secret key for you
       - key: DATABASE_URL
-        value: "" # Paste your Supabase connection string here
+        value: "" # Overridden by your Render dashboard environment variable

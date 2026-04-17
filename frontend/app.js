@@ -727,9 +727,14 @@ function buildInsights() {
 
 function buildMainCharts() {
   killCharts();
+  const sect1 = document.getElementById('dashCharts1');
+  const sect2 = document.getElementById('dashCharts2');
+  if (sect1) sect1.style.display = 'none';
+  if (sect2) sect2.style.display = 'none';
   const r1 = document.getElementById('chartsRow1');
   const r2 = document.getElementById('chartsRow2');
-  r1.innerHTML = ''; r2.innerHTML = '';
+  if (r1) r1.innerHTML = '';
+  if (r2) r2.innerHTML = '';
   const cityCol = firstCol('city') || firstCol('location');
   if (cityCol) { const data=groupBy(cityCol,12); if(data.length>1) addBarChart(r1,'Records by '+cityCol,data.map(d=>d[0]),data.map(d=>d[1]),'#3B82F6','h260'); }
   const indCol=firstCol('industry')||firstCol('keyword'), prodCol=firstCol('product');
@@ -746,11 +751,9 @@ function buildMainCharts() {
   const webCols=colsByType('website');
   if (webCols.length) { const total=S.clean.length,withWeb=countWithAny(webCols); addDonutChart(r2,'Website Presence',['Has Website','No Website'],[withWeb,total-withWeb],'h260',['#10B981','#E2E8F0']); }
 
-  // Hide empty chart sections to prevent massive gap UI bugs
-  const sect1 = document.getElementById('dashCharts1');
-  const sect2 = document.getElementById('dashCharts2');
-  if (sect1) sect1.style.display = r1.hasChildNodes() ? 'block' : 'none';
-  if (sect2) sect2.style.display = r2.hasChildNodes() ? 'block' : 'none';
+  // Show chart sections only if they actually have child nodes generated without crashing
+  if (sect1 && r1 && r1.hasChildNodes()) sect1.style.display = 'block';
+  if (sect2 && r2 && r2.hasChildNodes()) sect2.style.display = 'block';
 }
 
 function buildAnalytics() {
@@ -997,8 +1000,10 @@ function addBarChart(parent, title, labels, data, color, hClass='h260', horizont
   const textColor=isDark?'#CBD5E1':'#94A3B8';
   const gridColor=isDark?'rgba(51,65,85,.5)':'rgba(226,232,240,.6)';
   
-  const ch=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:color+'22',borderColor:color,borderWidth:1.5,borderRadius:5,borderSkipped:false,hoverBackgroundColor:color+'44'}]},options:{indexAxis:horizontal?'y':'x',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`Count: ${ctx.parsed[horizontal?'x':'y']}`}}},scales:{x:{grid:{color:gridColor,drawBorder:false},ticks:{color:textColor,font:{size:10,family:'DM Sans'},maxRotation:38,autoSkipPadding:8}},y:{grid:{color:gridColor,drawBorder:false},ticks:{color:textColor,font:{size:10,family:'DM Sans'}}}}}});
-  S.charts.push(ch);
+  try {
+    const ch=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:color+'22',borderColor:color,borderWidth:1.5,borderRadius:5,borderSkipped:false,hoverBackgroundColor:color+'44'}]},options:{indexAxis:horizontal?'y':'x',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`Count: ${ctx.parsed[horizontal?'x':'y']}`}}},scales:{x:{grid:{color:gridColor,drawBorder:false},ticks:{color:textColor,font:{size:10,family:'DM Sans'},maxRotation:38,autoSkipPadding:8}},y:{grid:{color:gridColor,drawBorder:false},ticks:{color:textColor,font:{size:10,family:'DM Sans'}}}}}});
+    S.charts.push(ch);
+  } catch(err) { console.error('Chart.js error:', err); }
 }
 
 function addDonutChart(parent, title, labels, data, hClass='h260', colors) {
@@ -1012,8 +1017,10 @@ function addDonutChart(parent, title, labels, data, hClass='h260', colors) {
   const borderWidth=isDark?1:0;
   const borderColor=isDark?'#1E293B':'#ffffff';
 
-  const ch=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:cols.slice(0,data.length),borderColor:borderColor,borderWidth:borderWidth,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'64%',plugins:{legend:{position:'right',labels:{color:textColor,font:{size:11,family:'DM Sans'},boxWidth:12,padding:8,usePointStyle:true}},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw.toLocaleString()} (${Math.round(ctx.raw/total*100)}%)`}}}}});
-  S.charts.push(ch);
+  try {
+    const ch=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:cols.slice(0,data.length),borderColor:borderColor,borderWidth:borderWidth,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'64%',plugins:{legend:{position:'right',labels:{color:textColor,font:{size:11,family:'DM Sans'},boxWidth:12,padding:8,usePointStyle:true}},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw.toLocaleString()} (${Math.round(ctx.raw/total*100)}%)`}}}}});
+    S.charts.push(ch);
+  } catch(err) { console.error('Chart.js error:', err); }
 }
 
 function killCharts() { S.charts.forEach(c=>c.destroy&&c.destroy()); S.charts=[]; }
@@ -1105,6 +1112,12 @@ function downloadExcel() {
 }
 
 function showView(id) {
+  // Guard: redirect to upload if no data and trying to access data views
+  const dataViews = ['dashboard','analytics','table','quality','dedup'];
+  if (dataViews.includes(id) && !S.clean.length) {
+    id = 'upload';
+  }
+
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-'+id).classList.add('active');
   document.querySelectorAll('.nav-item[data-view]').forEach(n=>n.classList.remove('active'));

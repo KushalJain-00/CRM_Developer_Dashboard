@@ -41,5 +41,6 @@ def get_db():
 
 def init_db():
     """Initialize database - create all tables"""
+    from db import models  # noqa
     Base.metadata.create_all(bind=engine)
 
