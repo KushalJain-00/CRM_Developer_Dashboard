@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 import os
 import sys
@@ -11,8 +12,25 @@ load_dotenv()
 
 from api.parse import router as parse_router
 from api.export_pdf import router as pdf_router
+from api.contacts import router as contacts_router
+from api.calls import router as calls_router
+from db.database import init_db
 
-app = FastAPI(title="CRM Intelligence API", version="1.0.0", docs_url=None, redoc_url=None)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialize database tables on startup"""
+    init_db()
+    yield
+
+
+app = FastAPI(
+    title="CRM Intelligence API",
+    version="2.0.0",
+    docs_url=None,
+    redoc_url=None,
+    lifespan=lifespan,
+)
 
 origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
 
@@ -26,6 +44,9 @@ app.add_middleware(
 
 app.include_router(parse_router, prefix="/api")
 app.include_router(pdf_router, prefix="/api")
+app.include_router(contacts_router, prefix="/api")
+app.include_router(calls_router, prefix="/api")
+
 
 @app.get("/health")
 async def health():

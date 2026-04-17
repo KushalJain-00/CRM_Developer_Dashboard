@@ -7,52 +7,62 @@ from typing import Any
 
 
 def parse_xls(content: bytes) -> dict:
+    """
+    Parse ALL valid sheets in an XLS workbook and merge
+    them into a single unified dataset.
+    """
     wb = xlrd.open_workbook(file_contents=content)
-    best_sheet = _pick_best_xls_sheet(wb)
-    sheet = wb.sheet_by_name(best_sheet)
-    if sheet.nrows < 2:
-        raise ValueError("Sheet appears empty")
-    headers = [str(sheet.cell_value(0, c)).strip() for c in range(sheet.ncols)]
-    rows = []
-    for r in range(1, sheet.nrows):
-        row = {}
-        for c, h in enumerate(headers):
-            cell = sheet.cell(r, c)
-            val = cell.value
-            if cell.ctype == xlrd.XL_CELL_NUMBER:
-                val = int(val) if val == int(val) else val
-            elif cell.ctype == xlrd.XL_CELL_DATE:
-                from xlrd import xldate_as_tuple
-                import datetime
-                try:
-                    t = xldate_as_tuple(val, wb.datemode)
-                    val = str(datetime.date(*t[:3]))
-                except Exception:
-                    val = str(val)
-            else:
-                val = str(val).strip() if val else ""
-            row[h] = val if val != "" else None
-        if any(v for v in row.values() if v is not None):
-            rows.append(row)
-    return {"sheet": best_sheet, "headers": headers, "rows": rows}
+    all_rows = []
+    all_headers = []
+    sheet_names_used = []
 
-
-def _pick_best_xls_sheet(wb: xlrd.Book) -> str:
-    best, best_score = wb.sheet_names()[0], -1
     for name in wb.sheet_names():
-        sheet = wb.sheet_by_name(name)
-        cols = sheet.ncols
-        rows = sheet.nrows
-        if cols <= 2:
-            continue
+        # Skip lookup / index sheets
         lname = name.lower()
         if re.search(r"mob no|email id|phone list|mobile list|index|lookup", lname):
             continue
-        score = rows * cols
-        if score > best_score:
-            best_score = score
-            best = name
-    return best
+
+        sheet = wb.sheet_by_name(name)
+        if sheet.nrows < 2 or sheet.ncols <= 2:
+            continue
+
+        headers = [str(sheet.cell_value(0, c)).strip() for c in range(sheet.ncols)]
+        headers = [h for h in headers if h]  # drop blank headers
+
+        # Track all unique headers across sheets
+        for h in headers:
+            if h not in all_headers:
+                all_headers.append(h)
+
+        for r in range(1, sheet.nrows):
+            row = {}
+            for c, h in enumerate(headers):
+                if c >= sheet.ncols:
+                    break
+                cell = sheet.cell(r, c)
+                val = cell.value
+                if cell.ctype == xlrd.XL_CELL_NUMBER:
+                    val = int(val) if val == int(val) else val
+                elif cell.ctype == xlrd.XL_CELL_DATE:
+                    from xlrd import xldate_as_tuple
+                    import datetime
+                    try:
+                        t = xldate_as_tuple(val, wb.datemode)
+                        val = str(datetime.date(*t[:3]))
+                    except Exception:
+                        val = str(val)
+                else:
+                    val = str(val).strip() if val else ""
+                row[h] = val if val != "" else None
+            if any(v for v in row.values() if v is not None):
+                all_rows.append(row)
+        sheet_names_used.append(name)
+
+    if not all_rows:
+        raise ValueError("No data found in any sheet")
+
+    combined_name = " + ".join(sheet_names_used) if len(sheet_names_used) > 1 else sheet_names_used[0]
+    return {"sheet": combined_name, "headers": all_headers, "rows": all_rows}
 
 
 def parse_pdf(content: bytes) -> dict:

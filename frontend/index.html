@@ -43,11 +43,17 @@
       <span class="ni-icon">🧹</span> Deduplication
     </div>
     <div class="sb-section">Export</div>
+    <div class="nav-item" onclick="saveToCRM()">
+      <span class="ni-icon">💾</span> Save to CRM
+    </div>
     <div class="nav-item" onclick="downloadExcel()">
       <span class="ni-icon">⬇</span> Export Excel
     </div>
     <div class="nav-item" onclick="downloadPDF()">
       <span class="ni-icon">📄</span> Export PDF
+    </div>
+    <div class="nav-item" onclick="downloadVCF()">
+      <span class="ni-icon">📱</span> Export .VCF
     </div>
   </nav>
   <div id="sbFileCard" class="sb-file-card hidden">
@@ -66,8 +72,10 @@
     </div>
     <div class="topbar-actions" id="topActions" style="display:none">
       <button class="btn btn-secondary btn-sm" onclick="resetApp()">↩ New File</button>
+      <button class="btn btn-primary btn-sm" id="btnSaveCRM" onclick="saveToCRM()">💾 Save to CRM</button>
       <button class="btn btn-success btn-sm" onclick="downloadExcel()">⬇ Excel</button>
       <button class="btn btn-warning btn-sm" id="btnPDF" onclick="downloadPDF()">📄 PDF</button>
+      <button class="btn btn-secondary btn-sm" onclick="downloadVCF()">📱 VCF</button>
     </div>
   </header>
 
@@ -228,5 +236,60 @@
 </div>
 
 <script src="app.js"></script>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Edit Record</div>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body" id="editFields"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Contact Detail Panel -->
+<div class="slide-panel" id="contactPanel">
+  <div class="sp-header">
+    <div>
+      <div class="sp-name" id="panelName">Contact</div>
+      <div class="sp-company" id="panelCompany"></div>
+    </div>
+    <button class="modal-close" onclick="closeContactPanel()">✕</button>
+  </div>
+  <div class="sp-section">
+    <div class="sp-section-title">📋 Contact Details</div>
+    <div id="panelDetails"></div>
+  </div>
+  <div class="sp-section">
+    <div class="sp-section-title">📞 Call Log</div>
+    <div class="call-log-form">
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <select id="callType" class="tbl-select" style="flex:1">
+          <option>Outgoing</option>
+          <option>Incoming</option>
+          <option>Follow-up</option>
+        </select>
+        <select id="callOutcome" class="tbl-select" style="flex:1">
+          <option>Connected</option>
+          <option>No Answer</option>
+          <option>Voicemail</option>
+          <option>Callback Scheduled</option>
+          <option>Not Interested</option>
+          <option>Deal Closed</option>
+        </select>
+      </div>
+      <textarea id="callNotes" placeholder="What was discussed on the call?" rows="3" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:12px;resize:vertical;background:var(--bg-2);color:var(--text)"></textarea>
+      <button class="btn btn-primary btn-sm" style="margin-top:8px;width:100%" onclick="addCallLogFromPanel()">📞 Record Call</button>
+    </div>
+    <div id="callLogsList" style="margin-top:12px"></div>
+  </div>
+</div>
+<div class="sp-backdrop" id="spBackdrop" onclick="closeContactPanel()"></div>
+
 </body>
 </html>

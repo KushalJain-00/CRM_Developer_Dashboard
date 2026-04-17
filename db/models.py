@@ -35,6 +35,7 @@ class Contact(Base):
     email_secondary = Column(String)
     phone_primary = Column(String)
     phone_secondary = Column(String)
+    phone_country = Column(String, default="IN")  # "IN" for Indian, "+1" for US, etc.
     whatsapp = Column(String)
     position = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)

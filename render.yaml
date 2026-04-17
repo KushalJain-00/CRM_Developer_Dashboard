@@ -6,8 +6,10 @@ services:
     startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: 3.11.8
       - key: ALLOWED_ORIGINS
         value: "http://localhost:3000" # Remember to change this to your Vercel URL!
       - key: API_KEY
         generateValue: true # Render will automatically generate a secure secret key for you
+      - key: DATABASE_URL
+        value: "" # Paste your Supabase connection string here

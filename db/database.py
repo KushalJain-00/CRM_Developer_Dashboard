@@ -5,14 +5,25 @@ import os
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./crm.db")
 
-# For SQLite, we need check_same_thread=False for FastAPI
+# Supabase gives "postgres://..." but SQLAlchemy requires "postgresql://..."
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+# Configure engine based on database type
 if DATABASE_URL.startswith("sqlite"):
     engine = create_engine(
         DATABASE_URL,
         connect_args={"check_same_thread": False}
     )
 else:
-    engine = create_engine(DATABASE_URL)
+    # PostgreSQL (Supabase) — use connection pooling for production
+    engine = create_engine(
+        DATABASE_URL,
+        pool_size=5,
+        max_overflow=10,
+        pool_pre_ping=True,       # auto-reconnect on stale connections
+        pool_recycle=300,          # recycle connections every 5 min
+    )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -31,3 +42,4 @@ def get_db():
 def init_db():
     """Initialize database - create all tables"""
     Base.metadata.create_all(bind=engine)
+

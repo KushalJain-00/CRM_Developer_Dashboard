@@ -6,7 +6,9 @@ const S = {
   fileName:'', sheetName:'',
   filtered:[], page:1, pageSize:50, sortCol:null, sortDir:1,
   charts:[], currentView:'upload',
-  dupGroups:[]
+  dupGroups:[],
+  validation: {dropped:0, invalidEmails:0, landlines:0, foreign:0, total:0},
+  dbContacts: [], sessionId: null,
 };
 
 const FT = {
@@ -49,21 +51,18 @@ function apiUploadHeaders() {
   return h;
 }
 
-function pickBestSheet(wb) {
-  let best = wb.SheetNames[0], bestScore = -1;
-  wb.SheetNames.forEach(name => {
+function getValidSheets(wb) {
+  return wb.SheetNames.filter(name => {
     const ws = wb.Sheets[name];
-    if (!ws['!ref']) return;
+    if (!ws['!ref']) return false;
     const range = XLSX.utils.decode_range(ws['!ref']);
     const rows = range.e.r - range.s.r;
     const cols = range.e.c - range.s.c + 1;
-    if (cols <= 2) return;
+    if (cols <= 2) return false;
     const lname = name.toLowerCase();
-    if (/mob no|email id|phone list|mobile list|index|lookup/.test(lname)) return;
-    const score = rows * cols;
-    if (score > bestScore) { bestScore = score; best = name; }
+    if (/mob no|email id|phone list|mobile list|index|lookup/.test(lname)) return false;
+    return rows > 0;
   });
-  return best;
 }
 
 function detectField(col, samples) {
@@ -160,17 +159,27 @@ async function handleFile(file) {
     reader.onload = e => {
       try {
         const wb = XLSX.read(e.target.result, {type:'array', cellDates:true});
-        S.sheetName = pickBestSheet(wb);
-        const ws = wb.Sheets[S.sheetName];
-        const json = XLSX.utils.sheet_to_json(ws, {defval:null, raw:false});
-        if (!json.length) { showError('Selected sheet appears empty.'); return; }
-        const allKeys = Object.keys(json[0]);
-        const mergedHeaders = mergeUnnamedCols(allKeys, json);
-        S.headers = mergedHeaders.filter(h => {
-          const vals = json.map(r=>r[h]).filter(v=>v!=null&&v!=='');
-          return vals.length > 0 && !String(h).startsWith('__EMPTY');
+        const validSheets = getValidSheets(wb);
+        if (!validSheets.length) { showError('No valid data sheets found.'); return; }
+        S.sheetName = validSheets.length > 1 ? validSheets.join(' + ') : validSheets[0];
+        let allJson = [], allHeaders = [];
+        validSheets.forEach(sn => {
+          const ws = wb.Sheets[sn];
+          const json = XLSX.utils.sheet_to_json(ws, {defval:null, raw:false});
+          if (!json.length) return;
+          const keys = Object.keys(json[0]);
+          const merged = mergeUnnamedCols(keys, json);
+          merged.forEach(h => {
+            if (!allHeaders.includes(h)) {
+              const vals = json.map(r=>r[h]).filter(v=>v!=null&&v!=='');
+              if (vals.length > 0 && !String(h).startsWith('__EMPTY')) allHeaders.push(h);
+            }
+          });
+          allJson = allJson.concat(json);
         });
-        S.rawData = json;
+        if (!allJson.length) { showError('All sheets appear empty.'); return; }
+        S.headers = allHeaders;
+        S.rawData = allJson;
         buildMapping();
       } catch(err) {
         showError('Could not read file: ' + err.message);
@@ -359,8 +368,11 @@ async function startProcessing() {
 
 function processData() {
   const keep = keepCols();
-  S.clean = S.rawData.map(row => {
-    const out = {};
+  S.validation = {dropped:0, invalidEmails:0, landlines:0, foreign:0, total:S.rawData.length};
+
+  // Step 1: Clean & normalize values
+  const cleaned = S.rawData.map(row => {
+    const out = { _phoneCountry: 'IN' };
     keep.forEach(h => {
       const type = S.mapping[h].type;
       let v = row[h];
@@ -374,15 +386,31 @@ function processData() {
         } else {
           out[h] = v.toLowerCase().replace(/\s+/g,'');
         }
+        // Strict email validation — discard invalid
+        if (out[h] && !isValidEmail(out[h])) {
+          out[h] = '';
+          S.validation.invalidEmails++;
+        }
+        if (out[h+'_2'] && !isValidEmail(out[h+'_2'])) out[h+'_2'] = '';
       } else if (type === 'phone' || type === 'whatsapp') {
         const sep = v.includes('/') ? '/' : v.includes(',') ? ',' : v.includes(' & ') ? '&' : null;
-        if (sep) {
-          const parts = v.split(sep).map(p=>p.trim()).filter(p=>p.length>=7);
-          out[h] = parts[0] || v.trim();
-          if (parts[1]) out[h+'_2'] = parts[1];
-        } else {
-          out[h] = v.trim();
-        }
+        let nums = sep ? v.split(sep).map(p=>p.trim()).filter(p=>p.length>=7) : [v.trim()];
+        // Classify each phone number
+        const validNums = [];
+        nums.forEach(n => {
+          const cls = classifyPhone(n);
+          if (cls.valid) {
+            validNums.push(n);
+            if (cls.type !== 'IN') {
+              out._phoneCountry = cls.type;
+              S.validation.foreign++;
+            }
+          } else if (cls.type === 'LANDLINE') {
+            S.validation.landlines++;
+          }
+        });
+        out[h] = validNums[0] || '';
+        if (validNums[1]) out[h+'_2'] = validNums[1];
       } else if (type === 'company' || type === 'contact' || type === 'city') {
         out[h] = toTitle(v);
       } else if (type === 'website') {
@@ -394,7 +422,21 @@ function processData() {
       }
     });
     return out;
-  }).filter(row => Object.values(row).some(v => v !== ''));
+  }).filter(row => Object.values(row).some(v => v !== '' && !String(v).startsWith('_')));
+
+  // Step 2: Enforce mandatory rule — must have email OR valid mobile
+  const emailCols = colsByType('email');
+  const phoneCols = [...colsByType('phone'), ...colsByType('whatsapp')];
+  S.clean = cleaned.filter(row => {
+    const hasEmail = emailCols.some(c => row[c] && row[c] !== '' && isValidEmail(row[c]));
+    const hasPhone = phoneCols.some(c => row[c] && row[c] !== '');
+    if (!hasEmail && !hasPhone) {
+      S.validation.dropped++;
+      return false;
+    }
+    return true;
+  });
+
   S.filtered = [...S.clean];
 }
 
@@ -430,6 +472,33 @@ function groupBy(col, limit=10) {
 }
 function toTitle(s) { return s.replace(/\w\S*/g, w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()); }
 function sleep(ms)  { return new Promise(r=>setTimeout(r,ms)); }
+
+/* ── Validation Helpers (Phase 2) ──────────────────────────────────── */
+const INDIAN_MOBILE_RE = /^(\+91[\s\-]?)?[6-9]\d{9}$/;
+const INTL_PHONE_RE    = /^\+(?!91)\d{1,3}[\s\-]?\d{5,14}$/;
+const STRICT_EMAIL_RE  = /^[\w.+%-]+@[\w.-]+\.[a-z]{2,}$/i;
+
+function isValidEmail(v) {
+  return v ? STRICT_EMAIL_RE.test(v.trim()) : false;
+}
+
+function classifyPhone(v) {
+  if (!v) return {valid:false, type:'INVALID', cleaned:''};
+  const cleaned = v.trim().replace(/[\s\-\(\)]/g, '');
+  // Indian mobile (with or without +91)
+  if (INDIAN_MOBILE_RE.test(cleaned)) return {valid:true, type:'IN', cleaned};
+  // Bare 10-digit Indian mobile
+  if (/^[6-9]\d{9}$/.test(cleaned)) return {valid:true, type:'IN', cleaned};
+  // International number
+  if (INTL_PHONE_RE.test(cleaned)) {
+    const m = cleaned.match(/^\+(\d{1,3})/);
+    return {valid:true, type: m ? '+'+m[1] : 'INTL', cleaned};
+  }
+  // Generic number ≥10 digits (probably landline or invalid)
+  if (/^\d{10,}$/.test(cleaned)) return {valid:false, type:'LANDLINE', cleaned};
+  // Too short or garbage
+  return {valid:false, type:'INVALID', cleaned};
+}
 
 function buildAllViews() {
   buildDashboard();
@@ -737,20 +806,23 @@ function filterTable() {
 
 function renderTable() {
   const keep=keepCols(), head=document.getElementById('tHead'), body=document.getElementById('tBody');
-  head.innerHTML='<tr>'+keep.map((c,i)=>{ const ft=FT[S.mapping[c].type],icon=ft?ft.icon:'',dir=S.sortCol===i?(S.sortDir===1?' ↑':' ↓'):''; return `<th onclick="sortTable(${i})" title="Sort by ${c}">${icon} ${c}${dir}</th>`; }).join('')+'</tr>';
+  head.innerHTML='<tr>'+keep.map((c,i)=>{ const ft=FT[S.mapping[c].type],icon=ft?ft.icon:'',dir=S.sortCol===i?(S.sortDir===1?' ↑':' ↓'):''; return `<th onclick="sortTable(${i})" title="Sort by ${c}">${icon} ${c}${dir}</th>`; }).join('')+'<th style="width:110px;text-align:center">Actions</th></tr>';
   let data=[...S.filtered];
   if (S.sortCol!==null) { const col=keep[S.sortCol]; data.sort((a,b)=>String(a[col]||'').localeCompare(String(b[col]||''))*S.sortDir); }
   const start=(S.page-1)*S.pageSize, page=data.slice(start,start+S.pageSize);
-  body.innerHTML=page.map(row=>`<tr>${keep.map(c=>{ const type=S.mapping[c].type; let v=row[c]||'';
+  body.innerHTML=page.map((row,ri)=>{
+    const idx = start + ri;
+    return `<tr>${keep.map(c=>{ const type=S.mapping[c].type; let v=row[c]||'';
     if(type==='email'&&v) v=`<a href="mailto:${v}" style="color:var(--blue)">${v}</a>`;
     else if(type==='website'&&v) v=`<a href="${v}" target="_blank" style="color:var(--emerald)">${v.replace(/https?:\/\//,'').slice(0,36)}</a>`;
-    else if(type==='phone'||type==='whatsapp') v=`<span class="mono" style="color:var(--emerald)">${v}</span>`;
+    else if(type==='phone'||type==='whatsapp') { const cls=row._phoneCountry&&row._phoneCountry!=='IN'?'foreign-flag':''; v=`<span class="mono ${cls}" style="color:var(--emerald)">${v}${row._phoneCountry&&row._phoneCountry!=='IN'?' <span class="badge b-amber" style="font-size:9px">'+row._phoneCountry+'</span>':''}</span>`; }
     else if(type==='id') v=v?`<span class="badge b-slate">#${v}</span>`:'';
     else if(type==='member'&&v) v=`<span class="badge b-emerald">✓ ${v}</span>`;
     else if(type==='company') v=`<span style="font-weight:700;color:var(--text)">${v}</span>`;
     else if(type==='industry'||type==='keyword') v=v?`<span class="badge b-violet">${v.slice(0,30)}</span>`:'';
     else if(type==='status') v=v?`<span class="badge b-amber">${v.slice(0,20)}</span>`:'';
-    return `<td title="${String(row[c]||'').replace(/"/g,'')}">${v}</td>`; }).join('')}</tr>`).join('');
+    return `<td title="${String(row[c]||'').replace(/"/g,'')}">${v}</td>`; }).join('')}<td class="row-actions"><button class="act-btn act-view" onclick="showContactPanel(${idx})" title="View & Call Logs">👁</button><button class="act-btn act-edit" onclick="editRow(${idx})" title="Edit">✏️</button><button class="act-btn act-del" onclick="deleteRow(${idx})" title="Delete">🗑</button></td></tr>`;
+  }).join('');
   document.getElementById('tblMeta').textContent=`${S.filtered.length.toLocaleString()} records`;
   document.getElementById('tblCount').textContent=`Showing ${start+1}–${Math.min(start+S.pageSize,data.length)} of ${S.filtered.length.toLocaleString()}`;
   renderPag(data.length);
@@ -897,6 +969,7 @@ function showView(id) {
 function resetApp() {
   S.rawData=[];S.headers=[];S.mapping={};S.clean=[];S.fileName='';S.sheetName='';
   S.filtered=[];S.page=1;S.sortCol=null;S.sortDir=1;S.dupGroups=[];
+  S.validation={dropped:0,invalidEmails:0,landlines:0,foreign:0,total:0};
   killCharts();
   document.getElementById('fileInput').value='';
   document.getElementById('topActions').style.display='none';
@@ -904,4 +977,273 @@ function resetApp() {
   document.getElementById('procSteps').innerHTML='';
   document.getElementById('progFill').style.width='0%';
   showView('upload');
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   CRM PHASE 2 — Save to DB, Edit, Delete, Contact Panel, Call Logs, VCF
+   ══════════════════════════════════════════════════════════════════════ */
+
+async function saveToCRM() {
+  if (!API_BASE) { alert('Backend not configured. Set CRM_API_BASE in config.js'); return; }
+  if (!S.clean.length) { alert('No data to save.'); return; }
+  const btn = document.getElementById('btnSaveCRM');
+  if (btn) { btn.innerHTML = '<span class="spinner-inline"></span> Saving…'; btn.disabled = true; }
+
+  const companyCols = colsByType('company');
+  const contactCols = colsByType('contact');
+  const emailCols = colsByType('email');
+  const phoneCols = [...colsByType('phone'), ...colsByType('whatsapp')];
+  const cityCols = colsByType('city');
+  const addressCols = colsByType('address');
+  const pinCols = colsByType('pincode');
+  const webCols = colsByType('website');
+  const indCols = [...colsByType('industry'), ...colsByType('keyword')];
+  const prodCols = colsByType('product');
+
+  const contacts = S.clean.map(row => ({
+    company_name: companyCols.length ? row[companyCols[0]] || null : null,
+    contact_name: contactCols.length ? row[contactCols[0]] || null : null,
+    email_primary: emailCols.length ? row[emailCols[0]] || null : null,
+    email_secondary: emailCols.length && row[emailCols[0]+'_2'] ? row[emailCols[0]+'_2'] : null,
+    phone_primary: phoneCols.length ? row[phoneCols[0]] || null : null,
+    phone_secondary: phoneCols.length && row[phoneCols[0]+'_2'] ? row[phoneCols[0]+'_2'] : null,
+    phone_country: row._phoneCountry || 'IN',
+    whatsapp: colsByType('whatsapp').length ? row[colsByType('whatsapp')[0]] || null : null,
+    address: addressCols.length ? row[addressCols[0]] || null : null,
+    city: cityCols.length ? row[cityCols[0]] || null : null,
+    pincode: pinCols.length ? row[pinCols[0]] || null : null,
+    website: webCols.length ? row[webCols[0]] || null : null,
+    industry: indCols.length ? row[indCols[0]] || null : null,
+    product: prodCols.length ? row[prodCols[0]] || null : null,
+    raw_data: row,
+  }));
+
+  try {
+    const res = await fetch(`${API_BASE}/api/contacts/batch`, {
+      method: 'POST',
+      headers: apiHeaders(),
+      body: JSON.stringify({
+        file_name: S.fileName,
+        sheet_name: S.sheetName,
+        mapping: S.mapping,
+        contacts,
+      }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    S.sessionId = data.session_id;
+    const msg = `✅ Saved ${data.imported} contacts to CRM.`
+      + (data.skipped ? ` ${data.skipped} skipped (no email/phone).` : '')
+      + (data.flagged_foreign ? ` ${data.flagged_foreign} foreign numbers flagged.` : '');
+    showNotification(msg, 'success');
+  } catch(err) {
+    showNotification('Failed to save: ' + err.message, 'error');
+  }
+  if (btn) { btn.innerHTML = '💾 Save to CRM'; btn.disabled = false; }
+}
+
+function showNotification(msg, type='info') {
+  let n = document.getElementById('crmNotification');
+  if (!n) {
+    n = document.createElement('div');
+    n.id = 'crmNotification';
+    document.body.appendChild(n);
+  }
+  n.className = `crm-notification ${type}`;
+  n.textContent = msg;
+  n.style.display = 'block';
+  setTimeout(() => { n.style.display = 'none'; }, 5000);
+}
+
+/* ── Edit Row ─────────────────────────────────────────────────────── */
+let _editIdx = null;
+function editRow(idx) {
+  _editIdx = idx;
+  const row = S.filtered[idx];
+  if (!row) return;
+  const keep = keepCols();
+  const modal = document.getElementById('editModal');
+  const form = document.getElementById('editFields');
+  form.innerHTML = '';
+  keep.forEach(col => {
+    const ft = FT[S.mapping[col].type];
+    const icon = ft ? ft.icon : '';
+    const val = row[col] || '';
+    form.innerHTML += `<div class="edit-field">
+      <label>${icon} ${col}</label>
+      <input type="text" data-col="${col}" value="${val.replace(/"/g,'&quot;')}" />
+    </div>`;
+  });
+  modal.classList.add('open');
+}
+
+function saveEdit() {
+  if (_editIdx === null) return;
+  const row = S.filtered[_editIdx];
+  const inputs = document.querySelectorAll('#editFields input');
+  inputs.forEach(inp => {
+    const col = inp.dataset.col;
+    const type = S.mapping[col] ? S.mapping[col].type : 'other';
+    let val = inp.value.trim();
+    // Validate email on edit
+    if (type === 'email' && val && !isValidEmail(val)) {
+      inp.style.border = '2px solid var(--rose)';
+      showNotification('Invalid email: ' + val, 'error');
+      return;
+    }
+    // Validate phone on edit
+    if ((type === 'phone' || type === 'whatsapp') && val) {
+      const cls = classifyPhone(val);
+      if (!cls.valid) {
+        inp.style.border = '2px solid var(--rose)';
+        showNotification('Invalid/landline number: ' + val, 'error');
+        return;
+      }
+    }
+    row[col] = val;
+  });
+  S.filtered[_editIdx] = row;
+  closeEditModal();
+  renderTable();
+  showNotification('✏️ Record updated', 'success');
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('open');
+  _editIdx = null;
+}
+
+/* ── Delete Row ───────────────────────────────────────────────────── */
+function deleteRow(idx) {
+  const row = S.filtered[idx];
+  if (!row) return;
+  const companyCols = colsByType('company');
+  const name = companyCols.length ? row[companyCols[0]] || 'this record' : 'this record';
+  if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+  // Remove from S.clean (find actual index)
+  const cleanIdx = S.clean.indexOf(row);
+  if (cleanIdx >= 0) S.clean.splice(cleanIdx, 1);
+  S.filtered = [...S.clean];
+  renderTable();
+  buildKPIs();
+  document.getElementById('sbFileMeta').textContent = `${S.clean.length.toLocaleString()} records · ${keepCols().length} fields`;
+  showNotification('🗑 Record deleted', 'success');
+}
+
+/* ── Contact Detail Panel + Call Logs ─────────────────────────────── */
+let _panelIdx = null;
+function showContactPanel(idx) {
+  _panelIdx = idx;
+  const row = S.filtered[idx];
+  if (!row) return;
+  const keep = keepCols();
+  const panel = document.getElementById('contactPanel');
+  const companyCols = colsByType('company');
+  const contactCols = colsByType('contact');
+  const emailCols = colsByType('email');
+  const phoneCols = [...colsByType('phone'), ...colsByType('whatsapp')];
+
+  const name = contactCols.length ? row[contactCols[0]] || '' : '';
+  const company = companyCols.length ? row[companyCols[0]] || '' : '';
+  const email = emailCols.length ? row[emailCols[0]] || '' : '';
+  const phone = phoneCols.length ? row[phoneCols[0]] || '' : '';
+
+  document.getElementById('panelName').textContent = name || company || 'Contact';
+  document.getElementById('panelCompany').textContent = company;
+
+  // Contact details
+  const detailsDiv = document.getElementById('panelDetails');
+  detailsDiv.innerHTML = keep.map(col => {
+    const ft = FT[S.mapping[col].type];
+    const val = row[col] || '—';
+    return `<div class="pd-row"><span class="pd-label">${ft ? ft.icon : ''} ${col}</span><span class="pd-val">${val}</span></div>`;
+  }).join('');
+
+  // Foreign number flag
+  if (row._phoneCountry && row._phoneCountry !== 'IN') {
+    detailsDiv.innerHTML += `<div class="pd-row"><span class="pd-label">🌍 Country</span><span class="pd-val"><span class="badge b-amber">${row._phoneCountry} — Foreign Number</span></span></div>`;
+  }
+
+  // Call logs section
+  document.getElementById('callLogsList').innerHTML = '<div class="empty-state" style="padding:16px;font-size:12px">💡 Call logs will appear here after saving to CRM and recording calls.</div>';
+
+  panel.classList.add('open');
+}
+
+function closeContactPanel() {
+  document.getElementById('contactPanel').classList.remove('open');
+  _panelIdx = null;
+}
+
+function addCallLogFromPanel() {
+  const notes = document.getElementById('callNotes').value.trim();
+  const outcome = document.getElementById('callOutcome').value;
+  const callType = document.getElementById('callType').value;
+  if (!notes) { showNotification('Please enter call notes.', 'error'); return; }
+
+  const now = new Date();
+  const entry = document.createElement('div');
+  entry.className = 'call-log-entry';
+  entry.innerHTML = `
+    <div class="cle-header">
+      <span class="cle-type badge ${callType==='Incoming'?'b-emerald':callType==='Follow-up'?'b-amber':'b-blue'}">${callType}</span>
+      <span class="cle-outcome">${outcome}</span>
+      <span class="cle-date">${now.toLocaleDateString()} ${now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+    </div>
+    <div class="cle-notes">${notes}</div>`;
+  const list = document.getElementById('callLogsList');
+  if (list.querySelector('.empty-state')) list.innerHTML = '';
+  list.prepend(entry);
+  document.getElementById('callNotes').value = '';
+  showNotification('📞 Call log recorded', 'success');
+}
+
+/* ── VCF Export ───────────────────────────────────────────────────── */
+function downloadVCF() {
+  if (!S.clean.length) { alert('No data to export.'); return; }
+  const companyCols = colsByType('company');
+  const contactCols = colsByType('contact');
+  const emailCols = colsByType('email');
+  const phoneCols = [...colsByType('phone'), ...colsByType('whatsapp')];
+  const addressCols = colsByType('address');
+  const cityCols = colsByType('city');
+  const webCols = colsByType('website');
+
+  let vcf = '';
+  S.clean.forEach(row => {
+    const name = contactCols.length ? row[contactCols[0]] || '' : '';
+    const company = companyCols.length ? row[companyCols[0]] || '' : '';
+    const email = emailCols.length ? row[emailCols[0]] || '' : '';
+    const phone = phoneCols.length ? row[phoneCols[0]] || '' : '';
+    const phone2 = phoneCols.length && row[phoneCols[0]+'_2'] ? row[phoneCols[0]+'_2'] : '';
+    const addr = addressCols.length ? row[addressCols[0]] || '' : '';
+    const city = cityCols.length ? row[cityCols[0]] || '' : '';
+    const web = webCols.length ? row[webCols[0]] || '' : '';
+
+    const displayName = name || company || 'Unknown';
+    const parts = displayName.split(' ');
+    const firstName = parts[0] || '';
+    const lastName = parts.slice(1).join(' ') || '';
+
+    vcf += 'BEGIN:VCARD\n';
+    vcf += 'VERSION:3.0\n';
+    vcf += `N:${lastName};${firstName};;;\n`;
+    vcf += `FN:${displayName}\n`;
+    if (company) vcf += `ORG:${company}\n`;
+    if (phone) vcf += `TEL;TYPE=CELL:${phone}\n`;
+    if (phone2) vcf += `TEL;TYPE=CELL:${phone2}\n`;
+    if (email) vcf += `EMAIL;TYPE=INTERNET:${email}\n`;
+    if (addr || city) vcf += `ADR;TYPE=WORK:;;${addr};${city};;;;\n`;
+    if (web) vcf += `URL:${web}\n`;
+    vcf += 'END:VCARD\n\n';
+  });
+
+  const blob = new Blob([vcf], {type: 'text/vcard;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (S.fileName || 'contacts').replace(/\.[^.]+$/, '') + '.vcf';
+  a.click();
+  URL.revokeObjectURL(url);
+  showNotification(`📱 Downloaded ${S.clean.length} contacts as VCF`, 'success');
 }
