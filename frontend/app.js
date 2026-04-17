@@ -1111,6 +1111,12 @@ function downloadExcel() {
   XLSX.writeFile(wb, S.fileName.replace(/\.(xlsx?|xls|csv|txt)$/i,'')+'_CRM_Export.xlsx');
 }
 
+function toggleSidebarCollapse() {
+  document.body.classList.toggle('sb-collapsed');
+  const btn = document.getElementById('sbToggleBtn');
+  if (btn) btn.innerHTML = document.body.classList.contains('sb-collapsed') ? '›' : '‹';
+}
+
 function showView(id) {
   // Guard: redirect to upload if no data and trying to access data views
   const dataViews = ['dashboard','analytics','table','quality','dedup'];

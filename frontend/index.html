@@ -20,40 +20,41 @@
       <div class="sb-logo-name">CRM Engine</div>
       <div class="sb-logo-ver">v4.0 · Adaptive Intelligence</div>
     </div>
+    <button class="sb-toggle-btn" id="sbToggleBtn" onclick="toggleSidebarCollapse()" title="Toggle Sidebar">‹</button>
   </div>
   <nav class="sb-nav" id="sbNav">
     <div class="sb-section">Workspace</div>
     <div class="nav-item active" data-view="upload" onclick="showView('upload'); if(window.innerWidth<=768)toggleSidebar()">
-      <span class="ni-icon">📁</span> Import File
+      <span class="ni-icon">📁</span> <span class="ni-label">Import File</span>
     </div>
     <div class="sb-section">Analysis</div>
     <div class="nav-item" data-view="dashboard" onclick="showView('dashboard'); if(window.innerWidth<=768)toggleSidebar()">
-      <span class="ni-icon">📊</span> Dashboard
+      <span class="ni-icon">📊</span> <span class="ni-label">Dashboard</span>
     </div>
     <div class="nav-item" data-view="analytics" onclick="showView('analytics'); if(window.innerWidth<=768)toggleSidebar()">
-      <span class="ni-icon">📈</span> Analytics
+      <span class="ni-icon">📈</span> <span class="ni-label">Analytics</span>
     </div>
     <div class="nav-item" data-view="table" onclick="showView('table'); if(window.innerWidth<=768)toggleSidebar()">
-      <span class="ni-icon">📋</span> Data Table
+      <span class="ni-icon">📋</span> <span class="ni-label">Data Table</span>
     </div>
     <div class="nav-item" data-view="quality" onclick="showView('quality'); if(window.innerWidth<=768)toggleSidebar()">
-      <span class="ni-icon">🔍</span> Data Quality
+      <span class="ni-icon">🔍</span> <span class="ni-label">Data Quality</span>
     </div>
     <div class="nav-item" data-view="dedup" onclick="showView('dedup'); if(window.innerWidth<=768)toggleSidebar()">
-      <span class="ni-icon">🧹</span> Deduplication
+      <span class="ni-icon">🧹</span> <span class="ni-label">Deduplication</span>
     </div>
     <div class="sb-section">Export</div>
     <div class="nav-item" onclick="saveToCRM(); if(window.innerWidth<=768)toggleSidebar()">
-      <span class="ni-icon">💾</span> Save to CRM
+      <span class="ni-icon">💾</span> <span class="ni-label">Save to CRM</span>
     </div>
     <div class="nav-item" onclick="downloadExcel(); if(window.innerWidth<=768)toggleSidebar()">
-      <span class="ni-icon">⬇</span> Export Excel
+      <span class="ni-icon">⬇</span> <span class="ni-label">Export Excel</span>
     </div>
     <div class="nav-item" onclick="downloadPDF(); if(window.innerWidth<=768)toggleSidebar()">
-      <span class="ni-icon">📄</span> Export PDF
+      <span class="ni-icon">📄</span> <span class="ni-label">Export PDF</span>
     </div>
     <div class="nav-item" onclick="downloadVCF(); if(window.innerWidth<=768)toggleSidebar()">
-      <span class="ni-icon">📱</span> Export .VCF
+      <span class="ni-icon">📱</span> <span class="ni-label">Export .VCF</span>
     </div>
   </nav>
   <div id="sbFileCard" class="sb-file-card hidden">
