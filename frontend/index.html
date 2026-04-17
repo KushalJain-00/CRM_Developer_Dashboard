@@ -72,14 +72,16 @@
       <div class="topbar-title" id="topTitle">Import a File to Begin</div>
       <div class="topbar-sub" id="topSub">Supports .xlsx · .xls · .csv · .txt · .pdf — any column structure</div>
     </div>
-    <div class="topbar-actions" id="topActions" style="display:none">
-      <button class="btn btn-secondary btn-sm" onclick="resetApp()">↩ New File</button>
-      <button class="btn btn-primary btn-sm" id="btnSaveCRM" onclick="saveToCRM()">💾 Save to CRM</button>
-      <button class="btn btn-success btn-sm" onclick="downloadExcel()">⬇ Excel</button>
-      <button class="btn btn-warning btn-sm" id="btnPDF" onclick="downloadPDF()">📄 PDF</button>
-      <button class="btn btn-secondary btn-sm" onclick="downloadVCF()">📱 VCF</button>
+    <div class="topbar-right">
+      <div class="topbar-actions" id="topActions" style="display:none">
+        <button class="btn btn-secondary btn-sm" onclick="resetApp()">↩ New File</button>
+        <button class="btn btn-primary btn-sm" id="btnSaveCRM" onclick="saveToCRM()">💾 Save to CRM</button>
+        <button class="btn btn-success btn-sm" onclick="downloadExcel()">⬇ Excel</button>
+        <button class="btn btn-warning btn-sm" id="btnPDF" onclick="downloadPDF()">📄 PDF</button>
+        <button class="btn btn-secondary btn-sm" onclick="downloadVCF()">📱 VCF</button>
+      </div>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
     </div>
-    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
   </header>
 
   <div class="content">
