@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./crm.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./crm.db").strip().strip('"').strip("'")
 
 # Supabase gives "postgres://..." but SQLAlchemy requires "postgresql://..."
 if DATABASE_URL.startswith("postgres://"):
