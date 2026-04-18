@@ -8,7 +8,7 @@ const S = {
   charts:[], currentView:'upload',
   dupGroups:[],
   validation: {dropped:0, invalidEmails:0, landlines:0, foreign:0, total:0},
-  dbContacts: [], sessionId: null,
+  dbContacts: [], sessionId: null, userEmail: null,
 };
 
 const FT = {
@@ -121,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Populate sidebar user info from session
   try {
     const session = JSON.parse(localStorage.getItem('crm-session') || '{}');
+    S.userEmail = session.email || null;
     const fullName = [session.firstName, session.lastName].filter(Boolean).join(' ') || session.email || 'User';
     const initials = fullName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'U';
     const el = (id) => document.getElementById(id);
@@ -1140,9 +1141,7 @@ function toggleSidebarCollapse() {
 function showView(id) {
   // Guard: redirect to upload if no data and trying to access data views
   const dataViews = ['dashboard','analytics','table','quality','dedup'];
-  if (dataViews.includes(id) && !S.clean.length) {
-    id = 'upload';
-  }
+  if (dataViews.includes(id) && !S.clean.length) return showView('upload');
 
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-'+id).classList.add('active');
@@ -1150,13 +1149,14 @@ function showView(id) {
   const nav=document.querySelector(`.nav-item[data-view="${id}"]`);
   if (nav) nav.classList.add('active');
   S.currentView=id;
-  const titles={upload:'Import File',mapping:'Field Mapping',processing:'Processing',dashboard:'Dashboard',analytics:'Analytics',table:'Data Table',quality:'Data Quality',dedup:'Deduplication'};
+  const titles={upload:'Import File',mapping:'Field Mapping',processing:'Processing',dashboard:'Dashboard',analytics:'Analytics',table:'Data Table',quality:'Data Quality',dedup:'Deduplication',history:'Upload History'};
   document.getElementById('topTitle').textContent=titles[id]||id;
   if (!['upload','mapping','processing'].includes(id))
     document.getElementById('topSub').textContent=`${S.fileName} · ${S.clean.length.toLocaleString()} records`;
   else
     document.getElementById('topSub').textContent='Supports .xlsx · .xls · .csv · .txt · .pdf — any column structure';
   if (id==='table') renderTable();
+  if (id==='history') loadHistory();
 }
 
 function resetApp() {
@@ -1220,6 +1220,7 @@ async function saveToCRM() {
         sheet_name: S.sheetName,
         mapping: S.mapping,
         contacts,
+        user_email: S.userEmail || null,
       }),
     });
     if (!res.ok) throw new Error(await res.text());
@@ -1233,6 +1234,67 @@ async function saveToCRM() {
     showNotification('Failed to save: ' + err.message, 'error');
   }
   if (btn) { btn.innerHTML = '💾 Save to CRM'; btn.disabled = false; }
+}
+
+async function loadHistory() {
+  const content = document.getElementById('historyContent');
+  if (!content) return;
+  if (!API_BASE) {
+    content.innerHTML = '<div class="empty-state">Backend not configured.</div>';
+    return;
+  }
+  try {
+    const email = S.userEmail || '';
+    const res = await fetch(`${API_BASE}/api/history?email=${encodeURIComponent(email)}`, { headers: apiHeaders() });
+    const data = await res.json();
+    if (!data.sessions?.length) {
+      content.innerHTML = '<div class="empty-state">No saved sessions yet. Import a file and click Save to CRM.</div>';
+      return;
+    }
+    content.innerHTML = `<div class="chart-card"><table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="border-bottom:1px solid var(--border)">
+        <th style="padding:10px;text-align:left">File</th>
+        <th style="padding:10px;text-align:left">Sheet</th>
+        <th style="padding:10px">Records</th>
+        <th style="padding:10px">Imported</th>
+        <th style="padding:10px">Date</th>
+        <th style="padding:10px">Actions</th>
+      </tr></thead>
+      <tbody>${data.sessions.map((s) => {
+        const safeName = String(s.file_name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        return `<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px;font-weight:600">${s.file_name}</td>
+          <td style="padding:10px;color:var(--text-3)">${s.sheet_name}</td>
+          <td style="padding:10px;text-align:center">${s.total_records || '—'}</td>
+          <td style="padding:10px;text-align:center;color:var(--emerald)">${s.imported || '—'}</td>
+          <td style="padding:10px;color:var(--text-3);font-size:11px">${new Date(s.upload_date).toLocaleString()}</td>
+          <td style="padding:10px"><button class="btn btn-secondary btn-sm" onclick="reloadSession(${s.id},'${safeName}')">↺ Reload</button>
+          <button class="btn btn-danger btn-sm" style="margin-left:4px" onclick="deleteSession(${s.id})">🗑</button></td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+  } catch (err) {
+    content.innerHTML = `<div class="empty-state">Could not load history: ${err.message}</div>`;
+  }
+}
+
+async function reloadSession(sessionId, fileName) {
+  const res = await fetch(`${API_BASE}/api/history/${sessionId}?page_size=5000`, { headers: apiHeaders() });
+  const data = await res.json();
+  if (!data.ok || !data.records.length) { alert('No records found.'); return; }
+  S.rawData = data.records;
+  S.headers = Object.keys(data.records[0]);
+  S.fileName = fileName;
+  S.sheetName = data.sheet_name;
+  S.mapping = data.mapping || {};
+  if (!Object.keys(S.mapping).length) buildMapping();
+  else startProcessing();
+}
+
+async function deleteSession(sessionId) {
+  if (!confirm('Delete this history entry?')) return;
+  await fetch(`${API_BASE}/api/history/${sessionId}`, { method: 'DELETE', headers: apiHeaders() });
+  loadHistory();
 }
 
 function showNotification(msg, type='info') {

@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="config.js"></script>
 
 <script>
   // If already signed in, skip to app
@@ -449,18 +450,40 @@
       card.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
     }
 
-    function signIn(form) {
+    async function upsertAuthUser(user) {
+      const API_BASE = (window.CRM_API_BASE || '').replace(/\/$/, '');
+      const API_KEY = window.CRM_API_KEY || '';
+      if (!API_BASE || !user?.email) return;
+      await fetch(`${API_BASE}/api/auth/upsert`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-API-Key': API_KEY},
+        body: JSON.stringify({
+          email: user.email,
+          name: user.user_metadata?.full_name || user.email,
+          provider_uid: user.id,
+        }),
+      });
+    }
+
+    async function signIn(form) {
       const email = document.getElementById('siEmail').value.trim();
-      const session = { email, signedInAt: Date.now() };
+      const providerUid = email;
+      const session = { email, provider_uid: providerUid, signedInAt: Date.now() };
+      const supabaseUser = { id: providerUid, email, user_metadata: { full_name: email } };
+      try { await upsertAuthUser(supabaseUser); } catch (e) { console.warn('Auth upsert failed:', e); }
       localStorage.setItem('crm-session', JSON.stringify(session));
       window.location.replace('index.html');
     }
 
-    function signUp(form) {
+    async function signUp(form) {
       const firstName = document.getElementById('suFirst').value.trim();
       const lastName  = document.getElementById('suLast').value.trim();
       const email     = document.getElementById('suEmail').value.trim();
-      const session   = { firstName, lastName, email, signedInAt: Date.now() };
+      const providerUid = crypto.randomUUID();
+      const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
+      const session   = { firstName, lastName, email, provider_uid: providerUid, signedInAt: Date.now() };
+      const supabaseUser = { id: providerUid, email, user_metadata: { full_name: fullName || email } };
+      try { await upsertAuthUser(supabaseUser); } catch (e) { console.warn('Auth upsert failed:', e); }
       localStorage.setItem('crm-session', JSON.stringify(session));
       window.location.replace('index.html');
     }

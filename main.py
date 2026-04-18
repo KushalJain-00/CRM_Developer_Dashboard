@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
+from api.auth    import router as auth_router
+from api.history import router as history_router
 import os
 import sys
 
@@ -46,6 +48,8 @@ app.include_router(parse_router, prefix="/api")
 app.include_router(pdf_router, prefix="/api")
 app.include_router(contacts_router, prefix="/api")
 app.include_router(calls_router, prefix="/api")
+app.include_router(auth_router,    prefix="/api")
+app.include_router(history_router, prefix="/api")
 
 
 @app.get("/health")

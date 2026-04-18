@@ -56,6 +56,9 @@
     <div class="nav-item" data-view="dedup" title="Deduplication" onclick="showView('dedup'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">🧹</span> <span class="ni-label">Deduplication</span>
     </div>
+    <div class="nav-item" data-view="history" title="History" onclick="showView('history'); if(window.innerWidth<=768)toggleSidebar()">
+      <span class="ni-icon">🕐</span> <span class="ni-label">History</span>
+    </div>
     <div class="sb-section">Export</div>
     <div class="nav-item" title="Save to CRM" onclick="saveToCRM(); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">💾</span> <span class="ni-label">Save to CRM</span>
@@ -127,7 +130,6 @@
           <div class="drop-desc">
             Drop multiple files at once — they'll be merged automatically into a single dataset.<br>
             Works with ANY column structure — messy headers, multiple phones in one cell, unnamed columns.
-          </div>
           </div>
           <button class="btn btn-primary" id="chooseFileBtn" onclick="event.stopPropagation();document.getElementById('fileInput').click()">
             Choose File
@@ -263,6 +265,11 @@
         </div>
       </div>
       <div id="dedupContent"></div>
+    </div>
+
+    <div class="view" id="view-history">
+      <div class="sec-hd"><div class="sec-title">Upload History</div></div>
+      <div id="historyContent"><div class="empty-state">Loading history…</div></div>
     </div>
 
   </div>

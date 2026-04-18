@@ -3,7 +3,15 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from .database import Base
 
-
+class User(Base):
+    __tablename__ = "users"
+    id           = Column(Integer, primary_key=True, index=True)
+    email        = Column(String, unique=True, index=True, nullable=False)
+    name         = Column(String)
+    provider_uid = Column(String, index=True)  # Supabase user.id
+    last_login   = Column(DateTime)
+    created_at   = Column(DateTime, default=datetime.utcnow)
+    sessions     = relationship("SessionData", back_populates="user", cascade="all, delete-orphan")
 class Company(Base):
     """Company/Organization table"""
     __tablename__ = "companies"
@@ -78,8 +86,13 @@ class SessionData(Base):
     upload_date = Column(DateTime, default=datetime.utcnow)
     mapping = Column(JSON)  # Store field mapping configuration
     is_active = Column(Boolean, default=True)
+    user_id       = Column(Integer, ForeignKey("users.id"), nullable=True)
+    total_records = Column(Integer, default=0)
+    imported      = Column(Integer, default=0)
+    skipped       = Column(Integer, default=0)
 
     # Relationships
+    user = relationship("User", back_populates="sessions")
     records = relationship("Record", back_populates="session", cascade="all, delete-orphan")
 
 

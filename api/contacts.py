@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.auth import verify_api_key
 from db.database import get_db
-from db.models import Company, Contact, SessionData, Record
+from db.models import Company, Contact, SessionData, Record, User
 
 router = APIRouter()
 
@@ -43,6 +43,7 @@ class BatchImportRequest(BaseModel):
     sheet_name: str
     mapping: dict
     contacts: List[ContactIn]
+    user_email: Optional[str] = None
 
 
 class ContactUpdate(BaseModel):
@@ -150,12 +151,21 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
     skipped = 0
     flagged_foreign = 0
 
+    user_id = None
+    if hasattr(body, "user_email") and body.user_email:
+        u = db.query(User).filter(User.email == body.user_email).first()
+        if u: user_id = u.id
+
+
     # Save session metadata
     session = SessionData(
-        file_name=body.file_name,
-        sheet_name=body.sheet_name,
-        mapping=body.mapping,
+    user_id=user_id,
+    file_name=body.file_name,
+    sheet_name=body.sheet_name,
+    mapping=body.mapping,
+    total_records=len(body.contacts),
     )
+
     db.add(session)
     db.flush()
 
@@ -213,6 +223,9 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
             db.add(Record(session_id=session.id, data=item.raw_data))
 
         imported += 1
+
+    session.imported = imported
+    session.skipped  = skipped
 
     db.commit()
 
