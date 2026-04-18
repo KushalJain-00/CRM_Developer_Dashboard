@@ -2,7 +2,11 @@ const API_BASE = (window.CRM_API_BASE || '').replace(/\/$/, '');
 const API_KEY  = window.CRM_API_KEY || '';
 const SUPABASE_URL = window.CRM_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = window.CRM_SUPABASE_ANON_KEY || '';
-const supabase = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
+// FIX: Renamed from "supabase" to "crmClient" to avoid SyntaxError conflict
+// with the window.supabase global injected by the Supabase CDN script.
+// The CDN registers a top-level "supabase" identifier which clashed with
+// this const, crashing app.js entirely and making ALL functions undefined.
+const crmClient = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
 
@@ -146,9 +150,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function syncAuthSession() {
-  if (!supabase) return;
+  if (!crmClient) return;
   try {
-    const { data, error } = await supabase.auth.getUser();
+    const { data, error } = await crmClient.auth.getUser();
     if (error) throw error;
     const user = data.user;
     if (!user) {
@@ -208,8 +212,8 @@ function toggleTheme() { setTheme(isDarkTheme() ? 'nexus-light' : 'nexus-dark');
 
 async function signOut() {
   if (!confirm('Sign out of CRM Engine?')) return;
-  if (supabase) {
-    try { await supabase.auth.signOut(); } catch (e) { console.warn('Supabase signout failed:', e); }
+  if (crmClient) {
+    try { await crmClient.auth.signOut(); } catch (e) { console.warn('Supabase signout failed:', e); }
   }
   localStorage.removeItem('crm-session');
   window.location.replace('signin.html');
