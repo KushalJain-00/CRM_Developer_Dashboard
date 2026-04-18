@@ -11,6 +11,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="config.js"></script>
+<script>
+  // Auth Guard — must run before page renders
+  (function() {
+    const session = localStorage.getItem('crm-session');
+    if (!session) { window.location.replace('signin.html'); }
+  })();
+</script>
 </head>
 <body>
 
@@ -69,11 +76,12 @@
     <div class="fc-meta" id="sbFileMeta">—</div>
   </div>
   <div class="sb-user">
-    <div class="sb-avatar">KJ</div>
+    <div class="sb-avatar" id="sbAvatarInitials">KJ</div>
     <div class="sb-user-info">
-      <div class="sb-user-name">Kushal Jain</div>
-      <div class="sb-user-role">Administrator</div>
+      <div class="sb-user-name" id="sbUserName">User</div>
+      <div class="sb-user-role" id="sbUserRole">CRM Member</div>
     </div>
+    <button title="Sign Out" onclick="signOut()" style="margin-left:auto;background:transparent;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:16px;flex-shrink:0;padding:4px;border-radius:6px;transition:color .2s" onmouseover="this.style.color='#FF6B6B'" onmouseout="this.style.color='rgba(255,255,255,.3)'">⏻</button>
   </div>
   <div class="sb-bottom">CRM Intelligence v5.0 · Nexus</div>
 </aside>

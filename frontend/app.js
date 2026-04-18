@@ -117,6 +117,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize theme from localStorage
   const savedTheme = localStorage.getItem('crm-theme') || 'nexus-light';
   setTheme(savedTheme, true);
+
+  // Populate sidebar user info from session
+  try {
+    const session = JSON.parse(localStorage.getItem('crm-session') || '{}');
+    const fullName = [session.firstName, session.lastName].filter(Boolean).join(' ') || session.email || 'User';
+    const initials = fullName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'U';
+    const el = (id) => document.getElementById(id);
+    if (el('sbUserName'))    el('sbUserName').textContent = fullName;
+    if (el('sbUserRole'))    el('sbUserRole').textContent = session.email || 'CRM Member';
+    if (el('sbAvatarInitials')) el('sbAvatarInitials').textContent = initials;
+  } catch(e) {}
 });
 
 /* ── UI Toggles ─────────────────────────────────────────────────────── */
@@ -151,6 +162,12 @@ function setTheme(name, skipCharts) {
 
 // Legacy compat
 function toggleTheme() { setTheme(isDarkTheme() ? 'nexus-light' : 'nexus-dark'); }
+
+function signOut() {
+  if (!confirm('Sign out of CRM Engine?')) return;
+  localStorage.removeItem('crm-session');
+  window.location.replace('signin.html');
+}
 
 function toggleSidebar() {
   const sb = document.getElementById('sidebar');

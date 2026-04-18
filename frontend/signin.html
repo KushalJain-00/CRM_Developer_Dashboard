@@ -9,6 +9,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
+<script>
+  // If already signed in, skip to app
+  if (localStorage.getItem('crm-session')) {
+    window.location.replace('index.html');
+  }
+</script>
+
   <style>
     :root {
       --bg: #12131A;
@@ -347,11 +354,11 @@
             <p class="auth-desc">Sign in to your CRM workspace</p>
           </div>
           
-          <form onsubmit="event.preventDefault(); window.location.href='index.html';">
+          <form onsubmit="event.preventDefault(); signIn(this);">
             <div class="input-grp">
               <label>Work Email</label>
               <div class="input-wrap">
-                <input type="email" placeholder="name@company.com" required>
+                <input type="email" id="siEmail" placeholder="name@company.com" required>
                 <div class="input-line"></div>
               </div>
             </div>
@@ -359,7 +366,7 @@
             <div class="input-grp" style="margin-bottom:12px;">
               <label>Password</label>
               <div class="input-wrap">
-                <input type="password" placeholder="••••••••" required>
+                <input type="password" id="siPassword" placeholder="••••••••" required>
                 <div class="input-line"></div>
               </div>
             </div>
@@ -383,19 +390,19 @@
             <p class="auth-desc">Create your CRM engine intelligence account</p>
           </div>
           
-          <form onsubmit="event.preventDefault(); window.location.href='index.html';">
+          <form onsubmit="event.preventDefault(); signUp(this);">
             <div style="display:flex; gap:12px">
               <div class="input-grp" style="flex:1">
                 <label>First Name</label>
                 <div class="input-wrap">
-                  <input type="text" placeholder="John" required>
+                  <input type="text" id="suFirst" placeholder="John" required>
                   <div class="input-line"></div>
                 </div>
               </div>
               <div class="input-grp" style="flex:1">
                 <label>Last Name</label>
                 <div class="input-wrap">
-                  <input type="text" placeholder="Doe" required>
+                  <input type="text" id="suLast" placeholder="Doe" required>
                   <div class="input-line"></div>
                 </div>
               </div>
@@ -404,7 +411,7 @@
             <div class="input-grp">
               <label>Work Email</label>
               <div class="input-wrap">
-                <input type="email" placeholder="name@company.com" required>
+                <input type="email" id="suEmail" placeholder="name@company.com" required>
                 <div class="input-line"></div>
               </div>
             </div>
@@ -412,7 +419,7 @@
             <div class="input-grp">
               <label>Password</label>
               <div class="input-wrap">
-                <input type="password" placeholder="••••••••" required>
+                <input type="password" id="suPassword" placeholder="••••••••" required>
                 <div class="input-line"></div>
               </div>
             </div>
@@ -439,8 +446,23 @@
     function toggleAuth(view) {
       document.getElementById('viewSignIn').style.display = view === 'signin' ? 'block' : 'none';
       document.getElementById('viewSignUp').style.display = view === 'signup' ? 'block' : 'none';
-      // Reset 3D tilt when swapping sizes to prevent jerky jumps
       card.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+    }
+
+    function signIn(form) {
+      const email = document.getElementById('siEmail').value.trim();
+      const session = { email, signedInAt: Date.now() };
+      localStorage.setItem('crm-session', JSON.stringify(session));
+      window.location.replace('index.html');
+    }
+
+    function signUp(form) {
+      const firstName = document.getElementById('suFirst').value.trim();
+      const lastName  = document.getElementById('suLast').value.trim();
+      const email     = document.getElementById('suEmail').value.trim();
+      const session   = { firstName, lastName, email, signedInAt: Date.now() };
+      localStorage.setItem('crm-session', JSON.stringify(session));
+      window.location.replace('index.html');
     }
 
     document.addEventListener('mousemove', (e) => {
