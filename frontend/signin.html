@@ -457,7 +457,10 @@
 
     const SUPABASE_URL = window.CRM_SUPABASE_URL || '';
     const SUPABASE_ANON_KEY = window.CRM_SUPABASE_ANON_KEY || '';
-    const supabase = (SUPABASE_URL && SUPABASE_ANON_KEY)
+    // FIX: Renamed from "supabase" to "crmClient" — same fix as app.js.
+    // The Supabase CDN registers window.supabase globally, which conflicts
+    // with a local const of the same name, crashing the script entirely.
+    const crmClient = (SUPABASE_URL && SUPABASE_ANON_KEY)
       ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
       : null;
 
@@ -500,7 +503,7 @@
     }
 
     async function signIn(form) {
-      if (!supabase) {
+      if (!crmClient) {
         alert('Supabase is not configured. Set CRM_SUPABASE_URL and CRM_SUPABASE_ANON_KEY in config.js');
         return;
       }
@@ -508,7 +511,7 @@
       const password = document.getElementById('siPassword').value;
       try {
         setSubmitting(form, true, 'Signing in...', 'Access Workspace');
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await crmClient.auth.signInWithPassword({ email, password });
         if (error) throw error;
         const user = data.user;
         setSessionFromSupabaseUser(user);
@@ -522,7 +525,7 @@
     }
 
     async function signUp(form) {
-      if (!supabase) {
+      if (!crmClient) {
         alert('Supabase is not configured. Set CRM_SUPABASE_URL and CRM_SUPABASE_ANON_KEY in config.js');
         return;
       }
@@ -533,7 +536,7 @@
       const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
       try {
         setSubmitting(form, true, 'Creating account...', 'Create Account');
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await crmClient.auth.signUp({
           email,
           password,
           options: { data: { full_name: fullName || email } },
