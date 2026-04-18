@@ -114,45 +114,43 @@ document.addEventListener('DOMContentLoaded', () => {
   dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
   dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); handleMultipleFiles(e.dataTransfer.files); });
 
-  // Initialize theme
-  const savedTheme = localStorage.getItem('crm-theme');
-  if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    document.getElementById('themeToggle').textContent = '☀️';
-  }
+  // Initialize theme from localStorage
+  const savedTheme = localStorage.getItem('crm-theme') || 'nexus-light';
+  setTheme(savedTheme, true);
 });
 
 /* ── UI Toggles ─────────────────────────────────────────────────────── */
-function toggleTheme() {
+function isDarkTheme() {
+  const t = document.documentElement.getAttribute('data-theme');
+  return t && t !== 'nexus-light';
+}
+
+function setTheme(name, skipCharts) {
   const root = document.documentElement;
-  const isDark = root.getAttribute('data-theme') === 'dark';
-  const btn = document.getElementById('themeToggle');
-  btn.style.transform = 'scale(0.8) rotate(180deg)';
-  setTimeout(() => {
-    if (isDark) {
-      root.removeAttribute('data-theme');
-      localStorage.setItem('crm-theme', 'light');
-      btn.textContent = '🌙';
-    } else {
-      root.setAttribute('data-theme', 'dark');
-      localStorage.setItem('crm-theme', 'dark');
-      btn.textContent = '☀️';
-    }
-    btn.style.transform = 'scale(1) rotate(0deg)';
-  }, 150);
-  
-  // Re-render charts if they exist so they pick up new colors
-  if (S.clean && S.clean.length) {
+  if (name === 'nexus-light') {
+    root.removeAttribute('data-theme');
+  } else {
+    root.setAttribute('data-theme', name);
+  }
+  localStorage.setItem('crm-theme', name);
+
+  // Update theme picker dots
+  document.querySelectorAll('.theme-dot').forEach(d => {
+    d.classList.toggle('active', d.getAttribute('data-theme') === name);
+  });
+
+  // Re-render charts to pick up new colors
+  if (!skipCharts && S.clean && S.clean.length) {
     killCharts();
     buildMainCharts();
     if (document.getElementById('analyticsTabs')) {
-      const activeTab = document.querySelector('.tab-pill.on');
-      if (activeTab) switchTab(activeTab.textContent.trim() === '🏆 Top Records' ? 'top' : activeTab.textContent.trim().includes('Distribution') ? 'dist' : activeTab.textContent.trim().includes('Reachability') ? 'reach' : activeTab.textContent.trim().includes('Industry') ? 'seg' : 'geo', activeTab);
-      // Wait, buildAnalytics automatically rebuilds the current tab!
       buildAnalytics();
     }
   }
 }
+
+// Legacy compat
+function toggleTheme() { setTheme(isDarkTheme() ? 'nexus-light' : 'nexus-dark'); }
 
 function toggleSidebar() {
   const sb = document.getElementById('sidebar');
@@ -996,12 +994,12 @@ function addBarChart(parent, title, labels, data, color, hClass='h260', horizont
   card.innerHTML=`<div class="chart-card-title">${title}</div><div class="chart-wrap ${hClass}"><canvas></canvas></div>`;
   parent.appendChild(card);
   const ctx=card.querySelector('canvas').getContext('2d');
-  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
-  const textColor=isDark?'#CBD5E1':'#94A3B8';
-  const gridColor=isDark?'rgba(51,65,85,.5)':'rgba(226,232,240,.6)';
+  const dark=isDarkTheme();
+  const textColor=dark?'#8B8DA0':'#7C7E92';
+  const gridColor=dark?'rgba(255,255,255,.06)':'rgba(0,0,0,.06)';
   
   try {
-    const ch=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:color+'22',borderColor:color,borderWidth:1.5,borderRadius:5,borderSkipped:false,hoverBackgroundColor:color+'44'}]},options:{indexAxis:horizontal?'y':'x',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`Count: ${ctx.parsed[horizontal?'x':'y']}`}}},scales:{x:{grid:{color:gridColor,drawBorder:false},ticks:{color:textColor,font:{size:10,family:'DM Sans'},maxRotation:38,autoSkipPadding:8}},y:{grid:{color:gridColor,drawBorder:false},ticks:{color:textColor,font:{size:10,family:'DM Sans'}}}}}});
+    const ch=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:color+'18',borderColor:color,borderWidth:1.5,borderRadius:6,borderSkipped:false,hoverBackgroundColor:color+'40'}]},options:{indexAxis:horizontal?'y':'x',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`Count: ${ctx.parsed[horizontal?'x':'y']}`}}},scales:{x:{grid:{color:gridColor,drawBorder:false},ticks:{color:textColor,font:{size:10,family:'Inter'},maxRotation:38,autoSkipPadding:8}},y:{grid:{color:gridColor,drawBorder:false},ticks:{color:textColor,font:{size:10,family:'Inter'}}}}}});
     S.charts.push(ch);
   } catch(err) { console.error('Chart.js error:', err); }
 }
@@ -1012,13 +1010,13 @@ function addDonutChart(parent, title, labels, data, hClass='h260', colors) {
   card.innerHTML=`<div class="chart-card-title">${title}</div><div class="chart-wrap ${hClass}" style="position:relative"><canvas></canvas><div class="donut-center"><div class="dc-val">${total.toLocaleString()}</div><div class="dc-lbl">Total</div></div></div>`;
   parent.appendChild(card);
   const ctx=card.querySelector('canvas').getContext('2d');
-  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
-  const textColor=isDark?'#94A3B8':'#64748B';
-  const borderWidth=isDark?1:0;
-  const borderColor=isDark?'#1E293B':'#ffffff';
+  const dark=isDarkTheme();
+  const textColor=dark?'#8B8DA0':'#7C7E92';
+  const borderWidth=dark?1:0;
+  const borderColor=dark?'var(--surf)':'#ffffff';
 
   try {
-    const ch=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:cols.slice(0,data.length),borderColor:borderColor,borderWidth:borderWidth,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'64%',plugins:{legend:{position:'right',labels:{color:textColor,font:{size:11,family:'DM Sans'},boxWidth:12,padding:8,usePointStyle:true}},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw.toLocaleString()} (${Math.round(ctx.raw/total*100)}%)`}}}}});
+    const ch=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:cols.slice(0,data.length),borderColor:borderColor,borderWidth:borderWidth,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'64%',plugins:{legend:{position:'right',labels:{color:textColor,font:{size:11,family:'Inter'},boxWidth:12,padding:8,usePointStyle:true}},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw.toLocaleString()} (${Math.round(ctx.raw/total*100)}%)`}}}}});
     S.charts.push(ch);
   } catch(err) { console.error('Chart.js error:', err); }
 }

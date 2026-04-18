@@ -5,13 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CRM Intelligence · v4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=4.0.1">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=5.0">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="config.js"></script>
 </head>
 <body>
+
+<!-- Ambient Background Glow Orbs -->
+<div class="ambient-orb ambient-orb-1"></div>
+<div class="ambient-orb ambient-orb-2"></div>
+<div class="ambient-orb ambient-orb-3"></div>
 
 <aside class="sidebar" id="sidebar">
   <div class="sb-logo">
@@ -24,36 +30,36 @@
   </div>
   <nav class="sb-nav" id="sbNav">
     <div class="sb-section">Workspace</div>
-    <div class="nav-item active" data-view="upload" onclick="showView('upload'); if(window.innerWidth<=768)toggleSidebar()">
+    <div class="nav-item active" data-view="upload" title="Import File" onclick="showView('upload'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">📁</span> <span class="ni-label">Import File</span>
     </div>
     <div class="sb-section">Analysis</div>
-    <div class="nav-item" data-view="dashboard" onclick="showView('dashboard'); if(window.innerWidth<=768)toggleSidebar()">
+    <div class="nav-item" data-view="dashboard" title="Dashboard" onclick="showView('dashboard'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">📊</span> <span class="ni-label">Dashboard</span>
     </div>
-    <div class="nav-item" data-view="analytics" onclick="showView('analytics'); if(window.innerWidth<=768)toggleSidebar()">
+    <div class="nav-item" data-view="analytics" title="Analytics" onclick="showView('analytics'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">📈</span> <span class="ni-label">Analytics</span>
     </div>
-    <div class="nav-item" data-view="table" onclick="showView('table'); if(window.innerWidth<=768)toggleSidebar()">
+    <div class="nav-item" data-view="table" title="Data Table" onclick="showView('table'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">📋</span> <span class="ni-label">Data Table</span>
     </div>
-    <div class="nav-item" data-view="quality" onclick="showView('quality'); if(window.innerWidth<=768)toggleSidebar()">
+    <div class="nav-item" data-view="quality" title="Data Quality" onclick="showView('quality'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">🔍</span> <span class="ni-label">Data Quality</span>
     </div>
-    <div class="nav-item" data-view="dedup" onclick="showView('dedup'); if(window.innerWidth<=768)toggleSidebar()">
+    <div class="nav-item" data-view="dedup" title="Deduplication" onclick="showView('dedup'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">🧹</span> <span class="ni-label">Deduplication</span>
     </div>
     <div class="sb-section">Export</div>
-    <div class="nav-item" onclick="saveToCRM(); if(window.innerWidth<=768)toggleSidebar()">
+    <div class="nav-item" title="Save to CRM" onclick="saveToCRM(); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">💾</span> <span class="ni-label">Save to CRM</span>
     </div>
-    <div class="nav-item" onclick="downloadExcel(); if(window.innerWidth<=768)toggleSidebar()">
+    <div class="nav-item" title="Export Excel" onclick="downloadExcel(); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">⬇</span> <span class="ni-label">Export Excel</span>
     </div>
-    <div class="nav-item" onclick="downloadPDF(); if(window.innerWidth<=768)toggleSidebar()">
+    <div class="nav-item" title="Export PDF" onclick="downloadPDF(); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">📄</span> <span class="ni-label">Export PDF</span>
     </div>
-    <div class="nav-item" onclick="downloadVCF(); if(window.innerWidth<=768)toggleSidebar()">
+    <div class="nav-item" title="Export VCF" onclick="downloadVCF(); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">📱</span> <span class="ni-label">Export .VCF</span>
     </div>
   </nav>
@@ -62,7 +68,14 @@
     <div class="fc-name" id="sbFileName">—</div>
     <div class="fc-meta" id="sbFileMeta">—</div>
   </div>
-  <div class="sb-bottom">CRM Intelligence · Gujarat B2B Data</div>
+  <div class="sb-user">
+    <div class="sb-avatar">KJ</div>
+    <div class="sb-user-info">
+      <div class="sb-user-name">Kushal Jain</div>
+      <div class="sb-user-role">Administrator</div>
+    </div>
+  </div>
+  <div class="sb-bottom">CRM Intelligence v5.0 · Nexus</div>
 </aside>
 <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
 
@@ -81,13 +94,12 @@
         <button class="btn btn-warning btn-sm" id="btnPDF" onclick="downloadPDF()">📄 PDF</button>
         <button class="btn btn-secondary btn-sm" onclick="downloadVCF()">📱 VCF</button>
       </div>
-      <div class="color-picker" title="Change Theme Color">
-        <button class="color-btn" style="background:var(--blue)" onclick="setPrimaryColor('blue')"></button>
-        <button class="color-btn" style="background:var(--emerald)" onclick="setPrimaryColor('emerald')"></button>
-        <button class="color-btn" style="background:var(--violet)" onclick="setPrimaryColor('violet')"></button>
-        <button class="color-btn" style="background:var(--rose)" onclick="setPrimaryColor('rose')"></button>
+      <div class="theme-picker" id="themePicker" title="Switch Theme">
+        <div class="theme-dot active" data-theme="nexus-light" onclick="setTheme('nexus-light')" title="Nexus Light"></div>
+        <div class="theme-dot" data-theme="nexus-dark" onclick="setTheme('nexus-dark')" title="Nexus Dark"></div>
+        <div class="theme-dot" data-theme="ocean" onclick="setTheme('ocean')" title="Ocean"></div>
+        <div class="theme-dot" data-theme="sunset" onclick="setTheme('sunset')" title="Sunset"></div>
       </div>
-      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
     </div>
   </header>
 
