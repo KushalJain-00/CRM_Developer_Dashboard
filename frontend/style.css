@@ -195,6 +195,10 @@ body {
   z-index: 200;
   border-right: 1px solid var(--sb-border);
   transition: width .3s cubic-bezier(.4,0,.2,1);
+  /* BUG FIX: overflow was implicitly hidden, which clipped the collapse
+     toggle button (.sb-toggle-btn) that sits at right:-14px outside the
+     sidebar boundary, making it invisible/unclickable. */
+  overflow: visible;
 }
 
 .sb-logo {

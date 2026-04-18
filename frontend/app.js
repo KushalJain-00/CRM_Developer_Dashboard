@@ -125,6 +125,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('crm-theme') || 'nexus-light';
   setTheme(savedTheme, true);
 
+  // BUG FIX: Restore sidebar collapsed state across page reloads
+  if (localStorage.getItem('crm-sb-collapsed') === '1') {
+    document.body.classList.add('sb-collapsed');
+    const btn = document.getElementById('sbToggleBtn');
+    if (btn) btn.innerHTML = '›';
+  }
+
   // Populate sidebar user info from session
   try {
     const session = JSON.parse(localStorage.getItem('crm-session') || '{}');
@@ -1000,8 +1007,16 @@ function onColFilterChange() {
 }
 
 function filterTable() {
-  const q=document.getElementById('searchBox').value.toLowerCase();
-  const colF=document.getElementById('colFilter').value, valF=document.getElementById('valFilter').value, keep=keepCols();
+  // BUG FIX: searchBox/colFilter/valFilter only exist inside the table view.
+  // Without this guard, calling filterTable() from any other context
+  // throws a TypeError and silently breaks all table search/filtering.
+  const searchEl = document.getElementById('searchBox');
+  const colEl    = document.getElementById('colFilter');
+  const valEl    = document.getElementById('valFilter');
+  if (!searchEl || !colEl || !valEl) return;
+
+  const q=searchEl.value.toLowerCase();
+  const colF=colEl.value, valF=valEl.value, keep=keepCols();
   S.filtered=S.clean.filter(row=>{ const mQ=!q||keep.some(c=>String(row[c]||'').toLowerCase().includes(q)); const mV=!valF||String(row[colF]||'')===valF; return mQ&&mV; });
   S.page=1; renderTable();
 }
@@ -1171,9 +1186,13 @@ function downloadExcel() {
   XLSX.writeFile(wb, outName);
 }
 function toggleSidebarCollapse() {
+  // BUG FIX: Sidebar collapse state was not persisted to localStorage,
+  // so refreshing the page always reset the sidebar to expanded.
   document.body.classList.toggle('sb-collapsed');
+  const collapsed = document.body.classList.contains('sb-collapsed');
   const btn = document.getElementById('sbToggleBtn');
-  if (btn) btn.innerHTML = document.body.classList.contains('sb-collapsed') ? '›' : '‹';
+  if (btn) btn.innerHTML = collapsed ? '›' : '‹';
+  localStorage.setItem('crm-sb-collapsed', collapsed ? '1' : '');
 }
 
 function showView(id) {
