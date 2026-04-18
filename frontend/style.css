@@ -190,12 +190,11 @@ body {
 .sidebar {
   position: fixed; left:0; top:0; bottom:0;
   width: var(--sb-w);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--sb-bg) 95%, #000 5%), var(--sb-bg-2));
+  background: var(--sb-bg);
   display: flex; flex-direction: column;
   z-index: 200;
   border-right: 1px solid var(--sb-border);
   transition: width .3s cubic-bezier(.4,0,.2,1);
-  box-shadow: 12px 0 40px rgba(0,0,0,.12);
 }
 
 .sb-logo {
@@ -247,45 +246,6 @@ body {
 }
 .sb-toggle-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-.sb-tools {
-  padding: 12px 14px 10px;
-  border-bottom: 1px solid var(--sb-border);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.sb-quick-btn {
-  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-  color: #fff;
-  border-radius: 10px;
-  height: 34px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all .2s ease;
-}
-.sb-quick-btn:hover {
-  background: color-mix(in srgb, var(--accent) 28%, transparent);
-  transform: translateY(-1px);
-}
-.sb-search {
-  width: 100%;
-  height: 34px;
-  border-radius: 10px;
-  border: 1px solid var(--sb-border);
-  background: rgba(255,255,255,.04);
-  color: #fff;
-  padding: 0 11px;
-  font-size: 12px;
-  outline: none;
-}
-.sb-search::placeholder { color: rgba(255,255,255,.35); }
-.sb-search:focus {
-  border-color: color-mix(in srgb, var(--accent) 55%, #fff 0%);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 26%, transparent);
-}
-
 .sb-nav {
   flex: 1; padding: 16px 0;
   overflow-y: auto; overflow-x: hidden;
@@ -303,27 +263,24 @@ body {
 }
 .nav-item {
   display: flex; align-items: center; gap: 12px;
-  padding: 10px 14px;
+  padding: 10px 22px;
   cursor: pointer;
   font-size: 13.5px; font-weight: 500;
   color: var(--sb-text);
   transition: all .15s;
   position: relative;
   border-radius: 0;
-  margin: 3px 10px;
+  margin: 1px 10px;
   border-radius: var(--r-sm);
-  border: 1px solid transparent;
 }
 .nav-item:hover {
   color: var(--sb-text-active);
-  background: color-mix(in srgb, var(--sb-hover) 75%, var(--accent-soft));
-  border-color: color-mix(in srgb, var(--accent) 25%, transparent);
+  background: var(--sb-hover);
 }
 .nav-item.active {
   color: var(--sb-text-active);
-  background: linear-gradient(90deg, var(--sb-active-bg), color-mix(in srgb, var(--sb-active-bg) 62%, transparent));
+  background: var(--sb-active-bg);
   font-weight: 600;
-  border-color: color-mix(in srgb, var(--accent) 36%, transparent);
 }
 .nav-item.active::before {
   content: '';
@@ -338,13 +295,6 @@ body {
   text-align: center; opacity: .7;
   transition: transform .2s, opacity .2s;
   flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 8px;
-  background: rgba(255,255,255,.05);
 }
 .nav-item:hover .ni-icon { transform: scale(1.08); opacity: .9; }
 .nav-item.active .ni-icon { opacity: 1; }
@@ -367,7 +317,6 @@ body {
   border-radius: var(--r);
   padding: 14px; transition: opacity .2s;
   overflow: hidden;
-  background: rgba(255,255,255,.03);
 }
 .sb-file-card .fc-label {
   font-size: 9px; color: rgba(255,255,255,.3);
@@ -419,8 +368,6 @@ body {
 
 /* ── Collapsed Sidebar States ─────────────────────────────────────── */
 .sb-collapsed .sb-logo-text { opacity:0; pointer-events:none; width:0; }
-.sb-collapsed .sb-tools { padding: 10px 8px; }
-.sb-collapsed .sb-quick-btn, .sb-collapsed .sb-search { display: none; }
 .sb-collapsed .sb-section { opacity:0; height:0; padding:0; overflow:hidden; }
 .sb-collapsed .nav-item .ni-label { display:none; }
 .sb-collapsed .nav-item .nav-badge { display:none; }
@@ -428,7 +375,7 @@ body {
 .sb-collapsed .sb-file-card { display:none; }
 .sb-collapsed .sb-user-info { opacity:0; width:0; }
 .sb-collapsed .sb-logo { padding: 24px 18px 20px; justify-content:center; }
-.sb-collapsed .nav-item { padding: 10px 0; justify-content:center; margin:3px 8px; }
+.sb-collapsed .nav-item { padding: 12px 0; justify-content:center; margin:1px 8px; }
 .sb-collapsed .nav-item .ni-icon { font-size:18px; }
 .sb-collapsed .nav-item.active::before { left:-8px; }
 .sb-collapsed .sb-user { justify-content:center; padding:16px 8px; }

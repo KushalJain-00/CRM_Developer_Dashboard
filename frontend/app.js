@@ -116,16 +116,6 @@ function detectField(col, samples) {
 document.addEventListener('DOMContentLoaded', () => {
   syncAuthSession();
 
-  const collapsed = localStorage.getItem('crm-sidebar-collapsed') === '1';
-  if (collapsed) {
-    document.body.classList.add('sb-collapsed');
-    document.documentElement.style.setProperty('--sb-w', '76px');
-    const btn = document.getElementById('sbToggleBtn');
-    if (btn) btn.innerHTML = '›';
-  } else {
-    document.documentElement.style.removeProperty('--sb-w');
-  }
-
   const dz = document.getElementById('dropZone');
   dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
   dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
@@ -134,17 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize theme from localStorage
   const savedTheme = localStorage.getItem('crm-theme') || 'nexus-light';
   setTheme(savedTheme, true);
-
-  // Defensive bindings in case inline onclick is blocked/stripped
-  const sbToggleBtn = document.getElementById('sbToggleBtn');
-  if (sbToggleBtn) sbToggleBtn.addEventListener('click', (e) => { e.preventDefault(); toggleSidebarCollapse(); });
-  document.querySelectorAll('.theme-dot').forEach(dot => {
-    dot.addEventListener('click', (e) => {
-      e.preventDefault();
-      const theme = dot.getAttribute('data-theme');
-      if (theme) setTheme(theme);
-    });
-  });
 
   // Populate sidebar user info from session
   try {
@@ -1192,34 +1171,9 @@ function downloadExcel() {
   XLSX.writeFile(wb, outName);
 }
 function toggleSidebarCollapse() {
-  const collapsed = !document.body.classList.contains('sb-collapsed');
-  document.body.classList.toggle('sb-collapsed', collapsed);
-  // Fallback for environments where CSS custom property updates lag
-  document.documentElement.style.setProperty('--sb-w', collapsed ? '76px' : '');
-  localStorage.setItem('crm-sidebar-collapsed', collapsed ? '1' : '0');
+  document.body.classList.toggle('sb-collapsed');
   const btn = document.getElementById('sbToggleBtn');
-  if (btn) btn.innerHTML = collapsed ? '›' : '‹';
-}
-
-function filterSidebarNav(query) {
-  const q = String(query || '').trim().toLowerCase();
-  const items = document.querySelectorAll('.sb-nav .nav-item');
-  const sections = document.querySelectorAll('.sb-nav .sb-section');
-  items.forEach(item => {
-    const label = item.textContent.toLowerCase();
-    const keep = !q || label.includes(q);
-    item.style.display = keep ? '' : 'none';
-  });
-
-  sections.forEach(section => {
-    let next = section.nextElementSibling;
-    let hasVisible = false;
-    while (next && !next.classList.contains('sb-section')) {
-      if (next.classList.contains('nav-item') && next.style.display !== 'none') hasVisible = true;
-      next = next.nextElementSibling;
-    }
-    section.style.display = hasVisible || !q ? '' : 'none';
-  });
+  if (btn) btn.innerHTML = document.body.classList.contains('sb-collapsed') ? '›' : '‹';
 }
 
 function showView(id) {
