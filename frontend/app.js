@@ -119,8 +119,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const collapsed = localStorage.getItem('crm-sidebar-collapsed') === '1';
   if (collapsed) {
     document.body.classList.add('sb-collapsed');
+    document.documentElement.style.setProperty('--sb-w', '76px');
     const btn = document.getElementById('sbToggleBtn');
     if (btn) btn.innerHTML = '›';
+  } else {
+    document.documentElement.style.removeProperty('--sb-w');
   }
 
   const dz = document.getElementById('dropZone');
@@ -131,6 +134,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize theme from localStorage
   const savedTheme = localStorage.getItem('crm-theme') || 'nexus-light';
   setTheme(savedTheme, true);
+
+  // Defensive bindings in case inline onclick is blocked/stripped
+  const sbToggleBtn = document.getElementById('sbToggleBtn');
+  if (sbToggleBtn) sbToggleBtn.addEventListener('click', (e) => { e.preventDefault(); toggleSidebarCollapse(); });
+  document.querySelectorAll('.theme-dot').forEach(dot => {
+    dot.addEventListener('click', (e) => {
+      e.preventDefault();
+      const theme = dot.getAttribute('data-theme');
+      if (theme) setTheme(theme);
+    });
+  });
 
   // Populate sidebar user info from session
   try {
@@ -1178,10 +1192,13 @@ function downloadExcel() {
   XLSX.writeFile(wb, outName);
 }
 function toggleSidebarCollapse() {
-  document.body.classList.toggle('sb-collapsed');
-  localStorage.setItem('crm-sidebar-collapsed', document.body.classList.contains('sb-collapsed') ? '1' : '0');
+  const collapsed = !document.body.classList.contains('sb-collapsed');
+  document.body.classList.toggle('sb-collapsed', collapsed);
+  // Fallback for environments where CSS custom property updates lag
+  document.documentElement.style.setProperty('--sb-w', collapsed ? '76px' : '');
+  localStorage.setItem('crm-sidebar-collapsed', collapsed ? '1' : '0');
   const btn = document.getElementById('sbToggleBtn');
-  if (btn) btn.innerHTML = document.body.classList.contains('sb-collapsed') ? '›' : '‹';
+  if (btn) btn.innerHTML = collapsed ? '›' : '‹';
 }
 
 function filterSidebarNav(query) {
