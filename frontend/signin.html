@@ -9,12 +9,17 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
   // If already signed in, skip to app
-  if (localStorage.getItem('crm-session')) {
-    window.location.replace('index.html');
-  }
+  (function() {
+    const hasLocal = !!localStorage.getItem('crm-session');
+    const hasSupabaseToken = Object.keys(localStorage).some((k) => k.includes('-auth-token'));
+    if (hasLocal || hasSupabaseToken) {
+      window.location.replace('index.html');
+    }
+  })();
 </script>
 
   <style>
@@ -450,6 +455,12 @@
       card.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
     }
 
+    const SUPABASE_URL = window.CRM_SUPABASE_URL || '';
+    const SUPABASE_ANON_KEY = window.CRM_SUPABASE_ANON_KEY || '';
+    const supabase = (SUPABASE_URL && SUPABASE_ANON_KEY)
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      : null;
+
     async function upsertAuthUser(user) {
       const API_BASE = (window.CRM_API_BASE || '').replace(/\/$/, '');
       const API_KEY = window.CRM_API_KEY || '';
@@ -465,27 +476,83 @@
       });
     }
 
-    async function signIn(form) {
-      const email = document.getElementById('siEmail').value.trim();
-      const providerUid = email;
-      const session = { email, provider_uid: providerUid, signedInAt: Date.now() };
-      const supabaseUser = { id: providerUid, email, user_metadata: { full_name: email } };
-      try { await upsertAuthUser(supabaseUser); } catch (e) { console.warn('Auth upsert failed:', e); }
+    function setSessionFromSupabaseUser(user) {
+      if (!user?.email) return;
+      const fullName = user.user_metadata?.full_name || '';
+      const parts = fullName.trim().split(/\s+/).filter(Boolean);
+      const firstName = parts[0] || '';
+      const lastName = parts.slice(1).join(' ') || '';
+      const session = {
+        firstName,
+        lastName,
+        email: user.email,
+        provider_uid: user.id,
+        signedInAt: Date.now(),
+      };
       localStorage.setItem('crm-session', JSON.stringify(session));
-      window.location.replace('index.html');
+    }
+
+    function setSubmitting(form, on, pendingLabel, idleLabel) {
+      const btn = form.querySelector('button[type="submit"]');
+      if (!btn) return;
+      btn.disabled = on;
+      btn.textContent = on ? pendingLabel : idleLabel;
+    }
+
+    async function signIn(form) {
+      if (!supabase) {
+        alert('Supabase is not configured. Set CRM_SUPABASE_URL and CRM_SUPABASE_ANON_KEY in config.js');
+        return;
+      }
+      const email = document.getElementById('siEmail').value.trim();
+      const password = document.getElementById('siPassword').value;
+      try {
+        setSubmitting(form, true, 'Signing in...', 'Access Workspace');
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        const user = data.user;
+        setSessionFromSupabaseUser(user);
+        try { await upsertAuthUser(user); } catch (e) { console.warn('Auth upsert failed:', e); }
+        window.location.replace('index.html');
+      } catch (e) {
+        alert(e.message || 'Sign-in failed');
+      } finally {
+        setSubmitting(form, false, 'Signing in...', 'Access Workspace');
+      }
     }
 
     async function signUp(form) {
+      if (!supabase) {
+        alert('Supabase is not configured. Set CRM_SUPABASE_URL and CRM_SUPABASE_ANON_KEY in config.js');
+        return;
+      }
       const firstName = document.getElementById('suFirst').value.trim();
       const lastName  = document.getElementById('suLast').value.trim();
       const email     = document.getElementById('suEmail').value.trim();
-      const providerUid = crypto.randomUUID();
+      const password  = document.getElementById('suPassword').value;
       const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
-      const session   = { firstName, lastName, email, provider_uid: providerUid, signedInAt: Date.now() };
-      const supabaseUser = { id: providerUid, email, user_metadata: { full_name: fullName || email } };
-      try { await upsertAuthUser(supabaseUser); } catch (e) { console.warn('Auth upsert failed:', e); }
-      localStorage.setItem('crm-session', JSON.stringify(session));
-      window.location.replace('index.html');
+      try {
+        setSubmitting(form, true, 'Creating account...', 'Create Account');
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { full_name: fullName || email } },
+        });
+        if (error) throw error;
+        if (!data.session) {
+          alert('Signup successful. Check your email to confirm your account, then sign in.');
+          toggleAuth('signin');
+          return;
+        }
+        const user = data.user;
+        setSessionFromSupabaseUser(user);
+        try { await upsertAuthUser(user); } catch (e) { console.warn('Auth upsert failed:', e); }
+        window.location.replace('index.html');
+      } catch (e) {
+        alert(e.message || 'Signup failed');
+      } finally {
+        setSubmitting(form, false, 'Creating account...', 'Create Account');
+      }
     }
 
     document.addEventListener('mousemove', (e) => {

@@ -1,5 +1,10 @@
 const API_BASE = (window.CRM_API_BASE || '').replace(/\/$/, '');
 const API_KEY  = window.CRM_API_KEY || '';
+const SUPABASE_URL = window.CRM_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = window.CRM_SUPABASE_ANON_KEY || '';
+const supabase = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
 
 const S = {
   rawData:[], headers:[], mapping:{}, clean:[],
@@ -109,6 +114,15 @@ function detectField(col, samples) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  syncAuthSession();
+
+  const collapsed = localStorage.getItem('crm-sidebar-collapsed') === '1';
+  if (collapsed) {
+    document.body.classList.add('sb-collapsed');
+    const btn = document.getElementById('sbToggleBtn');
+    if (btn) btn.innerHTML = '›';
+  }
+
   const dz = document.getElementById('dropZone');
   dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
   dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
@@ -130,6 +144,34 @@ document.addEventListener('DOMContentLoaded', () => {
     if (el('sbAvatarInitials')) el('sbAvatarInitials').textContent = initials;
   } catch(e) {}
 });
+
+async function syncAuthSession() {
+  if (!supabase) return;
+  try {
+    const { data, error } = await supabase.auth.getUser();
+    if (error) throw error;
+    const user = data.user;
+    if (!user) {
+      S.userEmail = null;
+      localStorage.removeItem('crm-session');
+      window.location.replace('signin.html');
+      return;
+    }
+    const fullName = user.user_metadata?.full_name || '';
+    const parts = fullName.trim().split(/\s+/).filter(Boolean);
+    const session = {
+      firstName: parts[0] || '',
+      lastName: parts.slice(1).join(' ') || '',
+      email: user.email,
+      provider_uid: user.id,
+      signedInAt: Date.now(),
+    };
+    S.userEmail = user.email || null;
+    localStorage.setItem('crm-session', JSON.stringify(session));
+  } catch (e) {
+    console.warn('Supabase session sync failed:', e);
+  }
+}
 
 /* ── UI Toggles ─────────────────────────────────────────────────────── */
 function isDarkTheme() {
@@ -164,8 +206,11 @@ function setTheme(name, skipCharts) {
 // Legacy compat
 function toggleTheme() { setTheme(isDarkTheme() ? 'nexus-light' : 'nexus-dark'); }
 
-function signOut() {
+async function signOut() {
   if (!confirm('Sign out of CRM Engine?')) return;
+  if (supabase) {
+    try { await supabase.auth.signOut(); } catch (e) { console.warn('Supabase signout failed:', e); }
+  }
   localStorage.removeItem('crm-session');
   window.location.replace('signin.html');
 }
@@ -1134,8 +1179,30 @@ function downloadExcel() {
 }
 function toggleSidebarCollapse() {
   document.body.classList.toggle('sb-collapsed');
+  localStorage.setItem('crm-sidebar-collapsed', document.body.classList.contains('sb-collapsed') ? '1' : '0');
   const btn = document.getElementById('sbToggleBtn');
   if (btn) btn.innerHTML = document.body.classList.contains('sb-collapsed') ? '›' : '‹';
+}
+
+function filterSidebarNav(query) {
+  const q = String(query || '').trim().toLowerCase();
+  const items = document.querySelectorAll('.sb-nav .nav-item');
+  const sections = document.querySelectorAll('.sb-nav .sb-section');
+  items.forEach(item => {
+    const label = item.textContent.toLowerCase();
+    const keep = !q || label.includes(q);
+    item.style.display = keep ? '' : 'none';
+  });
+
+  sections.forEach(section => {
+    let next = section.nextElementSibling;
+    let hasVisible = false;
+    while (next && !next.classList.contains('sb-section')) {
+      if (next.classList.contains('nav-item') && next.style.display !== 'none') hasVisible = true;
+      next = next.nextElementSibling;
+    }
+    section.style.display = hasVisible || !q ? '' : 'none';
+  });
 }
 
 function showView(id) {

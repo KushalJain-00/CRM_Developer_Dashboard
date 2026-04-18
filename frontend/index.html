@@ -11,11 +11,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   // Auth Guard — must run before page renders
   (function() {
-    const session = localStorage.getItem('crm-session');
-    if (!session) { window.location.replace('signin.html'); }
+    const hasLocal = !!localStorage.getItem('crm-session');
+    const hasSupabaseToken = Object.keys(localStorage).some((k) => k.includes('-auth-token'));
+    if (!hasLocal && !hasSupabaseToken) {
+      window.location.replace('signin.html');
+    }
   })();
 </script>
 </head>
@@ -34,6 +38,10 @@
       <div class="sb-logo-ver">v4.0 · Adaptive Intelligence</div>
     </div>
     <button class="sb-toggle-btn" id="sbToggleBtn" onclick="toggleSidebarCollapse()" title="Toggle Sidebar">‹</button>
+  </div>
+  <div class="sb-tools">
+    <button class="sb-quick-btn" onclick="resetApp()" title="Start New Import">＋ New Import</button>
+    <input class="sb-search" id="sbSearch" type="text" placeholder="Search navigation..." oninput="filterSidebarNav(this.value)" />
   </div>
   <nav class="sb-nav" id="sbNav">
     <div class="sb-section">Workspace</div>
