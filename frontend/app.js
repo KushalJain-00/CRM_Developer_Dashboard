@@ -1081,34 +1081,39 @@ function _printPDFFallback(keep, total, withEmail, withPhone, completeness) {
 
 function downloadExcel() {
   if (!S.clean.length) { alert('No data to export.'); return; }
-  const keep=keepCols(), wb=XLSX.utils.book_new();
-  const emailCols=colsByType('email'), phoneCols=[...colsByType('phone'),...colsByType('whatsapp')];
-  const withEmail=emailCols.length?countWithAny(emailCols):0, withPhone=phoneCols.length?countWithAny(phoneCols):0;
-  const completeness=Math.round(S.clean.reduce((sum,row)=>{const f=keep.filter(c=>row[c]&&row[c]!=='').length;return sum+f/keep.length;},0)/S.clean.length*100);
-  const summaryAOA=[['CRM DATA EXPORT SUMMARY'],[''],['Generated On',new Date().toLocaleString()],['Source File',S.fileName],['Sheet Name',S.sheetName],[''],['METRIC','VALUE','NOTES'],['Total Records',S.clean.length,'After cleaning & deduplication'],['Columns Exported',keep.length,'Fields mapped and included'],['Records with Email',withEmail,Math.round(withEmail/S.clean.length*100)+'% coverage'],['Records with Phone',withPhone,Math.round(withPhone/S.clean.length*100)+'% coverage'],['Data Completeness',completeness+'%','Average fields filled per record']];
-  const wsSummary=XLSX.utils.aoa_to_sheet(summaryAOA); wsSummary['!cols']=[{wch:28},{wch:22},{wch:32}];
-  XLSX.utils.book_append_sheet(wb,wsSummary,'Summary');
-  const expandedKeep=[]; keep.forEach(c=>{expandedKeep.push(c);if(S.clean.some(r=>r[c+'_2']))expandedKeep.push(c+'_2');});
-  const friendlyH=expandedKeep.map(c=>{const base=c.replace(/_2$/,''),ft=FT[S.mapping[base]?S.mapping[base].type:'other'],suffix=c.endsWith('_2')?' (Secondary)':'';return ft?`${ft.icon} ${base}${suffix}`:c;});
-  const rows=S.clean.map(row=>expandedKeep.map(c=>row[c]||''));
-  const wsData=XLSX.utils.aoa_to_sheet([friendlyH,...rows]);
-  wsData['!cols']=expandedKeep.map(c=>{const base=c.replace(/_2$/,''),t=S.mapping[base]?S.mapping[base].type:'other';return{wch:t==='address'||t==='product'?55:t==='company'?35:t==='phone'?20:t==='email'?35:t==='website'?40:t==='id'?8:22};});
-  XLSX.utils.book_append_sheet(wb,wsData,'CRM Data');
-  if (emailCols.length) {
-    const companyCols=colsByType('company');
-    const emails=S.clean.map(row=>({email:emailCols.map(c=>row[c]).find(v=>v&&v.includes('@')),email2:emailCols.map(c=>row[c+'_2']).find(v=>v&&v.includes('@')),company:companyCols.length?row[companyCols[0]]:''})).filter(e=>e.email);
-    const wsE=XLSX.utils.aoa_to_sheet([['Company','Email (Primary)','Email (Secondary)'],...emails.map(e=>[e.company,e.email,e.email2||''])]);
-    wsE['!cols']=[{wch:36},{wch:36},{wch:36}]; XLSX.utils.book_append_sheet(wb,wsE,'Email List');
-  }
-  if (phoneCols.length) {
-    const phones=[], companyCols=colsByType('company');
-    S.clean.forEach(row=>{ const company=companyCols.length?row[companyCols[0]]:''; phoneCols.forEach(c=>{ if(row[c]) String(row[c]).split('/').forEach(p=>{const clean=p.trim().replace(/[^0-9+]/g,'');if(clean.length>=8)phones.push([company,clean,'Primary']);}); if(row[c+'_2']) String(row[c+'_2']).split('/').forEach(p=>{const clean=p.trim().replace(/[^0-9+]/g,'');if(clean.length>=8)phones.push([company,clean,'Secondary']);}); }); });
-    const wsP=XLSX.utils.aoa_to_sheet([['Company','Phone Number','Type'],...phones]);
-    wsP['!cols']=[{wch:36},{wch:20},{wch:14}]; XLSX.utils.book_append_sheet(wb,wsP,'Phone List');
-  }
-  XLSX.writeFile(wb, S.fileName.replace(/\.(xlsx?|xls|csv|txt)$/i,'')+'_CRM_Export.xlsx');
-}
 
+  const wb = XLSX.utils.book_new();
+
+  // Build columns to export (all kept cols + secondary _2 variants if present)
+  const keep = keepCols();
+  const cols = [];
+  keep.forEach(c => {
+    cols.push(c);
+    if (S.clean.some(r => r[c + '_2'])) cols.push(c + '_2');
+  });
+
+  // Use original column headers; secondary columns get a " 2" suffix
+  const headers = cols.map(c => c.endsWith('_2') ? c.replace(/_2$/, '') + ' 2' : c);
+
+  // Build data rows — empty string for missing values
+  const rows = S.clean.map(row => cols.map(c => (row[c] !== undefined && row[c] !== null) ? row[c] : ''));
+
+  // Single sheet with original-style headers + cleaned data
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
+  // Auto-width columns by field type
+  ws['!cols'] = cols.map(c => {
+    const base = c.replace(/_2$/, '');
+    const t = S.mapping[base] ? S.mapping[base].type : 'other';
+    return { wch: t === 'address' || t === 'product' ? 55 : t === 'company' ? 35 : t === 'phone' ? 20 : t === 'email' ? 35 : t === 'website' ? 40 : t === 'id' ? 8 : 22 };
+  });
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Data');
+
+  // File name: original name + _cleaned
+  const outName = S.fileName.replace(/\.(xlsx?|xls|csv|txt)$/i, '') + '_cleaned.xlsx';
+  XLSX.writeFile(wb, outName);
+}
 function toggleSidebarCollapse() {
   document.body.classList.toggle('sb-collapsed');
   const btn = document.getElementById('sbToggleBtn');

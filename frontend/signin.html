@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="nexus-dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In · CRM Engine</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #12131A;
+      --bg-2: #1A1B25;
+      --surf: rgba(34, 35, 46, 0.4);
+      --surf-2: rgba(42, 43, 56, 0.5);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(108, 92, 231, 0.4);
+      --text: #F0F1F7;
+      --text-2: #C8CAD8;
+      --text-3: #8B8DA0;
+      --accent: #6C5CE7;
+      --accent-glow: rgba(108, 92, 231, 0.5);
+      --emerald: #2ECC71;
+      --cyan: #00D4FF;
+      --font-d: 'Plus Jakarta Sans', sans-serif;
+      --font-b: 'Inter', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-b);
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Ambient Orbs (Interactive tracking) */
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      z-index: 0;
+      opacity: 0.6;
+      pointer-events: none;
+      transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      will-change: transform;
+    }
+    .blob-1 {
+      width: 600px; height: 600px;
+      background: var(--accent);
+      top: -100px; left: -100px;
+      animation: pulse 8s infinite alternate ease-in-out;
+    }
+    .blob-2 {
+      width: 450px; height: 450px;
+      background: var(--cyan);
+      bottom: -50px; right: 10vw;
+      opacity: 0.3;
+      animation: pulse 10s infinite alternate-reverse ease-in-out;
+    }
+    .blob-3 {
+      width: 300px; height: 300px;
+      background: var(--emerald);
+      bottom: 20%; left: 30%;
+      opacity: 0.2;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1) translate(0, 0); }
+      100% { transform: scale(1.1) translate(30px, -30px); }
+    }
+
+    /* Layout */
+    .split {
+      display: flex; width: 100%; height: 100vh; z-index: 10; position: relative;
+    }
+
+    /* Left Side: Brand & Visuals */
+    .brand-side {
+      flex: 1;
+      display: flex; flex-direction: column;
+      justify-content: center;
+      padding: 60px 80px;
+      position: relative;
+      border-right: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(26,27,37,0.3) 0%, rgba(18,19,26,0.8) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    
+    .brand-logo {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 40px;
+    }
+    .brand-mark {
+      width: 54px; height: 54px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent), #8B5CF6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 8px 32px var(--accent-glow);
+      animation: float 4s ease-in-out infinite;
+    }
+    .brand-text {
+      font-family: var(--font-d);
+      font-size: 24px; font-weight: 800; letter-spacing: -0.03em;
+    }
+
+    .brand-hero {
+      font-family: var(--font-d);
+      font-size: 54px; font-weight: 800;
+      line-height: 1.1; letter-spacing: -0.04em;
+      margin-bottom: 24px;
+    }
+    .brand-hero span {
+       background: linear-gradient(to right, #00D4FF, #6C5CE7, #8B5CF6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .brand-sub {
+      font-size: 18px; color: var(--text-2);
+      line-height: 1.6; max-width: 480px; margin-bottom: 40px;
+    }
+
+    /* Floating UI Elements Animation */
+    .floating-ui {
+      position: relative; height: 200px;
+    }
+    .f-card {
+      position: absolute;
+      background: rgba(42,43,56,0.6);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+      animation: float 5s ease-in-out infinite;
+    }
+    .f-card-1 { top: 10px; left: 0; width: 280px; animation-delay: 0s; }
+    .f-card-2 { top: 80px; left: 180px; width: 220px; animation-delay: 1.5s; z-index: -1; opacity: 0.8; }
+    
+    .line-placeholder { height: 8px; border-radius: 4px; background: var(--border); margin-bottom: 12px; }
+    .line-placeholder.w-full { width: 100%; }
+    .line-placeholder.w-half { width: 50%; }
+    .line-placeholder.primary { background: var(--accent); }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+      100% { transform: translateY(0px); }
+    }
+
+    /* Right Side: Login Form */
+    .auth-side {
+      width: 520px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px;
+      perspective: 1000px;
+    }
+
+    .auth-card {
+      width: 100%; max-width: 420px;
+      background: var(--surf);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      padding: 48px 40px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+      transform-style: preserve-3d;
+      transition: transform 0.1s ease-out, border-color 0.3s;
+    }
+    
+    /* Interactive shine effect on card */
+    .auth-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: 32px;
+      padding: 2px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent 40%, rgba(255,255,255,0.05));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .auth-head { margin-bottom: 36px; text-align: center; }
+    .auth-title { font-family: var(--font-d); font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .auth-desc { font-size: 14px; color: var(--text-3); }
+
+    .input-grp { margin-bottom: 20px; position: relative; }
+    .input-grp label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: var(--text-2); margin-bottom: 8px;
+    }
+    
+    .input-wrap { position: relative; overflow: hidden; border-radius: 14px; }
+    .input-wrap input {
+      width: 100%; padding: 14px 18px;
+      background: rgba(18,19,26,0.6);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      color: var(--text);
+      font-family: var(--font-b); font-size: 14px;
+      outline: none;
+      transition: all 0.3s;
+    }
+    .input-wrap input:focus {
+      border-color: var(--accent);
+      background: rgba(18,19,26,0.9);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+    }
+
+    /* Input moving border effect */
+    .input-line {
+      position: absolute; bottom: 0; left: 0;
+      height: 2px; width: 100%;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.4s ease;
+    }
+    .input-wrap input:focus ~ .input-line {
+      transform: translateX(0%);
+      animation: lineSweep 2s infinite linear;
+    }
+    @keyframes lineSweep {
+      0% { transform: translateX(-100%); }
+      50% { transform: translateX(100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .auth-forgot {
+      text-align: right; margin-bottom: 24px;
+    }
+    .auth-forgot a {
+      font-size: 13px; color: var(--accent);
+      text-decoration: none; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .auth-forgot a:hover { color: #8B5CF6; text-shadow: 0 0 8px rgba(139,92,246,0.4); }
+
+    .btn-submit {
+      width: 100%; padding: 14px;
+      background: var(--accent);
+      color: #fff; border: none;
+      border-radius: 14px;
+      font-family: var(--font-b); font-size: 15px; font-weight: 600;
+      cursor: pointer; position: relative; overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 24px var(--accent-glow);
+    }
+    /* Button ripple sweep */
+    .btn-submit::after {
+      content: '';
+      position: absolute; top: 0; left: -100%;
+      width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transform: skewX(-20deg);
+      transition: all 0.5s ease;
+    }
+    .btn-submit:hover {
+      background: #8B5CF6;
+      box-shadow: 0 12px 32px rgba(139, 92, 246, 0.6);
+      transform: translateY(-2px);
+    }
+    .btn-submit:hover::after {
+      animation: shine 1.2s infinite;
+    }
+    @keyframes shine {
+      100% { left: 200%; }
+    }
+
+    .auth-footer {
+      margin-top: 32px; text-align: center;
+      font-size: 13px; color: var(--text-3);
+    }
+    .auth-footer a {
+      color: var(--text); font-weight: 600; text-decoration: none; cursor: pointer;
+    }
+
+    .auth-view {
+      animation: viewFadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    }
+    @keyframes viewFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive */
+    @media(max-width: 960px) {
+      .brand-side { display: none; }
+      .auth-side { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Interactive Background Orbs -->
+  <div class="blob blob-1" id="blob1"></div>
+  <div class="blob blob-2" id="blob2"></div>
+  <div class="blob blob-3" id="blob3"></div>
+
+  <div class="split">
+    
+    <!-- BRAND SIDE -->
+    <div class="brand-side">
+      <div class="brand-logo">
+        <div class="brand-mark">⚡</div>
+        <div class="brand-text">CRM Engine</div>
+      </div>
+      
+      <h1 class="brand-hero">Transform raw data into<br><span>actionable intelligence.</span></h1>
+      <p class="brand-sub">The Adaptive Intelligence CRM that automatically structures, cleans, and deduplicates your B2B datasets.</p>
+      
+      <!-- Interactive floating UI cards -->
+      <div class="floating-ui">
+        <div class="f-card f-card-1">
+          <div style="font-size:11px; color:var(--text-3); margin-bottom:12px; text-transform:uppercase; letter-spacing:1px; font-weight:700;">Detection AI</div>
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+            <div style="width:36px; height:36px; border-radius:10px; background:rgba(46,204,113,0.1); color:#2ECC71; display:flex; justify-content:center; align-items:center; font-size:16px;">✓</div>
+            <div>
+              <div class="line-placeholder w-full primary"></div>
+              <div class="line-placeholder w-half"></div>
+            </div>
+          </div>
+        </div>
+        <div class="f-card f-card-2">
+          <div style="font-size:24px; font-weight:800; color:var(--text); font-family:var(--font-d);">8,452</div>
+          <div style="font-size:12px; color:var(--text-3);">Verified Leads Imported</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUTH SIDE -->
+    <div class="auth-side" id="authWrapper">
+      <div class="auth-card" id="authCard">
+        <!-- SIGN IN VIEW -->
+        <div id="viewSignIn" class="auth-view">
+          <div class="auth-head">
+            <h2 class="auth-title">Welcome Back</h2>
+            <p class="auth-desc">Sign in to your CRM workspace</p>
+          </div>
+          
+          <form onsubmit="event.preventDefault(); window.location.href='index.html';">
+            <div class="input-grp">
+              <label>Work Email</label>
+              <div class="input-wrap">
+                <input type="email" placeholder="name@company.com" required>
+                <div class="input-line"></div>
+              </div>
+            </div>
+            
+            <div class="input-grp" style="margin-bottom:12px;">
+              <label>Password</label>
+              <div class="input-wrap">
+                <input type="password" placeholder="••••••••" required>
+                <div class="input-line"></div>
+              </div>
+            </div>
+            
+            <div class="auth-forgot">
+              <a href="#">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn-submit">Access Workspace</button>
+          </form>
+
+          <div class="auth-footer">
+            Don't have an account? <a onclick="toggleAuth('signup')">Request access</a>
+          </div>
+        </div>
+
+        <!-- SIGN UP VIEW -->
+        <div id="viewSignUp" class="auth-view" style="display: none;">
+          <div class="auth-head">
+            <h2 class="auth-title">Get Started</h2>
+            <p class="auth-desc">Create your CRM engine intelligence account</p>
+          </div>
+          
+          <form onsubmit="event.preventDefault(); window.location.href='index.html';">
+            <div style="display:flex; gap:12px">
+              <div class="input-grp" style="flex:1">
+                <label>First Name</label>
+                <div class="input-wrap">
+                  <input type="text" placeholder="John" required>
+                  <div class="input-line"></div>
+                </div>
+              </div>
+              <div class="input-grp" style="flex:1">
+                <label>Last Name</label>
+                <div class="input-wrap">
+                  <input type="text" placeholder="Doe" required>
+                  <div class="input-line"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="input-grp">
+              <label>Work Email</label>
+              <div class="input-wrap">
+                <input type="email" placeholder="name@company.com" required>
+                <div class="input-line"></div>
+              </div>
+            </div>
+            
+            <div class="input-grp">
+              <label>Password</label>
+              <div class="input-wrap">
+                <input type="password" placeholder="••••••••" required>
+                <div class="input-line"></div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-submit" style="margin-top: 12px;">Create Account</button>
+          </form>
+
+          <div class="auth-footer">
+            Already have an account? <a onclick="toggleAuth('signin')">Sign in</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Parallax & Interactive Blob Animation
+    const b1 = document.getElementById('blob1');
+    const b2 = document.getElementById('blob2');
+    const b3 = document.getElementById('blob3');
+    const card = document.getElementById('authCard');
+    const wrapper = document.getElementById('authWrapper');
+
+    function toggleAuth(view) {
+      document.getElementById('viewSignIn').style.display = view === 'signin' ? 'block' : 'none';
+      document.getElementById('viewSignUp').style.display = view === 'signup' ? 'block' : 'none';
+      // Reset 3D tilt when swapping sizes to prevent jerky jumps
+      card.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      const x = e.clientX;
+      const y = e.clientY;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      // Slowly move ambient backgrounds toward the mouse
+      const moveX = (x / w - 0.5) * 100;
+      const moveY = (y / h - 0.5) * 100;
+
+      b1.style.transform = `translate(${moveX * 1.5}px, ${moveY * 1.5}px)`;
+      b2.style.transform = `translate(${moveX * -1}px, ${moveY * -1}px)`;
+      b3.style.transform = `translate(${moveX * 2}px, ${moveY * 0.5}px)`;
+
+      // 3D Glass Card Tilt Effect based on mouse position relative to card
+      const rect = wrapper.getBoundingClientRect();
+      const cardX = x - (rect.left + rect.width / 2);
+      const cardY = y - (rect.top + rect.height / 2);
+      
+      // Calculate rotation (max 6 degrees)
+      const rotateY = (cardX / (rect.width / 2)) * 6;
+      const rotateX = -(cardY / (rect.height / 2)) * 6;
+
+      if (e.clientX > w / 2) {
+        // Only apply 3D tilt when mouse is on the right side of the screen
+        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+        card.style.borderColor = `rgba(108, 92, 231, ${0.1 + Math.abs(rotateY) / 60})`;
+      } else {
+        card.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+        card.style.borderColor = `var(--border)`;
+      }
+    });
+
+    wrapper.addEventListener('mouseleave', () => {
+      card.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+      card.style.borderColor = `var(--border)`;
+    });
+  </script>
+</body>
+</html>
