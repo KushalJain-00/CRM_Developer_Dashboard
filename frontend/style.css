@@ -1532,7 +1532,7 @@ tbody td {
   .topbar-actions .btn-sm { font-size: 10px; padding: 4px 6px; }
 }
 /* ══════════════════════════════════════════════════════════════════════
-   EML EMAIL EXTRACTOR DASHBOARD
+   EML EMAIL EXTRACTOR DASHBOARD — v2.0 Enhanced
    ══════════════════════════════════════════════════════════════════════ */
 .ft-chip.eml-chip {
   background: linear-gradient(135deg, rgba(0,212,255,.12), rgba(108,92,231,.12));
@@ -1541,11 +1541,14 @@ tbody td {
 }
 @keyframes emlChipPulse {
   0%,100% { box-shadow: 0 0 0 0 rgba(0,212,255,0); }
-  50%      { box-shadow: 0 0 0 4px rgba(0,212,255,.15); }
+  50%      { box-shadow: 0 0 0 5px rgba(0,212,255,.15); }
 }
+
+/* ── Morph Overlay ────────────────────────────────────────────────── */
 .eml-morph-overlay {
   position: fixed; inset: 0; z-index: 9999; pointer-events: none;
-  display: flex; align-items: center; justify-content: center; opacity: 0;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 20px; opacity: 0;
 }
 .eml-morph-overlay.active { pointer-events: all; }
 .eml-morph-overlay::before {
@@ -1555,6 +1558,21 @@ tbody td {
   transition: transform .65s cubic-bezier(.4,0,.2,1), border-radius .65s;
 }
 .eml-morph-overlay.expanding::before { transform: scale(4); border-radius: 0; }
+
+.eml-morph-ring {
+  position: absolute; width: 160px; height: 160px;
+  border: 3px solid transparent;
+  border-top-color: #00D4FF; border-right-color: #6C5CE7;
+  border-radius: 50%; z-index: 1;
+  animation: emlRingSpin 1.2s linear infinite;
+}
+.eml-morph-ring-2 {
+  width: 120px; height: 120px;
+  border-top-color: #2ECC71; border-right-color: #F59E0B;
+  animation-direction: reverse; animation-duration: 0.9s;
+}
+@keyframes emlRingSpin { to { transform: rotate(360deg); } }
+
 .eml-morph-particle {
   position: absolute; width: 6px; height: 6px; border-radius: 50%;
   background: var(--cyan); opacity: 0; pointer-events: none;
@@ -1564,143 +1582,326 @@ tbody td {
   100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
 }
 .eml-morph-icon {
-  position: relative; z-index: 1; font-size: 64px; opacity: 0;
+  position: relative; z-index: 2; font-size: 72px; opacity: 0;
   transform: scale(0.3) rotate(-20deg);
   transition: opacity .4s .3s, transform .5s .3s cubic-bezier(.34,1.56,.64,1);
-  filter: drop-shadow(0 0 32px rgba(0,212,255,.6));
+  filter: drop-shadow(0 0 40px rgba(0,212,255,.7));
 }
 .eml-morph-overlay.expanding .eml-morph-icon { opacity: 1; transform: scale(1) rotate(0deg); }
-.eml-dashboard { animation: emlDashIn .5s cubic-bezier(.2,.8,.2,1) forwards; }
-@keyframes emlDashIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+.eml-morph-status {
+  position: relative; z-index: 2; font-family: var(--font-b);
+  font-size: 14px; font-weight: 600; color: rgba(255,255,255,.7);
+  letter-spacing: .04em; opacity: 0;
+  transition: opacity .3s .4s, color .3s;
 }
+.eml-morph-overlay.expanding .eml-morph-status { opacity: 1; }
+.eml-morph-status.done { color: #2ECC71; }
+
+/* ── Dashboard Entry ──────────────────────────────────────────────── */
+.eml-dashboard { animation: emlDashIn .6s cubic-bezier(.2,.8,.2,1) forwards; }
+@keyframes emlDashIn {
+  from { opacity: 0; transform: translateY(24px) scale(.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Header ───────────────────────────────────────────────────────── */
 .eml-header {
   display: flex; align-items: center; justify-content: space-between;
-  background: linear-gradient(135deg, rgba(0,212,255,.08) 0%, rgba(108,92,231,.08) 100%);
-  border: 1px solid rgba(0,212,255,.18); border-radius: var(--r-xl);
-  padding: 20px 28px; margin-bottom: 20px; position: relative; overflow: hidden;
+  background: linear-gradient(135deg, rgba(0,212,255,.06) 0%, rgba(108,92,231,.06) 50%, rgba(46,204,113,.04) 100%);
+  border: 1px solid rgba(0,212,255,.15); border-radius: var(--r-xl);
+  padding: 22px 28px; margin-bottom: 22px; position: relative; overflow: hidden;
 }
 .eml-header::before {
   content: ''; position: absolute; inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(0,212,255,.04) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(0,212,255,.05) 50%, transparent 100%);
   animation: emlHeaderScan 4s linear infinite;
 }
+.eml-header::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, #00D4FF, #6C5CE7, #2ECC71, #00D4FF);
+  background-size: 200% 100%;
+  animation: emlGradientSlide 3s linear infinite;
+}
 @keyframes emlHeaderScan { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-.eml-header-left  { display: flex; align-items: center; gap: 16px; }
-.eml-header-icon  { font-size: 36px; animation: emlIconFloat 3s ease-in-out infinite; }
+@keyframes emlGradientSlide { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+.eml-header-left  { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
+.eml-header-icon  { font-size: 38px; animation: emlIconFloat 3s ease-in-out infinite; }
 @keyframes emlIconFloat {
   0%,100% { transform: translateY(0) rotate(-3deg); }
   50%     { transform: translateY(-6px) rotate(3deg); }
 }
 .eml-header-title { font-family: var(--font-d); font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -.02em; }
-.eml-header-sub   { font-size: 13px; color: var(--text-3); margin-top: 2px; }
-.eml-header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.eml-kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+.eml-header-sub   { font-size: 13px; color: var(--text-3); margin-top: 3px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.eml-header-actions { display: flex; gap: 8px; flex-wrap: wrap; position: relative; z-index: 1; }
+
+/* ── Type Badges ──────────────────────────────────────────────────── */
+.eml-type-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 8px; border-radius: 12px;
+  font-size: 10px; font-weight: 700; letter-spacing: .03em;
+}
+.eml-badge-reply { background: rgba(59,130,246,.12); color: #3B82F6; border: 1px solid rgba(59,130,246,.2); }
+.eml-badge-forward { background: rgba(245,166,35,.12); color: #F5A623; border: 1px solid rgba(245,166,35,.2); }
+.eml-badge-attach { background: rgba(108,92,231,.12); color: var(--accent); border: 1px solid rgba(108,92,231,.2); }
+.eml-badge-phone { background: rgba(46,204,113,.12); color: #2ECC71; border: 1px solid rgba(46,204,113,.2); }
+
+/* ── KPI Strip ────────────────────────────────────────────────────── */
+.eml-kpi-strip { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 22px; }
 .eml-kpi {
   background: var(--surf); border: 1px solid var(--border); border-radius: var(--r-lg);
-  padding: 20px 22px; position: relative; overflow: hidden;
-  transition: transform .2s, box-shadow .2s;
+  padding: 18px 20px; position: relative; overflow: hidden;
+  transition: transform .25s, box-shadow .25s;
+  animation: emlKpiIn .5s cubic-bezier(.2,.8,.2,1) both;
 }
-.eml-kpi:hover { transform: translateY(-2px); box-shadow: var(--sh-lg); }
+.eml-kpi:nth-child(1) { animation-delay: .05s; }
+.eml-kpi:nth-child(2) { animation-delay: .1s; }
+.eml-kpi:nth-child(3) { animation-delay: .15s; }
+.eml-kpi:nth-child(4) { animation-delay: .2s; }
+.eml-kpi:nth-child(5) { animation-delay: .25s; }
+.eml-kpi:nth-child(6) { animation-delay: .3s; }
+@keyframes emlKpiIn {
+  from { opacity: 0; transform: translateY(12px) scale(.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.eml-kpi:hover { transform: translateY(-3px); box-shadow: var(--sh-lg); }
 .eml-kpi::after {
-  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, var(--cyan), var(--accent));
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+  border-radius: 0 0 var(--r-lg) var(--r-lg);
   transform: scaleX(0); transform-origin: left; transition: transform .4s .1s;
 }
 .eml-kpi:hover::after { transform: scaleX(1); }
-.eml-kpi-val { font-family: var(--font-d); font-size: 32px; font-weight: 800; color: var(--cyan); letter-spacing: -.04em; line-height: 1; }
-.eml-kpi-label { font-size: 12px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; margin-top: 6px; }
+.eml-kpi-contacts::after { background: linear-gradient(90deg, #6C5CE7, #00D4FF); }
+.eml-kpi-emails::after   { background: linear-gradient(90deg, #00D4FF, #3B82F6); }
+.eml-kpi-domains::after  { background: linear-gradient(90deg, #2ECC71, #14B8A6); }
+.eml-kpi-attach::after   { background: linear-gradient(90deg, #F59E0B, #F97316); }
+.eml-kpi-phones::after   { background: linear-gradient(90deg, #EC4899, #8B5CF6); }
+.eml-kpi-urls::after     { background: linear-gradient(90deg, #3B82F6, #6C5CE7); }
+.eml-kpi-icon { font-size: 22px; margin-bottom: 6px; }
+.eml-kpi-val {
+  font-family: var(--font-d); font-size: 30px; font-weight: 800;
+  letter-spacing: -.04em; line-height: 1;
+  background: linear-gradient(135deg, #00D4FF, #6C5CE7);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.eml-kpi-contacts .eml-kpi-val { background: linear-gradient(135deg, #6C5CE7, #00D4FF); -webkit-background-clip: text; background-clip: text; }
+.eml-kpi-emails .eml-kpi-val   { background: linear-gradient(135deg, #00D4FF, #3B82F6); -webkit-background-clip: text; background-clip: text; }
+.eml-kpi-domains .eml-kpi-val  { background: linear-gradient(135deg, #2ECC71, #14B8A6); -webkit-background-clip: text; background-clip: text; }
+.eml-kpi-attach .eml-kpi-val   { background: linear-gradient(135deg, #F59E0B, #F97316); -webkit-background-clip: text; background-clip: text; }
+.eml-kpi-phones .eml-kpi-val   { background: linear-gradient(135deg, #EC4899, #8B5CF6); -webkit-background-clip: text; background-clip: text; }
+.eml-kpi-urls .eml-kpi-val     { background: linear-gradient(135deg, #3B82F6, #6C5CE7); -webkit-background-clip: text; background-clip: text; }
+.eml-kpi-label { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; margin-top: 6px; }
 @keyframes emlCountIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .eml-kpi-val.counted { animation: emlCountIn .4s ease forwards; }
-.eml-body { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; margin-bottom: 16px; }
+
+/* ── Body Grid ────────────────────────────────────────────────────── */
+.eml-body { display: grid; grid-template-columns: 1fr 1.4fr; gap: 18px; margin-bottom: 18px; }
 .eml-panel {
   background: var(--surf); border: 1px solid var(--border);
-  border-radius: var(--r-xl); padding: 22px; transition: border-color .2s;
+  border-radius: var(--r-xl); padding: 24px;
+  transition: border-color .25s, box-shadow .25s;
+  animation: emlPanelIn .5s .15s cubic-bezier(.2,.8,.2,1) both;
 }
-.eml-panel:hover { border-color: rgba(0,212,255,.2); }
+@keyframes emlPanelIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.eml-panel:hover { border-color: rgba(0,212,255,.2); box-shadow: 0 4px 24px rgba(0,212,255,.06); }
 .eml-panel-title {
   font-size: 13px; font-weight: 700; color: var(--text-3); text-transform: uppercase;
   letter-spacing: .08em; margin-bottom: 16px;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
-.eml-email-panel { display: flex; flex-direction: column; gap: 12px; }
-.eml-meta { display: flex; flex-direction: column; gap: 6px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-.eml-meta-row { display: flex; gap: 8px; font-size: 12.5px; }
-.eml-meta-label { min-width: 60px; font-weight: 700; color: var(--text-3); text-transform: uppercase; font-size: 10px; letter-spacing: .06em; padding-top: 2px; }
-.eml-meta-val { color: var(--text-2); word-break: break-word; }
+.eml-body-meta {
+  font-size: 11px; font-weight: 500; color: var(--text-4);
+  text-transform: none; letter-spacing: .02em;
+}
+.eml-email-panel { display: flex; flex-direction: column; gap: 14px; }
+
+/* ── Meta ─────────────────────────────────────────────────────────── */
+.eml-meta { display: flex; flex-direction: column; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.eml-meta-row { display: flex; gap: 10px; font-size: 12.5px; align-items: flex-start; }
+.eml-meta-label {
+  min-width: 64px; font-weight: 700; color: var(--text-3); text-transform: uppercase;
+  font-size: 10px; letter-spacing: .06em; padding-top: 4px; flex-shrink: 0;
+}
+.eml-meta-val { color: var(--text-2); word-break: break-word; line-height: 1.6; }
 .eml-meta-email-tag {
   display: inline-flex; align-items: center;
-  background: rgba(0,212,255,.1); border: 1px solid rgba(0,212,255,.2);
-  color: var(--cyan); border-radius: 20px; padding: 2px 10px;
-  font-size: 11px; font-weight: 600; margin: 2px 3px 2px 0;
-  cursor: pointer; transition: all .15s;
+  background: rgba(0,212,255,.08); border: 1px solid rgba(0,212,255,.18);
+  color: var(--cyan); border-radius: 20px; padding: 3px 12px;
+  font-size: 11.5px; font-weight: 600; margin: 2px 4px 2px 0;
+  cursor: pointer; transition: all .2s;
 }
-.eml-meta-email-tag:hover { background: rgba(0,212,255,.2); transform: translateY(-1px); }
-.eml-subject { font-family: var(--font-d); font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.4; }
+.eml-meta-email-tag:hover { background: rgba(0,212,255,.18); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,212,255,.15); }
+.eml-mailer-tag {
+  font-family: var(--font-m); font-size: 11px; color: var(--text-4);
+  background: var(--surf-2); padding: 2px 8px; border-radius: 6px;
+}
+
+/* ── Subject & Body ───────────────────────────────────────────────── */
+.eml-subject {
+  font-family: var(--font-d); font-size: 17px; font-weight: 700;
+  color: var(--text); line-height: 1.4;
+}
+.eml-subject-text {
+  background: linear-gradient(135deg, var(--text) 60%, var(--accent));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
 .eml-body-text {
-  font-size: 13px; color: var(--text-2); line-height: 1.7;
-  max-height: 260px; overflow-y: auto; white-space: pre-wrap; word-break: break-word;
-  padding: 12px; background: var(--bg-2); border-radius: var(--r); border: 1px solid var(--border);
+  font-size: 13px; color: var(--text-2); line-height: 1.75;
+  max-height: 280px; overflow-y: auto; white-space: pre-wrap; word-break: break-word;
+  padding: 14px 16px; background: var(--bg-2); border-radius: var(--r-lg);
+  border: 1px solid var(--border); transition: border-color .2s;
 }
-.eml-body-text::-webkit-scrollbar { width: 4px; }
+.eml-body-text:hover { border-color: rgba(0,212,255,.15); }
+.eml-body-text::-webkit-scrollbar { width: 5px; }
 .eml-body-text::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 4px; }
+
+/* ── Attachments ──────────────────────────────────────────────────── */
 .eml-attachments { display: flex; flex-wrap: wrap; gap: 8px; }
-.eml-attach-chip {
-  display: flex; align-items: center; gap: 6px;
-  background: var(--surf-2); border: 1px solid var(--border);
-  border-radius: var(--r-sm); padding: 6px 12px; font-size: 12px; color: var(--text-2);
+.eml-attach-label {
+  width: 100%; font-size: 12px; font-weight: 700; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px;
 }
+.eml-attach-chip {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surf-2); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 8px 14px; font-size: 12px; color: var(--text-2);
+  transition: all .2s; cursor: default;
+  animation: emlCardIn .3s ease both;
+}
+.eml-attach-chip:hover { border-color: rgba(108,92,231,.3); background: rgba(108,92,231,.04); transform: translateY(-1px); }
+.eml-attach-icon { font-size: 18px; }
+.eml-attach-name { font-weight: 600; color: var(--text); }
+.eml-attach-ext { font-family: var(--font-m); font-size: 10px; color: var(--text-4); background: var(--surf-3); padding: 1px 6px; border-radius: 4px; }
+
+/* ── Extras: Phones & URLs ────────────────────────────────────────── */
+.eml-extras { margin-top: 4px; }
+.eml-section-label {
+  font-size: 12px; font-weight: 700; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px;
+}
+.eml-phone-grid, .eml-url-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.eml-phone-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(46,204,113,.08); border: 1px solid rgba(46,204,113,.2);
+  color: #2ECC71; border-radius: 20px; padding: 5px 14px;
+  font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s;
+  font-family: var(--font-m);
+}
+.eml-phone-chip:hover { background: rgba(46,204,113,.15); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(46,204,113,.15); }
+.eml-url-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(59,130,246,.06); border: 1px solid rgba(59,130,246,.15);
+  color: #3B82F6; border-radius: var(--r-sm); padding: 5px 12px;
+  font-size: 11.5px; text-decoration: none; transition: all .2s;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.eml-url-chip:hover { background: rgba(59,130,246,.12); transform: translateY(-1px); }
+.eml-url-icon { flex-shrink: 0; }
+
+/* ── Contacts Panel ───────────────────────────────────────────────── */
 .eml-contacts-panel { display: flex; flex-direction: column; }
 .eml-search {
   flex: 1; min-width: 0; background: var(--bg-2); border: 1px solid var(--border);
-  border-radius: var(--r-sm); padding: 6px 12px; font-size: 12px; color: var(--text);
-  outline: none; transition: border-color .2s;
+  border-radius: var(--r-sm); padding: 7px 14px; font-size: 12px; color: var(--text);
+  outline: none; transition: border-color .2s, box-shadow .2s;
 }
-.eml-search:focus { border-color: var(--cyan); }
-.eml-contact-list { display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto; padding-right: 4px; }
+.eml-search:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,212,255,.1); }
+.eml-contact-list { display: flex; flex-direction: column; gap: 8px; max-height: 420px; overflow-y: auto; padding-right: 4px; }
 .eml-contact-list::-webkit-scrollbar { width: 4px; }
 .eml-contact-list::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 4px; }
+
+@keyframes emlCardIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
 .eml-contact-card {
   display: flex; align-items: center; gap: 12px;
   background: var(--surf-2); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 12px 14px; transition: all .2s; cursor: default;
-  animation: emlCardIn .3s ease both;
+  border-radius: var(--r); padding: 12px 14px; transition: all .25s; cursor: pointer;
+  animation: emlCardIn .35s ease both;
 }
-@keyframes emlCardIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
-.eml-contact-card:hover { border-color: rgba(0,212,255,.3); background: rgba(0,212,255,.04); transform: translateX(2px); }
+.eml-contact-card:hover {
+  border-color: rgba(0,212,255,.3); background: rgba(0,212,255,.04);
+  transform: translateX(3px); box-shadow: 0 2px 12px rgba(0,212,255,.08);
+}
 .eml-contact-avatar {
-  width: 36px; height: 36px; border-radius: 50%;
+  width: 38px; height: 38px; border-radius: 50%;
   background: linear-gradient(135deg, var(--accent), var(--cyan));
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(108,92,231,.3);
+  box-shadow: 0 2px 10px rgba(108,92,231,.25);
+  transition: transform .2s;
 }
+.eml-contact-card:hover .eml-contact-avatar { transform: scale(1.08); }
 .eml-contact-info { flex: 1; min-width: 0; }
 .eml-contact-name { font-weight: 700; font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .eml-contact-email { font-size: 11.5px; color: var(--cyan); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
-.eml-contact-source { font-size: 10px; color: var(--text-4); text-transform: uppercase; letter-spacing: .06em; margin-top: 3px; }
-.eml-contact-badge { font-size: 10px; padding: 3px 8px; border-radius: 20px; font-weight: 600; flex-shrink: 0; }
+.eml-contact-domain { font-size: 10px; color: var(--text-4); margin-top: 2px; }
+.eml-contact-badge { font-size: 10px; padding: 3px 9px; border-radius: 20px; font-weight: 700; flex-shrink: 0; letter-spacing: .03em; }
 .eml-badge-from  { background: rgba(46,204,113,.12); color: #2ECC71; border: 1px solid rgba(46,204,113,.2); }
 .eml-badge-to    { background: rgba(0,212,255,.12); color: var(--cyan); border: 1px solid rgba(0,212,255,.2); }
 .eml-badge-cc    { background: rgba(108,92,231,.12); color: var(--accent); border: 1px solid rgba(108,92,231,.2); }
 .eml-badge-body  { background: rgba(245,166,35,.12); color: #F5A623; border: 1px solid rgba(245,166,35,.2); }
-.eml-domains-section { background: var(--surf); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 22px; }
-.eml-domain-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
-.eml-domain-pill {
-  display: flex; align-items: center; gap: 8px;
-  background: var(--surf-2); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 8px 16px; font-size: 13px; font-weight: 600;
-  transition: all .2s; cursor: default; animation: emlCardIn .3s ease both;
+
+.eml-copy-btn {
+  width: 30px; height: 30px; border: none; border-radius: 8px;
+  background: transparent; cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s; flex-shrink: 0; opacity: 0;
 }
-.eml-domain-pill:hover { border-color: rgba(0,212,255,.4); background: rgba(0,212,255,.06); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,212,255,.12); }
-.eml-domain-name { color: var(--text); }
-.eml-domain-count { background: rgba(0,212,255,.15); color: var(--cyan); border-radius: 12px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
-.eml-empty { text-align: center; padding: 40px 20px; color: var(--text-3); font-size: 14px; }
-.eml-empty-icon { font-size: 36px; margin-bottom: 12px; opacity: .5; }
-body.eml-mode .sb-logo-mark { background: linear-gradient(135deg, #00D4FF, #6C5CE7) !important; }
+.eml-contact-card:hover .eml-copy-btn { opacity: 1; }
+.eml-copy-btn:hover { background: rgba(0,212,255,.1); transform: scale(1.15); }
+
+/* ── Domain Intelligence ──────────────────────────────────────────── */
+.eml-domains-section {
+  background: var(--surf); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 24px;
+  animation: emlPanelIn .5s .25s cubic-bezier(.2,.8,.2,1) both;
+}
+.eml-domain-grid { margin-top: 4px; }
+.eml-domain-chart-wrap { display: flex; flex-direction: column; gap: 10px; }
+.eml-domain-row {
+  display: flex; align-items: center; gap: 12px; font-size: 13px;
+  padding: 8px 12px; border-radius: var(--r-sm);
+  transition: background .2s; cursor: default;
+  animation: emlCardIn .35s ease both;
+}
+.eml-domain-row:hover { background: var(--surf-2); }
+.eml-domain-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.eml-domain-name { min-width: 140px; font-weight: 600; color: var(--text); font-family: var(--font-m); font-size: 12.5px; }
+.eml-domain-bar-bg { flex: 1; background: var(--surf-3); border-radius: 4px; height: 8px; overflow: hidden; }
+.eml-domain-bar-fg { height: 100%; border-radius: 4px; transition: width .6s cubic-bezier(.2,.8,.2,1); }
+.eml-domain-count {
+  min-width: 28px; text-align: right; font-weight: 700;
+  font-family: var(--font-d); font-size: 13px; color: var(--text);
+}
+.eml-domain-pct {
+  min-width: 36px; text-align: right; font-size: 11px; color: var(--text-4); font-weight: 500;
+}
+
+/* ── Empty State ──────────────────────────────────────────────────── */
+.eml-empty { text-align: center; padding: 44px 20px; color: var(--text-3); font-size: 14px; }
+.eml-empty-icon { font-size: 40px; margin-bottom: 14px; opacity: .4; }
+
+/* ── EML Mode ─────────────────────────────────────────────────────── */
+body.eml-mode .sb-logo-mark {
+  background: linear-gradient(135deg, #00D4FF, #6C5CE7) !important;
+  box-shadow: 0 0 20px rgba(0,212,255,.3);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────── */
+@media (max-width: 1200px) {
+  .eml-kpi-strip { grid-template-columns: repeat(3, 1fr); }
+}
 @media (max-width: 900px) {
   .eml-body { grid-template-columns: 1fr; }
-  .eml-kpi-strip { grid-template-columns: repeat(2,1fr); }
-  .eml-header { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .eml-kpi-strip { grid-template-columns: repeat(3, 1fr); }
+  .eml-header { flex-direction: column; gap: 14px; align-items: flex-start; }
+  .eml-domain-name { min-width: 100px; }
+}
+@media (max-width: 600px) {
+  .eml-kpi-strip { grid-template-columns: repeat(2, 1fr); }
+  .eml-kpi { padding: 14px 16px; }
+  .eml-kpi-val { font-size: 24px; }
+  .eml-header-actions { flex-wrap: wrap; }
+  .eml-contact-list { max-height: 300px; }
 }

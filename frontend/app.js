@@ -1617,7 +1617,7 @@ function downloadVCF() {
   showNotification(`📱 Downloaded ${S.clean.length} contacts as VCF`, 'success');
 }
 /* ══════════════════════════════════════════════════════════════════════
-   EML EMAIL EXTRACTOR
+   EML EMAIL EXTRACTOR — v2.0 Enhanced
    ══════════════════════════════════════════════════════════════════════ */
 const EML_SUPABASE_URL      = window.EML_SUPABASE_URL      || '';
 const EML_SUPABASE_ANON_KEY = window.EML_SUPABASE_ANON_KEY || '';
@@ -1627,9 +1627,7 @@ const emlClient = (EML_SUPABASE_URL && EML_SUPABASE_ANON_KEY && window.supabase)
 
 const EML = { raw:'', parsed:null, contacts:[], filtered:[] };
 
-/* ── EML file handler (called from handleFile and handleMultipleFiles) ── */
-
-/* ── Read .eml file ───────────────────────────────────────────────── */
+/* ── EML file handler ─────────────────────────────────────────────── */
 function handleEmlFile(file) {
   const reader = new FileReader();
   reader.onload = e => { EML.raw = e.target.result; triggerEmlMorph(file.name); };
@@ -1640,39 +1638,106 @@ function handleEmlFile(file) {
 function triggerEmlMorph(fileName) {
   const overlay = document.createElement('div');
   overlay.className = 'eml-morph-overlay';
-  overlay.innerHTML = '<div class="eml-morph-icon">✉️</div>';
+  overlay.innerHTML = `
+    <div class="eml-morph-ring"></div>
+    <div class="eml-morph-ring eml-morph-ring-2"></div>
+    <div class="eml-morph-icon">✉️</div>
+    <div class="eml-morph-status">Parsing email…</div>`;
   document.body.appendChild(overlay);
   const cx = window.innerWidth/2, cy = window.innerHeight/2;
-  for (let i=0; i<22; i++) {
+  for (let i=0; i<32; i++) {
     const p = document.createElement('div');
     p.className = 'eml-morph-particle';
-    const angle = (i/22)*Math.PI*2, dist = 180+Math.random()*200;
-    p.style.cssText = `left:${cx}px;top:${cy}px;--tx:${Math.cos(angle)*dist}px;--ty:${Math.sin(angle)*dist}px;background:${i%3===0?'#00D4FF':i%3===1?'#6C5CE7':'#2ECC71'};width:${4+Math.random()*6}px;height:${4+Math.random()*6}px;animation:particleFly ${0.6+Math.random()*0.5}s ${i*0.03}s cubic-bezier(.2,.8,.2,1) forwards;`;
+    const angle = (i/32)*Math.PI*2, dist = 140+Math.random()*260;
+    const size = 3+Math.random()*7;
+    const colors = ['#00D4FF','#6C5CE7','#2ECC71','#F59E0B','#EC4899','#3B82F6'];
+    p.style.cssText = `left:${cx}px;top:${cy}px;--tx:${Math.cos(angle)*dist}px;--ty:${Math.sin(angle)*dist}px;background:${colors[i%colors.length]};width:${size}px;height:${size}px;animation:particleFly ${0.5+Math.random()*0.6}s ${i*0.02}s cubic-bezier(.2,.8,.2,1) forwards;`;
     overlay.appendChild(p);
   }
   requestAnimationFrame(() => { overlay.style.opacity='1'; overlay.classList.add('active'); setTimeout(()=>overlay.classList.add('expanding'),50); });
+  const statusEl = overlay.querySelector('.eml-morph-status');
+  setTimeout(()=>{ if(statusEl) statusEl.textContent='Extracting contacts…'; },300);
+  setTimeout(()=>{ if(statusEl) statusEl.textContent='Building dashboard…'; },550);
+
   setTimeout(() => {
     parseEml(fileName); buildEmlDashboard(); showEmlView();
-    overlay.style.transition='opacity .4s'; overlay.style.opacity='0';
-    setTimeout(()=>overlay.remove(), 450);
-  }, 780);
+    if(statusEl) { statusEl.textContent=`${EML.contacts.length} contacts found!`; statusEl.classList.add('done'); }
+    overlay.style.transition='opacity .5s'; overlay.style.opacity='0';
+    setTimeout(()=>overlay.remove(), 550);
+  }, 850);
 }
 
-/* ── .eml parser ──────────────────────────────────────────────────── */
+/* ── .eml parser (v2 — full MIME multipart) ───────────────────────── */
 function parseEml(fileName) {
   const raw = EML.raw;
   const splitIdx = raw.indexOf('\r\n\r\n') !== -1 ? raw.indexOf('\r\n\r\n') : raw.indexOf('\n\n');
   const headerBlock = raw.slice(0, splitIdx);
   let body = raw.slice(splitIdx + (raw.indexOf('\r\n\r\n')!==-1?4:2));
   const headers = {};
-  headerBlock.replace(/\r\n(\s)/g,' ').replace(/\n(\s)/g,' ').split(/\r?\n/).forEach(line => {
+  const unfoldedHeaders = headerBlock.replace(/\r?\n([ \t]+)/g,' ');
+  unfoldedHeaders.split(/\r?\n/).forEach(line => {
     const idx = line.indexOf(':');
-    if (idx>0) headers[line.slice(0,idx).trim().toLowerCase()] = line.slice(idx+1).trim();
+    if (idx>0) {
+      const key = line.slice(0,idx).trim().toLowerCase();
+      const val = line.slice(idx+1).trim();
+      headers[key] = headers[key] ? headers[key] + ', ' + val : val;
+    }
   });
-  body = body.replace(/=\r?\n/g,'').replace(/=([0-9A-Fa-f]{2})/g,(_,h)=>String.fromCharCode(parseInt(h,16)));
-  const bodyText = body.replace(/<style[\s\S]*?<\/style>/gi,'').replace(/<script[\s\S]*?<\/script>/gi,'')
-    .replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
-    .replace(/&quot;/g,'"').replace(/ {2,}/g,' ').replace(/\n{3,}/g,'\n\n').trim();
+
+  const ct = headers['content-type'] || '';
+  const boundaryMatch = ct.match(/boundary="?([^";\s]+)"?/i);
+  let plainBody = '', htmlBody = '';
+
+  if (boundaryMatch) {
+    const boundary = boundaryMatch[1];
+    const parts = body.split('--' + boundary).filter(p => p.trim() && !p.trim().startsWith('--'));
+    for (const part of parts) {
+      const partSplit = part.indexOf('\r\n\r\n') !== -1 ? part.indexOf('\r\n\r\n') : part.indexOf('\n\n');
+      if (partSplit === -1) continue;
+      const partHeaders = part.slice(0, partSplit).toLowerCase();
+      let partBody = part.slice(partSplit + (part.indexOf('\r\n\r\n')!==-1?4:2));
+      const nestedBoundary = partHeaders.match(/boundary="?([^";\s]+)"?/i);
+      if (nestedBoundary) {
+        const nestedParts = partBody.split('--' + nestedBoundary[1]).filter(np => np.trim() && !np.trim().startsWith('--'));
+        for (const np of nestedParts) {
+          const npSplit = np.indexOf('\r\n\r\n') !== -1 ? np.indexOf('\r\n\r\n') : np.indexOf('\n\n');
+          if (npSplit === -1) continue;
+          const npHeaders = np.slice(0, npSplit).toLowerCase();
+          let npBody = np.slice(npSplit + (np.indexOf('\r\n\r\n')!==-1?4:2));
+          npBody = decodePartBody(npBody, npHeaders);
+          if (npHeaders.includes('text/plain') && !plainBody) plainBody = npBody;
+          else if (npHeaders.includes('text/html') && !htmlBody) htmlBody = npBody;
+        }
+        continue;
+      }
+      partBody = decodePartBody(partBody, partHeaders);
+      if (partHeaders.includes('text/plain') && !plainBody) plainBody = partBody;
+      else if (partHeaders.includes('text/html') && !htmlBody) htmlBody = partBody;
+    }
+  } else {
+    const cte = (headers['content-transfer-encoding'] || '').toLowerCase();
+    if (cte.includes('base64')) {
+      try { body = decodeURIComponent(escape(atob(body.replace(/\s/g,'')))); } catch(e) {}
+    } else if (cte.includes('quoted-printable')) {
+      body = body.replace(/=\r?\n/g,'').replace(/=([0-9A-Fa-f]{2})/g,(_,h)=>String.fromCharCode(parseInt(h,16)));
+    }
+    if (ct.includes('text/html')) htmlBody = body;
+    else plainBody = body;
+  }
+
+  let bodyText;
+  if (plainBody) {
+    bodyText = plainBody.replace(/\r\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+  } else if (htmlBody) {
+    bodyText = htmlBody
+      .replace(/<style[\s\S]*?<\/style>/gi,'').replace(/<script[\s\S]*?<\/script>/gi,'')
+      .replace(/<br\s*\/?>/gi,'\n').replace(/<\/p>/gi,'\n\n').replace(/<\/div>/gi,'\n')
+      .replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&')
+      .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"')
+      .replace(/ {2,}/g,' ').replace(/\n{3,}/g,'\n\n').trim();
+  } else {
+    bodyText = body.replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/ {2,}/g,' ').trim();
+  }
 
   function emailToName(e) { return e.split('@')[0].replace(/[._\-+]/g,' ').split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' '); }
   function parseAddresses(str) {
@@ -1684,18 +1749,47 @@ function parseEml(fileName) {
     }
     return results;
   }
+
   const attachments=[];
   const ar=/Content-Disposition:\s*attachment[^\n]*\n\s*filename[*]?="?([^"\n]+)"?/gi; let am;
   while((am=ar.exec(raw))!==null) attachments.push(am[1].trim());
   const ar2=/filename="([^"]+)"/gi;
   while((am=ar2.exec(raw))!==null) { if(!attachments.includes(am[1])) attachments.push(am[1].trim()); }
+  const ar3=/filename\*=(?:utf-8|UTF-8)''([^\s;]+)/gi;
+  while((am=ar3.exec(raw))!==null) {
+    try { const decoded = decodeURIComponent(am[1]); if(!attachments.includes(decoded)) attachments.push(decoded); } catch(e){}
+  }
+
+  const phones = [];
+  const phoneRe = /(?:\+?\d{1,3}[-.\s]?)?\(?\d{2,4}\)?[-.\s]?\d{3,4}[-.\s]?\d{3,4}/g;
+  let pm; const bodyForPhones = bodyText || '';
+  while((pm=phoneRe.exec(bodyForPhones))!==null) {
+    const cleaned = pm[0].replace(/[\s\-().]/g,'');
+    if (cleaned.length >= 10 && cleaned.length <= 15 && /\d{10,}/.test(cleaned) && !phones.includes(pm[0].trim())) phones.push(pm[0].trim());
+  }
+
+  const urls = [];
+  const urlRe = /https?:\/\/[^\s<>"')\]]+/gi; let um;
+  while((um=urlRe.exec(bodyForPhones))!==null) {
+    const url = um[0].replace(/[.,;:!?)]+$/,'');
+    if (!urls.includes(url) && urls.length < 20) urls.push(url);
+  }
+
+  const isReply = !!(headers['in-reply-to'] || headers['references'] || /^re:/i.test(headers['subject']||''));
+  const isForwarded = /^(?:fwd?|fw):/i.test(headers['subject']||'') || /[-]+\s*Forwarded message/i.test(bodyText||'');
 
   EML.parsed = {
     fileName, subject: decodeEmlEncoding(headers['subject']||'(No Subject)'),
     date: headers['date']||'', messageId: headers['message-id']||'',
     from: parseAddresses(headers['from']||''), to: parseAddresses(headers['to']||''),
     cc: parseAddresses(headers['cc']||''), bcc: parseAddresses(headers['bcc']||''),
-    body: bodyText.slice(0,3000), attachments,
+    replyTo: parseAddresses(headers['reply-to']||''),
+    body: (bodyText||'').slice(0,5000), bodyHtml: (htmlBody||'').slice(0,10000),
+    attachments, phones, urls,
+    isReply, isForwarded,
+    priority: headers['x-priority'] || headers['importance'] || 'normal',
+    mailer: headers['x-mailer'] || headers['user-agent'] || '',
+    contentType: ct,
   };
 
   const seen=new Set();
@@ -1703,12 +1797,24 @@ function parseEml(fileName) {
   EML.contacts=[];
   addContacts(EML.parsed.from,'FROM'); addContacts(EML.parsed.to,'TO');
   addContacts(EML.parsed.cc,'CC');     addContacts(EML.parsed.bcc,'BCC');
+  if (EML.parsed.replyTo.length) addContacts(EML.parsed.replyTo,'REPLY-TO');
   const bre=/\b([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})\b/g; let be;
-  while((be=bre.exec(body))!==null) {
+  while((be=bre.exec(bodyText||''))!==null) {
     const email=be[1].toLowerCase();
     if(!seen.has(email)){seen.add(email);EML.contacts.push({name:emailToName(email),email,source:'BODY',domain:email.split('@')[1]||''});}
   }
   EML.filtered=[...EML.contacts];
+}
+
+function decodePartBody(body, headers) {
+  if (headers.includes('base64')) {
+    try { return decodeURIComponent(escape(atob(body.replace(/[\r\n\s]/g,'')))); }
+    catch(e) { return body; }
+  }
+  if (headers.includes('quoted-printable')) {
+    return body.replace(/=\r?\n/g,'').replace(/=([0-9A-Fa-f]{2})/g,(_,h)=>String.fromCharCode(parseInt(h,16)));
+  }
+  return body;
 }
 
 function decodeEmlEncoding(str) {
@@ -1718,47 +1824,122 @@ function decodeEmlEncoding(str) {
   });
 }
 
-/* ── Build dashboard ──────────────────────────────────────────────── */
 function buildEmlDashboard() {
   const p=EML.parsed; if(!p) return;
+  const uniqueDomains = [...new Set(EML.contacts.map(c=>c.domain).filter(Boolean))];
+
   animateCount('emlKpiContacts',EML.contacts.length);
   animateCount('emlKpiEmails',EML.contacts.length);
-  animateCount('emlKpiDomains',[...new Set(EML.contacts.map(c=>c.domain).filter(Boolean))].length);
+  animateCount('emlKpiDomains',uniqueDomains.length);
   animateCount('emlKpiAttach',p.attachments.length);
-  document.getElementById('emlFileName').textContent=p.fileName;
-  document.getElementById('emlFileSub').textContent=`${EML.contacts.length} contact${EML.contacts.length!==1?'s':''} extracted · ${p.date?new Date(p.date).toLocaleString():'Unknown date'}`;
-  function addrTags(list){return list.map(c=>`<span class="eml-meta-email-tag" title="${c.email}">${escHtml(c.name||c.email)}</span>`).join('');}
+
+  const phonesKpi = document.getElementById('emlKpiPhones');
+  if (phonesKpi) animateCount('emlKpiPhones', p.phones.length);
+  const urlsKpi = document.getElementById('emlKpiUrls');
+  if (urlsKpi) animateCount('emlKpiUrls', p.urls.length);
+
+  document.getElementById('emlFileName').textContent=p.subject || p.fileName;
+  const dateStr = p.date ? new Date(p.date).toLocaleString('en-IN', {dateStyle:'medium', timeStyle:'short'}) : 'Unknown date';
+  const badges = [];
+  if (p.isReply) badges.push('<span class="eml-type-badge eml-badge-reply">↩ Reply</span>');
+  if (p.isForwarded) badges.push('<span class="eml-type-badge eml-badge-forward">→ Forward</span>');
+  if (p.attachments.length) badges.push(`<span class="eml-type-badge eml-badge-attach">📎 ${p.attachments.length}</span>`);
+  if (p.phones.length) badges.push(`<span class="eml-type-badge eml-badge-phone">📞 ${p.phones.length}</span>`);
+  document.getElementById('emlFileSub').innerHTML=`${EML.contacts.length} contact${EML.contacts.length!==1?'s':''} · ${dateStr} ${badges.join(' ')}`;
+
+  function addrTags(list){return list.map(c=>`<span class="eml-meta-email-tag" title="Click to copy: ${escHtml(c.email)}" onclick="copyToClip('${escHtml(c.email)}')">${escHtml(c.name||c.email)}</span>`).join('');}
+
   document.getElementById('emlMeta').innerHTML=`
     ${p.from.length?`<div class="eml-meta-row"><span class="eml-meta-label">FROM</span><div class="eml-meta-val">${addrTags(p.from)}</div></div>`:''}
     ${p.to.length?`<div class="eml-meta-row"><span class="eml-meta-label">TO</span><div class="eml-meta-val">${addrTags(p.to)}</div></div>`:''}
     ${p.cc.length?`<div class="eml-meta-row"><span class="eml-meta-label">CC</span><div class="eml-meta-val">${addrTags(p.cc)}</div></div>`:''}
-    ${p.date?`<div class="eml-meta-row"><span class="eml-meta-label">DATE</span><div class="eml-meta-val">${escHtml(p.date)}</div></div>`:''}`;
-  document.getElementById('emlSubject').textContent=p.subject;
-  document.getElementById('emlBodyText').textContent=p.body||'(No readable body content)';
+    ${p.replyTo&&p.replyTo.length?`<div class="eml-meta-row"><span class="eml-meta-label">REPLY-TO</span><div class="eml-meta-val">${addrTags(p.replyTo)}</div></div>`:''}
+    ${p.date?`<div class="eml-meta-row"><span class="eml-meta-label">DATE</span><div class="eml-meta-val">${escHtml(dateStr)}</div></div>`:''}
+    ${p.mailer?`<div class="eml-meta-row"><span class="eml-meta-label">MAILER</span><div class="eml-meta-val eml-mailer-tag">${escHtml(p.mailer)}</div></div>`:''}`;
+
+  document.getElementById('emlSubject').innerHTML=`<span class="eml-subject-text">${escHtml(p.subject)}</span>`;
+
+  const bodyEl = document.getElementById('emlBodyText');
+  const wordCount = (p.body||'').split(/\s+/).filter(Boolean).length;
+  bodyEl.textContent = p.body||'(No readable body content)';
+  const bodyMeta = document.getElementById('emlBodyMeta');
+  if (bodyMeta) bodyMeta.textContent = `${wordCount} words · ${(p.body||'').length} chars`;
+
   const attEl=document.getElementById('emlAttachments');
-  attEl.innerHTML=p.attachments.length?p.attachments.map(a=>`<div class="eml-attach-chip">📎 ${escHtml(a)}</div>`).join(''):'';
+  if (p.attachments.length) {
+    const icons={pdf:'📄',doc:'📝',docx:'📝',xls:'📗',xlsx:'📗',png:'🖼️',jpg:'🖼️',jpeg:'🖼️',gif:'🖼️',zip:'📦',rar:'📦',mp3:'🎵',mp4:'🎬',csv:'📊',pptx:'📊',ppt:'📊',txt:'📝'};
+    attEl.innerHTML = `<div class="eml-attach-label">📎 ${p.attachments.length} Attachment${p.attachments.length>1?'s':''}</div>` +
+      p.attachments.map((a,i) => {
+        const ext = a.split('.').pop().toLowerCase();
+        return `<div class="eml-attach-chip" style="animation-delay:${i*0.08}s"><span class="eml-attach-icon">${icons[ext]||'📄'}</span><span class="eml-attach-name">${escHtml(a)}</span><span class="eml-attach-ext">.${ext}</span></div>`;
+      }).join('');
+  } else attEl.innerHTML='';
+
+  const phonesEl = document.getElementById('emlPhones');
+  if (phonesEl) {
+    if (p.phones.length) {
+      phonesEl.innerHTML = `<div class="eml-section-label">📞 Phone Numbers Found</div><div class="eml-phone-grid">${
+        p.phones.map(ph => `<span class="eml-phone-chip" onclick="copyToClip('${escHtml(ph)}')" title="Click to copy">📞 ${escHtml(ph)}</span>`).join('')
+      }</div>`;
+      phonesEl.style.display = '';
+    } else phonesEl.style.display = 'none';
+  }
+
+  const urlsEl = document.getElementById('emlUrls');
+  if (urlsEl) {
+    if (p.urls.length) {
+      urlsEl.innerHTML = `<div class="eml-section-label">🔗 Links Found (${p.urls.length})</div><div class="eml-url-grid">${
+        p.urls.slice(0,10).map(u => `<a class="eml-url-chip" href="${escHtml(u)}" target="_blank" rel="noopener"><span class="eml-url-icon">🔗</span>${escHtml(u.length>55?u.slice(0,52)+'…':u)}</a>`).join('')
+      }</div>`;
+      urlsEl.style.display = '';
+    } else urlsEl.style.display = 'none';
+  }
+
   renderEmlContacts();
+
   const domainCounts={};
   EML.contacts.forEach(c=>{if(c.domain) domainCounts[c.domain]=(domainCounts[c.domain]||0)+1;});
   const sorted=Object.entries(domainCounts).sort((a,b)=>b[1]-a[1]);
-  document.getElementById('emlDomainGrid').innerHTML=sorted.length
-    ?sorted.map(([d,n],i)=>`<div class="eml-domain-pill" style="animation-delay:${i*0.06}s"><span class="eml-domain-name">@${escHtml(d)}</span><span class="eml-domain-count">${n}</span></div>`).join('')
-    :'<div class="eml-empty"><div class="eml-empty-icon">🌐</div>No domains found</div>';
+
+  const dGrid = document.getElementById('emlDomainGrid');
+  if (sorted.length) {
+    const totalContacts = EML.contacts.length;
+    const colors = ['#00D4FF','#6C5CE7','#2ECC71','#F59E0B','#EC4899','#3B82F6','#F97316','#14B8A6'];
+    dGrid.innerHTML = `<div class="eml-domain-chart-wrap">${sorted.map(([d,n],i)=>{
+      const pct = Math.round(n/totalContacts*100);
+      const color = colors[i % colors.length];
+      return `<div class="eml-domain-row" style="animation-delay:${i*0.06}s">
+        <div class="eml-domain-dot" style="background:${color}"></div>
+        <span class="eml-domain-name">@${escHtml(d)}</span>
+        <div class="eml-domain-bar-bg"><div class="eml-domain-bar-fg" style="width:${pct}%;background:${color}"></div></div>
+        <span class="eml-domain-count">${n}</span>
+        <span class="eml-domain-pct">${pct}%</span>
+      </div>`;
+    }).join('')}</div>`;
+  } else {
+    dGrid.innerHTML = '<div class="eml-empty"><div class="eml-empty-icon">🌐</div>No domains found</div>';
+  }
 }
 
 function renderEmlContacts() {
   const list=document.getElementById('emlContactList');
   if(!EML.filtered.length){list.innerHTML='<div class="eml-empty"><div class="eml-empty-icon">👤</div>No contacts found</div>';return;}
-  const sb={FROM:'eml-badge-from',TO:'eml-badge-to',CC:'eml-badge-cc',BCC:'eml-badge-cc',BODY:'eml-badge-body'};
-  list.innerHTML=EML.filtered.map((c,i)=>`<div class="eml-contact-card" style="animation-delay:${i*0.05}s">
-    <div class="eml-contact-avatar">${escHtml(c.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?')}</div>
+  const sb={FROM:'eml-badge-from',TO:'eml-badge-to',CC:'eml-badge-cc',BCC:'eml-badge-cc','REPLY-TO':'eml-badge-cc',BODY:'eml-badge-body'};
+  const avatarColors = ['#6C5CE7','#00D4FF','#2ECC71','#F59E0B','#EC4899','#3B82F6','#F97316','#14B8A6','#8B5CF6','#EF4444'];
+  list.innerHTML=EML.filtered.map((c,i)=>{
+    const initials = escHtml(c.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?');
+    const color = avatarColors[i % avatarColors.length];
+    return `<div class="eml-contact-card" style="animation-delay:${i*0.04}s" onclick="copyToClip('${escHtml(c.email)}')" title="Click to copy email">
+    <div class="eml-contact-avatar" style="background:linear-gradient(135deg, ${color}, ${color}88)">${initials}</div>
     <div class="eml-contact-info">
       <div class="eml-contact-name">${escHtml(c.name)}</div>
       <div class="eml-contact-email">${escHtml(c.email)}</div>
-      <div class="eml-contact-source">From ${c.source}</div>
+      <div class="eml-contact-domain">@${escHtml(c.domain)}</div>
     </div>
     <span class="eml-contact-badge ${sb[c.source]||'eml-badge-body'}">${c.source}</span>
-  </div>`).join('');
+    <button class="eml-copy-btn" onclick="event.stopPropagation();copyToClip('${escHtml(c.email)}')" title="Copy email">📋</button>
+  </div>`;
+  }).join('');
 }
 
 function emlFilterContacts() {
@@ -1769,9 +1950,21 @@ function emlFilterContacts() {
 
 function animateCount(id,target) {
   const el=document.getElementById(id); if(!el) return;
-  const dur=600,start=performance.now(); el.classList.remove('counted');
+  const dur=800,start=performance.now(); el.classList.remove('counted');
   function frame(now){const p=Math.min((now-start)/dur,1),ease=1-Math.pow(1-p,3);el.textContent=Math.round(ease*target);if(p<1)requestAnimationFrame(frame);else{el.textContent=target;el.classList.add('counted');}}
   requestAnimationFrame(frame);
+}
+
+/* ── Clipboard helper ─────────────────────────────────────────────── */
+function copyToClip(text) {
+  navigator.clipboard.writeText(text).then(()=>{
+    showNotification(`📋 Copied: ${text}`, 'success');
+  }).catch(()=>{
+    const ta=document.createElement('textarea'); ta.value=text;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    showNotification(`📋 Copied: ${text}`, 'success');
+  });
 }
 
 /* ── Show / exit EML view ─────────────────────────────────────────── */
@@ -1779,7 +1972,7 @@ function showEmlView() {
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-eml').classList.add('active');
   document.querySelectorAll('.nav-item[data-view]').forEach(n=>n.classList.remove('active'));
-  document.getElementById('topTitle').textContent='📧 Email Extractor';
+  document.getElementById('topTitle').textContent='📧 Email Intelligence';
   document.getElementById('topSub').textContent=`${EML.parsed?.fileName||'Email'} · ${EML.contacts.length} contacts extracted`;
   document.body.classList.add('eml-mode');
   const ta=document.getElementById('topActions'); if(ta) ta.style.display='flex';
@@ -1788,13 +1981,13 @@ function showEmlView() {
 function exitEmlDashboard() {
   document.body.classList.remove('eml-mode');
   const v=document.getElementById('view-eml');
-  v.style.transition='opacity .3s'; v.style.opacity='0';
-  setTimeout(()=>{v.style.opacity='';v.style.transition='';v.classList.remove('active');EML.raw='';EML.parsed=null;EML.contacts=[];EML.filtered=[];showView('upload');},320);
+  v.style.transition='opacity .35s, transform .35s'; v.style.opacity='0'; v.style.transform='translateY(12px)';
+  setTimeout(()=>{v.style.opacity='';v.style.transform='';v.style.transition='';v.classList.remove('active');EML.raw='';EML.parsed=null;EML.contacts=[];EML.filtered=[];showView('upload');},380);
 }
 
 /* ── Export CSV ───────────────────────────────────────────────────── */
 function emlExportCSV() {
-  if(!EML.contacts.length){alert('No contacts to export.');return;}
+  if(!EML.contacts.length){showNotification('No contacts to export.','error');return;}
   const rows=[['Name','Email','Domain','Source']];
   EML.contacts.forEach(c=>rows.push([c.name,c.email,c.domain,c.source]));
   const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
@@ -1811,7 +2004,6 @@ async function emlSaveToSupabase() {
   const p=EML.parsed;
   try {
     showNotification('Saving to EML database…','info');
-    // 1. Insert email record
     const {data:emailRow,error:emailErr} = await emlClient.from('eml_emails').insert({
       file_name:     p.fileName,
       subject:       p.subject,

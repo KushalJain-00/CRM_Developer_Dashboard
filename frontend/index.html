@@ -286,29 +286,33 @@
           </div>
           <div class="eml-header-actions">
             <button class="btn btn-secondary btn-sm" onclick="emlExportCSV()">⬇ Export CSV</button>
-            <button class="btn btn-primary btn-sm" onclick="emlSaveToSupabase()">☁ Save to EML DB</button>
+            <button class="btn btn-primary btn-sm" onclick="emlSaveToSupabase()">☁ Save to DB</button>
             <button class="btn btn-success btn-sm" onclick="emlSendToCRM()">💾 Push to CRM</button>
             <button class="btn btn-secondary btn-sm" onclick="exitEmlDashboard()">✕ Close</button>
           </div>
         </div>
         <div class="eml-kpi-strip" id="emlKpiStrip">
-          <div class="eml-kpi"><div class="eml-kpi-val" id="emlKpiContacts">—</div><div class="eml-kpi-label">Contacts Found</div></div>
-          <div class="eml-kpi"><div class="eml-kpi-val" id="emlKpiEmails">—</div><div class="eml-kpi-label">Email Addresses</div></div>
-          <div class="eml-kpi"><div class="eml-kpi-val" id="emlKpiDomains">—</div><div class="eml-kpi-label">Unique Domains</div></div>
-          <div class="eml-kpi"><div class="eml-kpi-val" id="emlKpiAttach">—</div><div class="eml-kpi-label">Attachments</div></div>
+          <div class="eml-kpi eml-kpi-contacts"><div class="eml-kpi-icon">👤</div><div class="eml-kpi-val" id="emlKpiContacts">—</div><div class="eml-kpi-label">Contacts Found</div></div>
+          <div class="eml-kpi eml-kpi-emails"><div class="eml-kpi-icon">📧</div><div class="eml-kpi-val" id="emlKpiEmails">—</div><div class="eml-kpi-label">Email Addresses</div></div>
+          <div class="eml-kpi eml-kpi-domains"><div class="eml-kpi-icon">🌐</div><div class="eml-kpi-val" id="emlKpiDomains">—</div><div class="eml-kpi-label">Unique Domains</div></div>
+          <div class="eml-kpi eml-kpi-attach"><div class="eml-kpi-icon">📎</div><div class="eml-kpi-val" id="emlKpiAttach">—</div><div class="eml-kpi-label">Attachments</div></div>
+          <div class="eml-kpi eml-kpi-phones"><div class="eml-kpi-icon">📞</div><div class="eml-kpi-val" id="emlKpiPhones">—</div><div class="eml-kpi-label">Phone Numbers</div></div>
+          <div class="eml-kpi eml-kpi-urls"><div class="eml-kpi-icon">🔗</div><div class="eml-kpi-val" id="emlKpiUrls">—</div><div class="eml-kpi-label">Links Found</div></div>
         </div>
         <div class="eml-body">
           <div class="eml-panel eml-email-panel">
-            <div class="eml-panel-title">📨 Message Preview</div>
+            <div class="eml-panel-title">📨 Message Preview <span class="eml-body-meta" id="emlBodyMeta"></span></div>
             <div class="eml-meta" id="emlMeta"></div>
             <div class="eml-subject" id="emlSubject"></div>
             <div class="eml-body-text" id="emlBodyText"></div>
             <div class="eml-attachments" id="emlAttachments"></div>
+            <div class="eml-extras" id="emlPhones"></div>
+            <div class="eml-extras" id="emlUrls"></div>
           </div>
           <div class="eml-panel eml-contacts-panel">
             <div class="eml-panel-title">
               <span>👤 Extracted Contacts</span>
-              <input class="eml-search" id="emlSearch" placeholder="Search contacts…" oninput="emlFilterContacts()">
+              <input class="eml-search" id="emlSearch" placeholder="🔍 Search contacts…" oninput="emlFilterContacts()">
             </div>
             <div class="eml-contact-list" id="emlContactList"></div>
           </div>
