@@ -1330,6 +1330,7 @@ async function loadHistory() {
           <td style="padding:10px;text-align:center;color:var(--emerald)">${s.imported || '—'}</td>
           <td style="padding:10px;color:var(--text-3);font-size:11px">${new Date(s.upload_date).toLocaleString()}</td>
           <td style="padding:10px"><button class="btn btn-secondary btn-sm" onclick="reloadSession(${s.id},'${safeName}')">↺ Reload</button>
+          <button class="btn btn-primary btn-sm" style="margin-left:4px" onclick="exportSessionWithCalls(${s.id},'${safeName}')">⬇ Export+Calls</button>
           <button class="btn btn-danger btn-sm" style="margin-left:4px" onclick="deleteSession(${s.id})">🗑</button></td>
         </tr>`;
       }).join('')}</tbody>
@@ -1348,6 +1349,7 @@ async function reloadSession(sessionId, fileName) {
   S.fileName = fileName;
   S.sheetName = data.sheet_name;
   S.mapping = data.mapping || {};
+  S.sessionId = sessionId;
   if (!Object.keys(S.mapping).length) buildMapping();
   else startProcessing();
 }
@@ -1356,6 +1358,48 @@ async function deleteSession(sessionId) {
   if (!confirm('Delete this history entry?')) return;
   await fetch(`${API_BASE}/api/history/${sessionId}`, { method: 'DELETE', headers: apiHeaders() });
   loadHistory();
+}
+
+async function exportSessionWithCalls(sessionId, fileName) {
+  showNotification('Building export with call logs…', 'info');
+  try {
+    const res = await fetch(`${API_BASE}/api/history/${sessionId}/export`, { headers: apiHeaders() });
+    const data = await res.json();
+    if (!data.ok || !data.records.length) { alert('No records found.'); return; }
+
+    const wb = XLSX.utils.book_new();
+    const rows = data.records;
+
+    // All column keys — original cols first, call log cols (_*) at end
+    const allKeys = [...new Set(rows.flatMap((r) => Object.keys(r)))];
+    const dataCols = allKeys.filter((k) => !k.startsWith('_'));
+    const callCols = allKeys.filter((k) => k.startsWith('_'));
+    const finalCols = [...dataCols, ...callCols];
+
+    // Friendly header names for call log columns
+    const colLabel = {
+      _last_call_date: 'Last Call Date',
+      _last_call_type: 'Last Call Type',
+      _last_outcome: 'Last Outcome',
+      _last_notes: 'Last Notes',
+      _total_calls: 'Total Calls',
+      _next_action: 'Next Action',
+      _next_action_date: 'Next Action Date',
+      _all_call_summary: 'All Calls Summary',
+    };
+    const headers = finalCols.map((k) => colLabel[k] || k);
+    const sheetRows = rows.map((row) => finalCols.map((k) => row[k] ?? ''));
+
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...sheetRows]);
+    ws['!cols'] = finalCols.map((k) => ({ wch: k.includes('summary') ? 80 : k.startsWith('_') ? 22 : 25 }));
+    XLSX.utils.book_append_sheet(wb, ws, 'Data + Call Logs');
+
+    const outName = (fileName || 'export').replace(/\.(xlsx?|csv|txt)$/i, '') + '_with_calls.xlsx';
+    XLSX.writeFile(wb, outName);
+    showNotification(`✅ Exported ${rows.length} records with call history`, 'success');
+  } catch (err) {
+    showNotification('Export failed: ' + err.message, 'error');
+  }
 }
 
 function showNotification(msg, type='info') {
