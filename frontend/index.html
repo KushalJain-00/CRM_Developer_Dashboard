@@ -138,13 +138,14 @@
           <button class="btn btn-primary" id="chooseFileBtn" onclick="event.stopPropagation();document.getElementById('fileInput').click()">
             Choose File
           </button>
-          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.txt,.pdf" multiple style="display:none" onchange="handleMultipleFiles(this.files)">
+          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.txt,.pdf,.eml" multiple style="display:none" onchange="handleMultipleFiles(this.files)">
           <div class="ft-chips">
             <span class="ft-chip">📗 .xlsx</span>
             <span class="ft-chip">📘 .xls</span>
             <span class="ft-chip">📄 .csv</span>
             <span class="ft-chip">📝 .txt</span>
             <span class="ft-chip">📑 .pdf</span>
+            <span class="ft-chip eml-chip">📧 .eml</span>
           </div>
         </div>
         <div class="upload-grid">
@@ -269,6 +270,54 @@
         </div>
       </div>
       <div id="dedupContent"></div>
+    </div>
+
+
+    <!-- EML EMAIL EXTRACTOR DASHBOARD -->
+    <div class="view" id="view-eml">
+      <div class="eml-dashboard">
+        <div class="eml-header">
+          <div class="eml-header-left">
+            <div class="eml-header-icon">✉️</div>
+            <div>
+              <div class="eml-header-title" id="emlFileName">Email Analysis</div>
+              <div class="eml-header-sub" id="emlFileSub">Parsing message…</div>
+            </div>
+          </div>
+          <div class="eml-header-actions">
+            <button class="btn btn-secondary btn-sm" onclick="emlExportCSV()">⬇ Export CSV</button>
+            <button class="btn btn-primary btn-sm" onclick="emlSaveToSupabase()">☁ Save to EML DB</button>
+            <button class="btn btn-success btn-sm" onclick="emlSendToCRM()">💾 Push to CRM</button>
+            <button class="btn btn-secondary btn-sm" onclick="exitEmlDashboard()">✕ Close</button>
+          </div>
+        </div>
+        <div class="eml-kpi-strip" id="emlKpiStrip">
+          <div class="eml-kpi"><div class="eml-kpi-val" id="emlKpiContacts">—</div><div class="eml-kpi-label">Contacts Found</div></div>
+          <div class="eml-kpi"><div class="eml-kpi-val" id="emlKpiEmails">—</div><div class="eml-kpi-label">Email Addresses</div></div>
+          <div class="eml-kpi"><div class="eml-kpi-val" id="emlKpiDomains">—</div><div class="eml-kpi-label">Unique Domains</div></div>
+          <div class="eml-kpi"><div class="eml-kpi-val" id="emlKpiAttach">—</div><div class="eml-kpi-label">Attachments</div></div>
+        </div>
+        <div class="eml-body">
+          <div class="eml-panel eml-email-panel">
+            <div class="eml-panel-title">📨 Message Preview</div>
+            <div class="eml-meta" id="emlMeta"></div>
+            <div class="eml-subject" id="emlSubject"></div>
+            <div class="eml-body-text" id="emlBodyText"></div>
+            <div class="eml-attachments" id="emlAttachments"></div>
+          </div>
+          <div class="eml-panel eml-contacts-panel">
+            <div class="eml-panel-title">
+              <span>👤 Extracted Contacts</span>
+              <input class="eml-search" id="emlSearch" placeholder="Search contacts…" oninput="emlFilterContacts()">
+            </div>
+            <div class="eml-contact-list" id="emlContactList"></div>
+          </div>
+        </div>
+        <div class="eml-domains-section">
+          <div class="eml-panel-title">🌐 Domain Intelligence</div>
+          <div class="eml-domain-grid" id="emlDomainGrid"></div>
+        </div>
+      </div>
     </div>
 
     <div class="view" id="view-history">

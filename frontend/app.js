@@ -1607,3 +1607,249 @@ function downloadVCF() {
   URL.revokeObjectURL(url);
   showNotification(`📱 Downloaded ${S.clean.length} contacts as VCF`, 'success');
 }
+/* ══════════════════════════════════════════════════════════════════════
+   EML EMAIL EXTRACTOR
+   ══════════════════════════════════════════════════════════════════════ */
+const EML_SUPABASE_URL      = window.EML_SUPABASE_URL      || '';
+const EML_SUPABASE_ANON_KEY = window.EML_SUPABASE_ANON_KEY || '';
+const emlClient = (EML_SUPABASE_URL && EML_SUPABASE_ANON_KEY && window.supabase)
+  ? window.supabase.createClient(EML_SUPABASE_URL, EML_SUPABASE_ANON_KEY)
+  : null;
+
+const EML = { raw:'', parsed:null, contacts:[], filtered:[] };
+
+/* ── Hook into existing file handlers ─────────────────────────────── */
+const _origHandleMultiple = handleMultipleFiles;
+async function handleMultipleFiles(fileList) {
+  const emlFiles = Array.from(fileList).filter(f => /\.eml$/i.test(f.name));
+  if (emlFiles.length > 0) { handleEmlFile(emlFiles[0]); return; }
+  return _origHandleMultiple(fileList);
+}
+
+/* ── Read .eml file ───────────────────────────────────────────────── */
+function handleEmlFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => { EML.raw = e.target.result; triggerEmlMorph(file.name); };
+  reader.readAsText(file, 'utf-8');
+}
+
+/* ── Morph animation ──────────────────────────────────────────────── */
+function triggerEmlMorph(fileName) {
+  const overlay = document.createElement('div');
+  overlay.className = 'eml-morph-overlay';
+  overlay.innerHTML = '<div class="eml-morph-icon">✉️</div>';
+  document.body.appendChild(overlay);
+  const cx = window.innerWidth/2, cy = window.innerHeight/2;
+  for (let i=0; i<22; i++) {
+    const p = document.createElement('div');
+    p.className = 'eml-morph-particle';
+    const angle = (i/22)*Math.PI*2, dist = 180+Math.random()*200;
+    p.style.cssText = `left:${cx}px;top:${cy}px;--tx:${Math.cos(angle)*dist}px;--ty:${Math.sin(angle)*dist}px;background:${i%3===0?'#00D4FF':i%3===1?'#6C5CE7':'#2ECC71'};width:${4+Math.random()*6}px;height:${4+Math.random()*6}px;animation:particleFly ${0.6+Math.random()*0.5}s ${i*0.03}s cubic-bezier(.2,.8,.2,1) forwards;`;
+    overlay.appendChild(p);
+  }
+  requestAnimationFrame(() => { overlay.style.opacity='1'; overlay.classList.add('active'); setTimeout(()=>overlay.classList.add('expanding'),50); });
+  setTimeout(() => {
+    parseEml(fileName); buildEmlDashboard(); showEmlView();
+    overlay.style.transition='opacity .4s'; overlay.style.opacity='0';
+    setTimeout(()=>overlay.remove(), 450);
+  }, 780);
+}
+
+/* ── .eml parser ──────────────────────────────────────────────────── */
+function parseEml(fileName) {
+  const raw = EML.raw;
+  const splitIdx = raw.indexOf('\r\n\r\n') !== -1 ? raw.indexOf('\r\n\r\n') : raw.indexOf('\n\n');
+  const headerBlock = raw.slice(0, splitIdx);
+  let body = raw.slice(splitIdx + (raw.indexOf('\r\n\r\n')!==-1?4:2));
+  const headers = {};
+  headerBlock.replace(/\r\n(\s)/g,' ').replace(/\n(\s)/g,' ').split(/\r?\n/).forEach(line => {
+    const idx = line.indexOf(':');
+    if (idx>0) headers[line.slice(0,idx).trim().toLowerCase()] = line.slice(idx+1).trim();
+  });
+  body = body.replace(/=\r?\n/g,'').replace(/=([0-9A-Fa-f]{2})/g,(_,h)=>String.fromCharCode(parseInt(h,16)));
+  const bodyText = body.replace(/<style[\s\S]*?<\/style>/gi,'').replace(/<script[\s\S]*?<\/script>/gi,'')
+    .replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
+    .replace(/&quot;/g,'"').replace(/ {2,}/g,' ').replace(/\n{3,}/g,'\n\n').trim();
+
+  function emailToName(e) { return e.split('@')[0].replace(/[._\-+]/g,' ').split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' '); }
+  function parseAddresses(str) {
+    if (!str) return [];
+    const results=[], re=/(?:"?([^"<,]+)"?\s*)?<([^>]+@[^>]+)>|([^\s,<]+@[^\s,>]+)/g; let m;
+    while((m=re.exec(str))!==null) {
+      const name=(m[1]||'').trim().replace(/^"|"$/g,''), email=(m[2]||m[3]||'').trim().toLowerCase();
+      if(email) results.push({name:name||emailToName(email),email});
+    }
+    return results;
+  }
+  const attachments=[];
+  const ar=/Content-Disposition:\s*attachment[^\n]*\n\s*filename[*]?="?([^"\n]+)"?/gi; let am;
+  while((am=ar.exec(raw))!==null) attachments.push(am[1].trim());
+  const ar2=/filename="([^"]+)"/gi;
+  while((am=ar2.exec(raw))!==null) { if(!attachments.includes(am[1])) attachments.push(am[1].trim()); }
+
+  EML.parsed = {
+    fileName, subject: decodeEmlEncoding(headers['subject']||'(No Subject)'),
+    date: headers['date']||'', messageId: headers['message-id']||'',
+    from: parseAddresses(headers['from']||''), to: parseAddresses(headers['to']||''),
+    cc: parseAddresses(headers['cc']||''), bcc: parseAddresses(headers['bcc']||''),
+    body: bodyText.slice(0,3000), attachments,
+  };
+
+  const seen=new Set();
+  function addContacts(list,source) { list.forEach(c=>{ if(!seen.has(c.email)){seen.add(c.email);EML.contacts.push({...c,source,domain:c.email.split('@')[1]||''});}});}
+  EML.contacts=[];
+  addContacts(EML.parsed.from,'FROM'); addContacts(EML.parsed.to,'TO');
+  addContacts(EML.parsed.cc,'CC');     addContacts(EML.parsed.bcc,'BCC');
+  const bre=/\b([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})\b/g; let be;
+  while((be=bre.exec(body))!==null) {
+    const email=be[1].toLowerCase();
+    if(!seen.has(email)){seen.add(email);EML.contacts.push({name:emailToName(email),email,source:'BODY',domain:email.split('@')[1]||''});}
+  }
+  EML.filtered=[...EML.contacts];
+}
+
+function decodeEmlEncoding(str) {
+  return str.replace(/=\?([^?]+)\?(Q|B)\?([^?]*)\?=/gi,(_,charset,enc,data)=>{
+    try { return enc.toUpperCase()==='B'?decodeURIComponent(escape(atob(data))):data.replace(/_/g,' ').replace(/=([0-9A-Fa-f]{2})/g,(__,h)=>String.fromCharCode(parseInt(h,16))); }
+    catch{return data;}
+  });
+}
+
+/* ── Build dashboard ──────────────────────────────────────────────── */
+function buildEmlDashboard() {
+  const p=EML.parsed; if(!p) return;
+  animateCount('emlKpiContacts',EML.contacts.length);
+  animateCount('emlKpiEmails',EML.contacts.length);
+  animateCount('emlKpiDomains',[...new Set(EML.contacts.map(c=>c.domain).filter(Boolean))].length);
+  animateCount('emlKpiAttach',p.attachments.length);
+  document.getElementById('emlFileName').textContent=p.fileName;
+  document.getElementById('emlFileSub').textContent=`${EML.contacts.length} contact${EML.contacts.length!==1?'s':''} extracted · ${p.date?new Date(p.date).toLocaleString():'Unknown date'}`;
+  function addrTags(list){return list.map(c=>`<span class="eml-meta-email-tag" title="${c.email}">${escHtml(c.name||c.email)}</span>`).join('');}
+  document.getElementById('emlMeta').innerHTML=`
+    ${p.from.length?`<div class="eml-meta-row"><span class="eml-meta-label">FROM</span><div class="eml-meta-val">${addrTags(p.from)}</div></div>`:''}
+    ${p.to.length?`<div class="eml-meta-row"><span class="eml-meta-label">TO</span><div class="eml-meta-val">${addrTags(p.to)}</div></div>`:''}
+    ${p.cc.length?`<div class="eml-meta-row"><span class="eml-meta-label">CC</span><div class="eml-meta-val">${addrTags(p.cc)}</div></div>`:''}
+    ${p.date?`<div class="eml-meta-row"><span class="eml-meta-label">DATE</span><div class="eml-meta-val">${escHtml(p.date)}</div></div>`:''}`;
+  document.getElementById('emlSubject').textContent=p.subject;
+  document.getElementById('emlBodyText').textContent=p.body||'(No readable body content)';
+  const attEl=document.getElementById('emlAttachments');
+  attEl.innerHTML=p.attachments.length?p.attachments.map(a=>`<div class="eml-attach-chip">📎 ${escHtml(a)}</div>`).join(''):'';
+  renderEmlContacts();
+  const domainCounts={};
+  EML.contacts.forEach(c=>{if(c.domain) domainCounts[c.domain]=(domainCounts[c.domain]||0)+1;});
+  const sorted=Object.entries(domainCounts).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('emlDomainGrid').innerHTML=sorted.length
+    ?sorted.map(([d,n],i)=>`<div class="eml-domain-pill" style="animation-delay:${i*0.06}s"><span class="eml-domain-name">@${escHtml(d)}</span><span class="eml-domain-count">${n}</span></div>`).join('')
+    :'<div class="eml-empty"><div class="eml-empty-icon">🌐</div>No domains found</div>';
+}
+
+function renderEmlContacts() {
+  const list=document.getElementById('emlContactList');
+  if(!EML.filtered.length){list.innerHTML='<div class="eml-empty"><div class="eml-empty-icon">👤</div>No contacts found</div>';return;}
+  const sb={FROM:'eml-badge-from',TO:'eml-badge-to',CC:'eml-badge-cc',BCC:'eml-badge-cc',BODY:'eml-badge-body'};
+  list.innerHTML=EML.filtered.map((c,i)=>`<div class="eml-contact-card" style="animation-delay:${i*0.05}s">
+    <div class="eml-contact-avatar">${escHtml(c.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?')}</div>
+    <div class="eml-contact-info">
+      <div class="eml-contact-name">${escHtml(c.name)}</div>
+      <div class="eml-contact-email">${escHtml(c.email)}</div>
+      <div class="eml-contact-source">From ${c.source}</div>
+    </div>
+    <span class="eml-contact-badge ${sb[c.source]||'eml-badge-body'}">${c.source}</span>
+  </div>`).join('');
+}
+
+function emlFilterContacts() {
+  const q=(document.getElementById('emlSearch')?.value||'').toLowerCase();
+  EML.filtered=q?EML.contacts.filter(c=>c.name.toLowerCase().includes(q)||c.email.toLowerCase().includes(q)||c.domain.toLowerCase().includes(q)):[...EML.contacts];
+  renderEmlContacts();
+}
+
+function animateCount(id,target) {
+  const el=document.getElementById(id); if(!el) return;
+  const dur=600,start=performance.now(); el.classList.remove('counted');
+  function frame(now){const p=Math.min((now-start)/dur,1),ease=1-Math.pow(1-p,3);el.textContent=Math.round(ease*target);if(p<1)requestAnimationFrame(frame);else{el.textContent=target;el.classList.add('counted');}}
+  requestAnimationFrame(frame);
+}
+
+/* ── Show / exit EML view ─────────────────────────────────────────── */
+function showEmlView() {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-eml').classList.add('active');
+  document.querySelectorAll('.nav-item[data-view]').forEach(n=>n.classList.remove('active'));
+  document.getElementById('topTitle').textContent='📧 Email Extractor';
+  document.getElementById('topSub').textContent=`${EML.parsed?.fileName||'Email'} · ${EML.contacts.length} contacts extracted`;
+  document.body.classList.add('eml-mode');
+  const ta=document.getElementById('topActions'); if(ta) ta.style.display='flex';
+}
+
+function exitEmlDashboard() {
+  document.body.classList.remove('eml-mode');
+  const v=document.getElementById('view-eml');
+  v.style.transition='opacity .3s'; v.style.opacity='0';
+  setTimeout(()=>{v.style.opacity='';v.style.transition='';v.classList.remove('active');EML.raw='';EML.parsed=null;EML.contacts=[];EML.filtered=[];showView('upload');},320);
+}
+
+/* ── Export CSV ───────────────────────────────────────────────────── */
+function emlExportCSV() {
+  if(!EML.contacts.length){alert('No contacts to export.');return;}
+  const rows=[['Name','Email','Domain','Source']];
+  EML.contacts.forEach(c=>rows.push([c.name,c.email,c.domain,c.source]));
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+  a.download=(EML.parsed?.fileName||'email').replace('.eml','')+'_contacts.csv';
+  a.click(); showNotification(`📧 Exported ${EML.contacts.length} contacts as CSV`,'success');
+}
+
+/* ── Save to Supabase EML DB ──────────────────────────────────────── */
+async function emlSaveToSupabase() {
+  if(!emlClient){showNotification('EML Supabase not configured. Add EML_SUPABASE_URL and EML_SUPABASE_ANON_KEY to config.js','error');return;}
+  if(!EML.parsed){showNotification('No email loaded','error');return;}
+  const p=EML.parsed;
+  try {
+    showNotification('Saving to EML database…','info');
+    // 1. Insert email record
+    const {data:emailRow,error:emailErr} = await emlClient.from('eml_emails').insert({
+      file_name:     p.fileName,
+      subject:       p.subject,
+      sender_name:   p.from[0]?.name||null,
+      sender_email:  p.from[0]?.email||null,
+      to_emails:     p.to.map(c=>c.email).join(', ')||null,
+      cc_emails:     p.cc.map(c=>c.email).join(', ')||null,
+      sent_date:     p.date?new Date(p.date).toISOString():null,
+      body_preview:  p.body.slice(0,500),
+      attachments:   p.attachments.join(', ')||null,
+      total_contacts:EML.contacts.length,
+    }).select().single();
+    if(emailErr) throw emailErr;
+    // 2. Insert all extracted contacts
+    const contactRows = EML.contacts.map(c=>({
+      email_id:    emailRow.id,
+      name:        c.name,
+      email:       c.email,
+      domain:      c.domain,
+      source_field:c.source,
+    }));
+    const {error:contactErr} = await emlClient.from('eml_contacts').insert(contactRows);
+    if(contactErr) throw contactErr;
+    showNotification(`✅ Saved email + ${EML.contacts.length} contacts to EML database`,'success');
+  } catch(err) {
+    showNotification('Save failed: '+err.message,'error');
+  }
+}
+
+/* ── Push contacts into main CRM table ───────────────────────────── */
+function emlSendToCRM() {
+  if(!EML.contacts.length){alert('No contacts to push.');return;}
+  const rows=EML.contacts.map(c=>({'Name':c.name,'Email':c.email,'Domain':c.domain,'Source':c.source}));
+  S.rawData=rows; S.headers=['Name','Email','Domain','Source'];
+  S.fileName=EML.parsed?.fileName||'Email Import'; S.sheetName='EML Contacts';
+  S.mapping={'Name':{type:'contact',keep:true},'Email':{type:'email',keep:true},'Domain':{type:'website',keep:true},'Source':{type:'other',keep:true}};
+  S.clean=rows; S.filtered=[...rows]; S.page=1;
+  document.body.classList.remove('eml-mode');
+  showNotification(`✅ ${rows.length} email contacts pushed to CRM table`,'success');
+  const ta=document.getElementById('topActions'); if(ta) ta.style.display='flex';
+  showView('table');
+}
+
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
