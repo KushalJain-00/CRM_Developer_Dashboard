@@ -231,6 +231,11 @@ async function handleFile(file) {
   S.fileName = file.name;
   const ext = file.name.split('.').pop().toLowerCase();
 
+  if (ext === 'eml') {
+    handleEmlFile(file);
+    return;
+  }
+
   if (ext === 'txt') {
     const reader = new FileReader();
     reader.onload = e => {
@@ -310,8 +315,12 @@ async function handleFile(file) {
 
 /* ── Multi-File Handler ────────────────────────────────────────────── */
 async function handleMultipleFiles(fileList) {
-  const files = Array.from(fileList).filter(f => /\.(xlsx|xls|csv|txt|pdf)$/i.test(f.name));
-  if (!files.length) { showError('No supported files found. Drop .xlsx, .xls, .csv, .txt, or .pdf files.'); return; }
+  // Intercept .eml files and route to the EML extractor
+  const emlFiles = Array.from(fileList).filter(f => /\.eml$/i.test(f.name));
+  if (emlFiles.length > 0) { handleEmlFile(emlFiles[0]); return; }
+
+  const files = Array.from(fileList).filter(f => /\.(xlsx|xls|csv|txt|pdf|eml)$/i.test(f.name));
+  if (!files.length) { showError('No supported files found. Drop .xlsx, .xls, .csv, .txt, .pdf, or .eml files.'); return; }
 
   // If only 1 file, use normal flow
   if (files.length === 1) { handleFile(files[0]); return; }
@@ -1618,13 +1627,7 @@ const emlClient = (EML_SUPABASE_URL && EML_SUPABASE_ANON_KEY && window.supabase)
 
 const EML = { raw:'', parsed:null, contacts:[], filtered:[] };
 
-/* ── Hook into existing file handlers ─────────────────────────────── */
-const _origHandleMultiple = handleMultipleFiles;
-async function handleMultipleFiles(fileList) {
-  const emlFiles = Array.from(fileList).filter(f => /\.eml$/i.test(f.name));
-  if (emlFiles.length > 0) { handleEmlFile(emlFiles[0]); return; }
-  return _origHandleMultiple(fileList);
-}
+/* ── EML file handler (called from handleFile and handleMultipleFiles) ── */
 
 /* ── Read .eml file ───────────────────────────────────────────────── */
 function handleEmlFile(file) {
