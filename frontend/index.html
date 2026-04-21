@@ -285,7 +285,9 @@
             </div>
           </div>
           <div class="eml-header-actions">
-            <button class="btn btn-secondary btn-sm" onclick="emlExportCSV()">⬇ Export CSV</button>
+            
+            <button class="btn btn-secondary btn-sm" onclick="emlExportCSV()">⬇ CSV</button>
+            <button class="btn btn-success btn-sm" onclick="emlExportExcel()">⬇ Excel</button>
             <button class="btn btn-primary btn-sm" onclick="emlSaveToSupabase()">☁ Save to DB</button>
             <button class="btn btn-success btn-sm" onclick="emlSendToCRM()">💾 Push to CRM</button>
             <button class="btn btn-secondary btn-sm" onclick="exitEmlDashboard()">✕ Close</button>
@@ -306,8 +308,10 @@
             <div class="eml-subject" id="emlSubject"></div>
             <div class="eml-body-text" id="emlBodyText"></div>
             <div class="eml-attachments" id="emlAttachments"></div>
+            <div id="emlSigData" style="display:none"></div>
             <div class="eml-extras" id="emlPhones"></div>
             <div class="eml-extras" id="emlUrls"></div>
+            <div class="eml-extras" id="emlSigData" style="display:none"></div>
           </div>
           <div class="eml-panel eml-contacts-panel">
             <div class="eml-panel-title">

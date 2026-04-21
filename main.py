@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from api.auth    import router as auth_router
 from api.history import router as history_router
+from api.parse_signature import router as sig_router
 import os
 import sys
 
@@ -50,6 +51,7 @@ app.include_router(contacts_router, prefix="/api")
 app.include_router(calls_router, prefix="/api")
 app.include_router(auth_router,    prefix="/api")
 app.include_router(history_router, prefix="/api")
+app.include_router(sig_router, prefix="/api")
 
 
 @app.get("/health")

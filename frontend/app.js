@@ -1625,7 +1625,7 @@ const emlClient = (EML_SUPABASE_URL && EML_SUPABASE_ANON_KEY && window.supabase)
   ? window.supabase.createClient(EML_SUPABASE_URL, EML_SUPABASE_ANON_KEY)
   : null;
 
-const EML = { raw:'', parsed:null, contacts:[], filtered:[] };
+const EML = { raw:'', parsed:null, contacts:[], filtered:[], sigData:{}, sigLoading:false };
 
 /* ── EML file handler ─────────────────────────────────────────────── */
 function handleEmlFile(file) {
@@ -1804,6 +1804,25 @@ function parseEml(fileName) {
     if(!seen.has(email)){seen.add(email);EML.contacts.push({name:emailToName(email),email,source:'BODY',domain:email.split('@')[1]||''});}
   }
   EML.filtered=[...EML.contacts];
+  EML.sigData = {};
+  if (API_BASE && EML.parsed?.body) {
+    EML.sigLoading = true;
+    fetch(`${API_BASE}/api/parse-signature`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
+      body: JSON.stringify({ body_text: EML.parsed.body, subject: EML.parsed.subject }),
+    })
+    .then(r => r.json())
+    .then(data => {
+      EML.sigLoading = false;
+      if (data.ok && data.fields && Object.values(data.fields).some(v => v)) {
+        EML.sigData = data.fields;
+        renderSigPanel();
+        showNotification('🪪 Signature intelligence extracted by AI', 'success');
+      }
+    })
+    .catch(() => { EML.sigLoading = false; });
+  }
 }
 
 function decodePartBody(body, headers) {
@@ -1822,6 +1841,67 @@ function decodeEmlEncoding(str) {
     try { return enc.toUpperCase()==='B'?decodeURIComponent(escape(atob(data))):data.replace(/_/g,' ').replace(/=([0-9A-Fa-f]{2})/g,(__,h)=>String.fromCharCode(parseInt(h,16))); }
     catch{return data;}
   });
+}
+
+function extractSignatureData(bodyText) {
+  if (!bodyText) return {};
+  // Signatures typically appear after "-- " or the last quoted block
+  // Take the last 40 lines of body as signature zone
+  const lines = bodyText.split('\n').map(l => l.trim()).filter(Boolean);
+  const sigStart = Math.max(0, lines.length - 40);
+  const sigLines = lines.slice(sigStart);
+
+  const result = { company: null, designation: null, phone: null, website: null, address: null };
+
+  // Phone — already extracted globally, pick first
+  const phoneRe = /(?:\+?91[\s\-]?)?[6-9]\d{9}|\+\d{1,3}[\s\-]?\d{6,14}/;
+  for (const l of sigLines) {
+    if (!result.phone && phoneRe.test(l.replace(/[\s\(\)\-\.]/g,''))) {
+      result.phone = l.replace(/^(ph|phone|mob|mobile|tel|cell)[:\s]*/i,'').trim();
+    }
+  }
+
+  // Website
+  const webRe = /(?:www\.|https?:\/\/)[^\s<>,"']+/i;
+  for (const l of sigLines) {
+    const m = l.match(webRe);
+    if (m && !result.website) result.website = m[0].trim();
+  }
+
+  // Designation — lines with common title keywords
+  const desgRe = /\b(ceo|cto|cfo|coo|founder|co-founder|director|manager|head|vp|vice president|president|engineer|developer|consultant|analyst|executive|officer|lead|partner|proprietor|md|gm|agm|dgm)\b/i;
+  for (const l of sigLines) {
+    if (!result.designation && desgRe.test(l) && l.length < 80) {
+      result.designation = l.replace(/^[|\-•·]\s*/,'').trim();
+    }
+  }
+
+  // Company — line after name/designation that looks like an org
+  // Heuristic: all-caps or contains Ltd/Pvt/Inc/Corp/LLP/Industries/Solutions/Technologies
+  const compRe = /\b(ltd|pvt|inc|corp|llp|llc|industries|solutions|technologies|systems|services|enterprises|group|associates|consulting|trading|mfg|manufacturing|exports|imports)\b/i;
+  for (const l of sigLines) {
+    if (!result.company && compRe.test(l) && l.length < 100) {
+      result.company = l.replace(/^[|\-•·]\s*/,'').trim();
+    }
+  }
+  // Fallback: line that's mostly uppercase and 3-60 chars
+  if (!result.company) {
+    for (const l of sigLines) {
+      if (l.length >= 3 && l.length <= 60 && l === l.toUpperCase() && /[A-Z]{3,}/.test(l)) {
+        result.company = l; break;
+      }
+    }
+  }
+
+  // Address — line with pincode or common address keywords
+  const addrRe = /\d{6}|\b(road|rd|street|st|nagar|colony|sector|plot|phase|industrial|estate|ahmedabad|surat|mumbai|gujarat|maharashtra)\b/i;
+  for (const l of sigLines) {
+    if (!result.address && addrRe.test(l) && l.length > 10 && l.length < 150) {
+      result.address = l.replace(/^[|\-•·]\s*/,'').trim();
+    }
+  }
+
+  return result;
 }
 
 function buildEmlDashboard() {
@@ -1895,6 +1975,27 @@ function buildEmlDashboard() {
     } else urlsEl.style.display = 'none';
   }
 
+  // Signature intelligence panel
+  const sigEl = document.getElementById('emlSigData');
+  if (sigEl) {
+    const sd = EML.sigData;
+    const hasAny = sd.company || sd.designation || sd.phone || sd.website || sd.address;
+    if (hasAny) {
+      sigEl.innerHTML = `
+        <div class="eml-section-label">🪪 Signature Intelligence</div>
+        <div class="eml-sig-grid">
+          ${sd.company     ? `<div class="eml-sig-row"><span class="eml-sig-label">🏢 Company</span><span class="eml-sig-val">${escHtml(sd.company)}</span></div>` : ''}
+          ${sd.designation ? `<div class="eml-sig-row"><span class="eml-sig-label">💼 Designation</span><span class="eml-sig-val">${escHtml(sd.designation)}</span></div>` : ''}
+          ${sd.phone       ? `<div class="eml-sig-row"><span class="eml-sig-label">📞 Phone</span><span class="eml-sig-val">${escHtml(sd.phone)}</span></div>` : ''}
+          ${sd.website     ? `<div class="eml-sig-row"><span class="eml-sig-label">🌐 Website</span><span class="eml-sig-val"><a href="${escHtml(sd.website)}" target="_blank">${escHtml(sd.website)}</a></span></div>` : ''}
+          ${sd.address     ? `<div class="eml-sig-row"><span class="eml-sig-label">📍 Address</span><span class="eml-sig-val">${escHtml(sd.address)}</span></div>` : ''}
+        </div>`;
+      sigEl.style.display = '';
+    } else {
+      sigEl.style.display = 'none';
+    }
+  }
+
   renderEmlContacts();
 
   const domainCounts={};
@@ -1942,6 +2043,43 @@ function renderEmlContacts() {
   }).join('');
 }
 
+function renderSigPanel() {
+  const el = document.getElementById('emlSigData');
+  if (!el) return;
+  const sd = EML.sigData || {};
+  const hasAny = Object.values(sd).some(v => v);
+
+  if (EML.sigLoading) {
+    el.style.display = '';
+    el.innerHTML = `<div class="eml-section-label">🪪 Signature Intelligence</div>
+      <div class="eml-sig-loading"><span class="spinner-inline"></span> AI extracting signature data…</div>`;
+    return;
+  }
+  if (!hasAny) { el.style.display = 'none'; return; }
+
+  const row = (icon, label, val) => val
+    ? `<div class="eml-sig-row">
+        <span class="eml-sig-label">${icon} ${label}</span>
+        <span class="eml-sig-val">${escHtml(val)}</span>
+       </div>` : '';
+
+  el.style.display = '';
+  el.innerHTML = `
+    <div class="eml-section-label">🪪 Signature Intelligence <span class="eml-sig-badge">AI</span></div>
+    <div class="eml-sig-grid">
+      ${row('👤','Name',        sd.name)}
+      ${row('🏢','Company',     sd.company)}
+      ${row('💼','Designation', sd.designation)}
+      ${row('📞','Phone',       sd.phone_primary)}
+      ${row('📞','Phone 2',     sd.phone_secondary)}
+      ${row('📧','Email',       sd.email)}
+      ${row('🌐','Website',     sd.website)}
+      ${row('📍','Address',     sd.address)}
+      ${row('🏙','City',        sd.city)}
+      ${row('🔢','Pincode',     sd.pincode)}
+    </div>`;
+}
+
 function emlFilterContacts() {
   const q=(document.getElementById('emlSearch')?.value||'').toLowerCase();
   EML.filtered=q?EML.contacts.filter(c=>c.name.toLowerCase().includes(q)||c.email.toLowerCase().includes(q)||c.domain.toLowerCase().includes(q)):[...EML.contacts];
@@ -1987,14 +2125,42 @@ function exitEmlDashboard() {
 
 /* ── Export CSV ───────────────────────────────────────────────────── */
 function emlExportCSV() {
-  if(!EML.contacts.length){showNotification('No contacts to export.','error');return;}
-  const rows=[['Name','Email','Domain','Source']];
-  EML.contacts.forEach(c=>rows.push([c.name,c.email,c.domain,c.source]));
-  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
-  a.download=(EML.parsed?.fileName||'email').replace('.eml','')+'_contacts.csv';
-  a.click(); showNotification(`📧 Exported ${EML.contacts.length} contacts as CSV`,'success');
+  if (!EML.contacts.length) { showNotification('No contacts to export.','error'); return; }
+  const sd = EML.sigData || {};
+  const rows = [['Name','Email','Company','Designation','Phone','Phone 2','Website','Address','City','Pincode','Domain','Source']];
+  EML.contacts.forEach(c => rows.push([
+    c.name, c.email,
+    sd.company||'', sd.designation||'',
+    sd.phone_primary||'', sd.phone_secondary||'',
+    sd.website||'', sd.address||'', sd.city||'', sd.pincode||'',
+    c.domain, c.source,
+  ]));
+  const csv = rows.map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8;'}));
+  a.download = (EML.parsed?.fileName||'email').replace('.eml','') + '_contacts.csv';
+  a.click();
+  showNotification(`📧 Exported ${EML.contacts.length} contacts`, 'success');
+}
+
+/* ── Export Excel ───────────────────────────────────────────────────── */
+function emlExportExcel() {
+  if (!EML.contacts.length) { showNotification('No contacts to export.','error'); return; }
+  const sd = EML.sigData || {};
+  const headers = ['Name','Email','Company','Designation','Phone','Phone 2','Website','Address','City','Pincode','Domain','Source'];
+  const rows = EML.contacts.map(c => [
+    c.name, c.email,
+    sd.company||'', sd.designation||'',
+    sd.phone_primary||'', sd.phone_secondary||'',
+    sd.website||'', sd.address||'', sd.city||'', sd.pincode||'',
+    c.domain, c.source,
+  ]);
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  ws['!cols'] = [28,36,36,28,20,20,36,50,20,12,28,12].map(w => ({wch:w}));
+  XLSX.utils.book_append_sheet(wb, ws, 'EML Contacts');
+  XLSX.writeFile(wb, (EML.parsed?.fileName||'email').replace('.eml','') + '_contacts.xlsx');
+  showNotification(`⬇ Exported ${EML.contacts.length} contacts to Excel`, 'success');
 }
 
 /* ── Save to Supabase EML DB ──────────────────────────────────────── */
@@ -2035,15 +2201,46 @@ async function emlSaveToSupabase() {
 
 /* ── Push contacts into main CRM table ───────────────────────────── */
 function emlSendToCRM() {
-  if(!EML.contacts.length){alert('No contacts to push.');return;}
-  const rows=EML.contacts.map(c=>({'Name':c.name,'Email':c.email,'Domain':c.domain,'Source':c.source}));
-  S.rawData=rows; S.headers=['Name','Email','Domain','Source'];
-  S.fileName=EML.parsed?.fileName||'Email Import'; S.sheetName='EML Contacts';
-  S.mapping={'Name':{type:'contact',keep:true},'Email':{type:'email',keep:true},'Domain':{type:'website',keep:true},'Source':{type:'other',keep:true}};
-  S.clean=rows; S.filtered=[...rows]; S.page=1;
+  if (!EML.contacts.length) { alert('No contacts to push.'); return; }
+  const sd = EML.sigData || {};
+  const rows = EML.contacts.map(c => ({
+    'Name':        c.name                  || '',
+    'Email':       c.email                 || '',
+    'Company':     sd.company              || '',
+    'Designation': sd.designation          || '',
+    'Phone':       sd.phone_primary        || '',
+    'Phone 2':     sd.phone_secondary      || '',
+    'Website':     sd.website              || '',
+    'Address':     sd.address              || '',
+    'City':        sd.city                 || '',
+    'Pincode':     sd.pincode              || '',
+    'Domain':      c.domain               || '',
+    'Source':      c.source               || '',
+  }));
+  S.rawData   = rows;
+  S.headers   = ['Name','Email','Company','Designation','Phone','Phone 2','Website','Address','City','Pincode','Domain','Source'];
+  S.fileName  = EML.parsed?.fileName || 'Email Import';
+  S.sheetName = 'EML Contacts';
+  S.mapping   = {
+    'Name':        { type:'contact',  keep:true  },
+    'Email':       { type:'email',    keep:true  },
+    'Company':     { type:'company',  keep:true  },
+    'Designation': { type:'other',    keep:true  },
+    'Phone':       { type:'phone',    keep:true  },
+    'Phone 2':     { type:'phone',    keep:true  },
+    'Website':     { type:'website',  keep:true  },
+    'Address':     { type:'address',  keep:true  },
+    'City':        { type:'city',     keep:true  },
+    'Pincode':     { type:'pincode',  keep:true  },
+    'Domain':      { type:'website',  keep:false },
+    'Source':      { type:'other',    keep:false },
+  };
+  S.clean    = rows.filter(r => r.Email);
+  S.filtered = [...S.clean];
+  S.page     = 1;
   document.body.classList.remove('eml-mode');
-  showNotification(`✅ ${rows.length} email contacts pushed to CRM table`,'success');
-  const ta=document.getElementById('topActions'); if(ta) ta.style.display='flex';
+  showNotification(`✅ ${S.clean.length} contacts pushed to CRM with AI-extracted signature data`, 'success');
+  document.getElementById('topActions').style.display = 'flex';
   showView('table');
 }
 
