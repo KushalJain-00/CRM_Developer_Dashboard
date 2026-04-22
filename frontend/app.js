@@ -682,8 +682,7 @@ function findDuplicates() {
     });
     Object.values(emailGroups).forEach(indices => {
       if (indices.length > 1) {
-        const rows = indices.map(i => S.clean[i]);
-        S.dupGroups.push(rows);
+        S.dupGroups.push(indices);
       }
     });
   }
