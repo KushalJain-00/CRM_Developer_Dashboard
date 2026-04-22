@@ -3,6 +3,7 @@ import pdfplumber
 import openpyxl
 import io
 import re
+import time
 from typing import Any
 
 
@@ -11,12 +12,16 @@ def parse_xls(content: bytes) -> dict:
     Parse ALL valid sheets in an XLS workbook and merge
     them into a single unified dataset.
     """
+    start_time = time.time()
     wb = xlrd.open_workbook(file_contents=content)
     all_rows = []
     all_headers = []
     sheet_names_used = []
 
     for name in wb.sheet_names():
+        if time.time() - start_time > 15:
+            raise TimeoutError("XLS processing exceeded 15 seconds limit")
+            
         # Skip lookup / index sheets
         lname = name.lower()
         if re.search(r"mob no|email id|phone list|mobile list|index|lookup", lname):
@@ -35,6 +40,9 @@ def parse_xls(content: bytes) -> dict:
                 all_headers.append(h)
 
         for r in range(1, sheet.nrows):
+            if time.time() - start_time > 15:
+                raise TimeoutError("XLS processing exceeded 15 seconds limit")
+                
             row = {}
             for c, h in enumerate(headers):
                 if c >= sheet.ncols:
@@ -66,11 +74,15 @@ def parse_xls(content: bytes) -> dict:
 
 
 def parse_pdf(content: bytes) -> dict:
+    start_time = time.time()
     rows = []
     headers = None
 
     with pdfplumber.open(io.BytesIO(content)) as pdf:
         for page in pdf.pages:
+            if time.time() - start_time > 15:
+                raise TimeoutError("PDF processing exceeded 15 seconds limit")
+                
             tables = page.extract_tables()
             if tables:
                 for table in tables:

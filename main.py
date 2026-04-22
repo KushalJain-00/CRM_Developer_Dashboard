@@ -2,9 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
-from api.auth    import router as auth_router
-from api.history import router as history_router
-from api.parse_signature import router as sig_router
 import os
 import sys
 
@@ -13,6 +10,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 load_dotenv()
 
+from api.auth    import router as auth_router
+from api.history import router as history_router
+from api.parse_signature import router as sig_router
 from api.parse import router as parse_router
 from api.export_pdf import router as pdf_router
 from api.contacts import router as contacts_router

@@ -11,23 +11,23 @@ import os, hashlib, json
 router = APIRouter()
 _cache: dict = {}   # in-memory cache: signature_hash → parsed fields
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY", ""))
-
 SYSTEM_PROMPT = """You are a contact information extractor. Given a raw email signature block, extract structured fields.
 
-Return ONLY a valid JSON object with these exact keys (use null if not found):
-{
-  "name": null,
-  "company": null,
-  "designation": null,
-  "phone_primary": null,
-  "phone_secondary": null,
-  "email": null,
-  "website": null,
-  "address": null,
-  "city": null,
-  "pincode": null
-}
+Return ONLY a valid JSON array of objects, where each object represents a distinct contact/signature found. Use null if a field is not found:
+[
+  {
+    "name": null,
+    "company": null,
+    "designation": null,
+    "phone_primary": null,
+    "phone_secondary": null,
+    "email": null,
+    "website": null,
+    "address": null,
+    "city": null,
+    "pincode": null
+  }
+]
 
 Rules:
 - name: full name of the person signing
@@ -40,7 +40,7 @@ Rules:
 - address: street/plot/office address
 - city: city name
 - pincode: 6-digit PIN code
-- Return ONLY the JSON. No explanation. No markdown. No code blocks."""
+- Return ONLY the JSON array. No explanation. No markdown. No code blocks."""
 
 
 class SignatureRequest(BaseModel):
@@ -74,13 +74,14 @@ def extract_signature_block(body_text: str) -> str:
 
 @router.post("/parse-signature")
 async def parse_signature(body: SignatureRequest):
-    if not client.api_key:
+    api_key = os.getenv("GROQ_API_KEY", "")
+    if not api_key:
         raise HTTPException(500, "GROQ_API_KEY not configured")
 
     sig_block = extract_signature_block(body.body_text)
 
     if not sig_block or len(sig_block) < 10:
-        return JSONResponse({"ok": True, "fields": {}, "cached": False})
+        return JSONResponse({"ok": True, "fields": [], "cached": False})
 
     # Cache check
     cache_key = hashlib.md5(sig_block.encode()).hexdigest()
@@ -88,6 +89,7 @@ async def parse_signature(body: SignatureRequest):
         return JSONResponse({"ok": True, "fields": _cache[cache_key], "cached": True})
 
     try:
+        client = Groq(api_key=api_key)
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
@@ -95,7 +97,7 @@ async def parse_signature(body: SignatureRequest):
                 {"role": "user",   "content": f"Extract contact info from this email signature:\n\n{sig_block}"}
             ],
             temperature=0.1,
-            max_tokens=300,
+            max_tokens=500,
         )
         raw = response.choices[0].message.content.strip()
 
@@ -107,10 +109,15 @@ async def parse_signature(body: SignatureRequest):
         raw = raw.strip()
 
         fields = json.loads(raw)
+        
+        # Cache limit
+        if len(_cache) > 500:
+            _cache.clear()
+            
         _cache[cache_key] = fields
         return JSONResponse({"ok": True, "fields": fields, "cached": False})
 
     except json.JSONDecodeError:
-        return JSONResponse({"ok": True, "fields": {}, "error": "Parse failed"})
+        return JSONResponse({"ok": True, "fields": [], "error": "Parse failed"})
     except Exception as e:
         raise HTTPException(500, f"Groq error: {str(e)}")

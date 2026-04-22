@@ -46,22 +46,51 @@ async def export_session_with_calls(session_id: int, db: Session = Depends(get_d
 
     records = db.query(Record).filter(Record.session_id == session_id).all()
 
+    # Pre-fetch contacts
+    emails = []
+    phones = []
+    for r in records:
+        row = dict(r.data or {})
+        e = row.get('email') or row.get('Email') or row.get('email_primary')
+        p = row.get('phone') or row.get('Phone') or row.get('phone_primary')
+        if e: emails.append(e)
+        if p: phones.append(p)
+
+    contacts = []
+    if emails or phones:
+        q = db.query(Contact)
+        filters = []
+        if emails: filters.append(Contact.email_primary.in_(emails))
+        if phones: filters.append(Contact.phone_primary.in_(phones))
+        from sqlalchemy import or_
+        contacts = q.filter(or_(*filters)).all()
+
+    contact_by_email = {c.email_primary: c for c in contacts if c.email_primary}
+    contact_by_phone = {c.phone_primary: c for c in contacts if c.phone_primary}
+
+    # Pre-fetch call logs
+    contact_ids = [c.id for c in contacts]
+    logs_by_contact = {}
+    if contact_ids:
+        logs = db.query(CallLog).filter(CallLog.contact_id.in_(contact_ids)).order_by(CallLog.call_date.desc()).all()
+        for log in logs:
+            if log.contact_id not in logs_by_contact:
+                logs_by_contact[log.contact_id] = []
+            logs_by_contact[log.contact_id].append(log)
+
     # For each record, try to find its contact and attach call logs
     result = []
     for r in records:
         row = dict(r.data or {})
-        # Match contact by email or phone
         email = row.get('email') or row.get('Email') or row.get('email_primary')
         phone = row.get('phone') or row.get('Phone') or row.get('phone_primary')
-        contact = None
-        if email:
-            contact = db.query(Contact).filter(Contact.email_primary == email).first()
+        
+        contact = contact_by_email.get(email)
         if not contact and phone:
-            contact = db.query(Contact).filter(Contact.phone_primary == phone).first()
+            contact = contact_by_phone.get(phone)
 
         if contact:
-            logs = db.query(CallLog).filter(CallLog.contact_id == contact.id)\
-                     .order_by(CallLog.call_date.desc()).all()
+            logs = logs_by_contact.get(contact.id, [])
             if logs:
                 # Flatten call logs into columns: Last Call Date, Last Outcome, All Notes
                 row['_last_call_date']    = logs[0].call_date.strftime('%Y-%m-%d %H:%M') if logs[0].call_date else ''

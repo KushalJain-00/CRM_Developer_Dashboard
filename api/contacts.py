@@ -169,6 +169,21 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
     db.add(session)
     db.flush()
 
+    # Pre-fetch existing emails and phones for duplicate detection
+    existing_emails = set()
+    existing_phones = set()
+    
+    batch_emails = [item.email_primary for item in body.contacts if item.email_primary]
+    batch_phones = [item.phone_primary for item in body.contacts if item.phone_primary]
+    
+    if batch_emails:
+        for c in db.query(Contact.email_primary).filter(Contact.email_primary.in_(batch_emails)).all():
+            if c[0]: existing_emails.add(c[0])
+            
+    if batch_phones:
+        for c in db.query(Contact.phone_primary).filter(Contact.phone_primary.in_(batch_phones)).all():
+            if c[0]: existing_phones.add(c[0])
+
     for item in body.contacts:
         # ── Validate email ────────────────────────────────────────
         email_ok = validate_email(item.email_primary) if item.email_primary else False
@@ -198,6 +213,17 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
             skipped += 1
             continue
 
+        # ── Duplicate check ───────────────────────────────────────
+        if has_email and item.email_primary in existing_emails:
+            skipped += 1
+            continue
+        if has_phone and item.phone_primary in existing_phones:
+            skipped += 1
+            continue
+            
+        if has_email: existing_emails.add(item.email_primary)
+        if has_phone: existing_phones.add(item.phone_primary)
+
         # ── Flag foreign numbers ──────────────────────────────────
         if item.phone_country and item.phone_country not in ("IN", "INVALID"):
             flagged_foreign += 1
@@ -213,6 +239,7 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
             email_secondary=item.email_secondary,
             phone_primary=item.phone_primary,
             phone_secondary=item.phone_secondary,
+            phone_country=item.phone_country,
             whatsapp=item.whatsapp,
             position=item.position,
         )

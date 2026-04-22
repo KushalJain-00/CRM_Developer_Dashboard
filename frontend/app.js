@@ -317,7 +317,8 @@ async function handleFile(file) {
 async function handleMultipleFiles(fileList) {
   // Intercept .eml files and route to the EML extractor
   const emlFiles = Array.from(fileList).filter(f => /\.eml$/i.test(f.name));
-  if (emlFiles.length > 0) { handleEmlFile(emlFiles[0]); return; }
+  if (emlFiles.length === 1) { handleEmlFile(emlFiles[0]); return; }
+  if (emlFiles.length > 1) { handleBulkEml(emlFiles); return; }
 
   const files = Array.from(fileList).filter(f => /\.(xlsx|xls|csv|txt|pdf|eml)$/i.test(f.name));
   if (!files.length) { showError('No supported files found. Drop .xlsx, .xls, .csv, .txt, .pdf, or .eml files.'); return; }
@@ -1338,7 +1339,7 @@ async function loadHistory() {
           <td style="padding:10px;text-align:center">${s.total_records || '—'}</td>
           <td style="padding:10px;text-align:center;color:var(--emerald)">${s.imported || '—'}</td>
           <td style="padding:10px;color:var(--text-3);font-size:11px">${new Date(s.upload_date).toLocaleString()}</td>
-          <td style="padding:10px"><button class="btn btn-secondary btn-sm" onclick="reloadSession(${s.id},'${safeName}')">↺ Reload</button>
+          <td style="padding:10px"><button class="btn btn-secondary btn-sm" onclick="reloadSession(${s.id},'${safeName}', this)">↺ Reload</button>
           <button class="btn btn-primary btn-sm" style="margin-left:4px" onclick="exportSessionWithCalls(${s.id},'${safeName}')">⬇ Export+Calls</button>
           <button class="btn btn-danger btn-sm" style="margin-left:4px" onclick="deleteSession(${s.id})">🗑</button></td>
         </tr>`;
@@ -1349,24 +1350,35 @@ async function loadHistory() {
   }
 }
 
-async function reloadSession(sessionId, fileName) {
-  const res = await fetch(`${API_BASE}/api/history/${sessionId}?page_size=5000`, { headers: apiHeaders() });
-  const data = await res.json();
-  if (!data.ok || !data.records.length) { alert('No records found.'); return; }
-  S.rawData = data.records;
-  S.headers = Object.keys(data.records[0]);
-  S.fileName = fileName;
-  S.sheetName = data.sheet_name;
-  S.mapping = data.mapping || {};
-  S.sessionId = sessionId;
-  if (!Object.keys(S.mapping).length) buildMapping();
-  else startProcessing();
+async function reloadSession(sessionId, fileName, btnEl) {
+  try {
+    if (btnEl) btnEl.innerHTML = `<span class="spinner-inline"></span> Loading…`;
+    const res = await fetch(`${API_BASE}/api/history/${sessionId}?page_size=1000`, { headers: apiHeaders() });
+    const data = await res.json();
+    if (!data.ok || !data.records.length) { showNotification('No records found.', 'error'); return; }
+    S.rawData = data.records;
+    S.headers = Object.keys(data.records[0]);
+    S.fileName = fileName;
+    S.sheetName = data.sheet_name;
+    S.mapping = data.mapping || {};
+    S.sessionId = sessionId;
+    if (!Object.keys(S.mapping).length) buildMapping();
+    else startProcessing();
+  } catch (err) {
+    showNotification(`Reload failed: ${err.message}`, 'error');
+  } finally {
+    if (btnEl) btnEl.innerHTML = `↺ Reload`;
+  }
 }
 
 async function deleteSession(sessionId) {
   if (!confirm('Delete this history entry?')) return;
-  await fetch(`${API_BASE}/api/history/${sessionId}`, { method: 'DELETE', headers: apiHeaders() });
-  loadHistory();
+  try {
+    await fetch(`${API_BASE}/api/history/${sessionId}`, { method: 'DELETE', headers: apiHeaders() });
+    loadHistory();
+  } catch (err) {
+    showNotification(`Delete failed: ${err.message}`, 'error');
+  }
 }
 
 async function exportSessionWithCalls(sessionId, fileName) {
@@ -2128,13 +2140,16 @@ function emlExportCSV() {
   if (!EML.contacts.length) { showNotification('No contacts to export.','error'); return; }
   const sd = EML.sigData || {};
   const rows = [['Name','Email','Company','Designation','Phone','Phone 2','Website','Address','City','Pincode','Domain','Source']];
-  EML.contacts.forEach(c => rows.push([
-    c.name, c.email,
-    sd.company||'', sd.designation||'',
-    sd.phone_primary||'', sd.phone_secondary||'',
-    sd.website||'', sd.address||'', sd.city||'', sd.pincode||'',
-    c.domain, c.source,
-  ]));
+  EML.contacts.forEach(c => {
+    const csd = sd[c.email] || {};
+    rows.push([
+      c.name, c.email,
+      csd.company||'', csd.designation||'',
+      csd.phone_primary||'', csd.phone_secondary||'',
+      csd.website||'', csd.address||'', csd.city||'', csd.pincode||'',
+      c.domain, c.source,
+    ]);
+  });
   const csv = rows.map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8;'}));
@@ -2148,13 +2163,16 @@ function emlExportExcel() {
   if (!EML.contacts.length) { showNotification('No contacts to export.','error'); return; }
   const sd = EML.sigData || {};
   const headers = ['Name','Email','Company','Designation','Phone','Phone 2','Website','Address','City','Pincode','Domain','Source'];
-  const rows = EML.contacts.map(c => [
-    c.name, c.email,
-    sd.company||'', sd.designation||'',
-    sd.phone_primary||'', sd.phone_secondary||'',
-    sd.website||'', sd.address||'', sd.city||'', sd.pincode||'',
-    c.domain, c.source,
-  ]);
+  const rows = EML.contacts.map(c => {
+    const csd = sd[c.email] || {};
+    return [
+      c.name, c.email,
+      csd.company||'', csd.designation||'',
+      csd.phone_primary||'', csd.phone_secondary||'',
+      csd.website||'', csd.address||'', csd.city||'', csd.pincode||'',
+      c.domain, c.source,
+    ];
+  });
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
   ws['!cols'] = [28,36,36,28,20,20,36,50,20,12,28,12].map(w => ({wch:w}));
@@ -2184,13 +2202,25 @@ async function emlSaveToSupabase() {
     }).select().single();
     if(emailErr) throw emailErr;
     // 2. Insert all extracted contacts
-    const contactRows = EML.contacts.map(c=>({
-      email_id:    emailRow.id,
-      name:        c.name,
-      email:       c.email,
-      domain:      c.domain,
-      source_field:c.source,
-    }));
+    const sd = EML.sigData || {};
+    const contactRows = EML.contacts.map(c=>{
+      const csd = sd[c.email] || {};
+      return {
+        email_id:      emailRow.id,
+        name:          c.name,
+        email:         c.email,
+        domain:        c.domain,
+        source:        c.source,
+        company:       csd.company || null,
+        designation:   csd.designation || null,
+        phone_primary: csd.phone_primary || null,
+        phone_secondary: csd.phone_secondary || null,
+        website:       csd.website || null,
+        address:       csd.address || null,
+        city:          csd.city || null,
+        pincode:       csd.pincode || null,
+      };
+    });
     const {error:contactErr} = await emlClient.from('eml_contacts').insert(contactRows);
     if(contactErr) throw contactErr;
     showNotification(`✅ Saved email + ${EML.contacts.length} contacts to EML database`,'success');
@@ -2203,20 +2233,23 @@ async function emlSaveToSupabase() {
 function emlSendToCRM() {
   if (!EML.contacts.length) { alert('No contacts to push.'); return; }
   const sd = EML.sigData || {};
-  const rows = EML.contacts.map(c => ({
-    'Name':        c.name                  || '',
-    'Email':       c.email                 || '',
-    'Company':     sd.company              || '',
-    'Designation': sd.designation          || '',
-    'Phone':       sd.phone_primary        || '',
-    'Phone 2':     sd.phone_secondary      || '',
-    'Website':     sd.website              || '',
-    'Address':     sd.address              || '',
-    'City':        sd.city                 || '',
-    'Pincode':     sd.pincode              || '',
-    'Domain':      c.domain               || '',
-    'Source':      c.source               || '',
-  }));
+  const rows = EML.contacts.map(c => {
+    const csd = sd[c.email] || {};
+    return {
+      'Name':        c.name                  || '',
+      'Email':       c.email                 || '',
+      'Company':     csd.company              || '',
+      'Designation': csd.designation          || '',
+      'Phone':       csd.phone_primary        || '',
+      'Phone 2':     csd.phone_secondary      || '',
+      'Website':     csd.website              || '',
+      'Address':     csd.address              || '',
+      'City':        csd.city                 || '',
+      'Pincode':     csd.pincode              || '',
+      'Domain':      c.domain               || '',
+      'Source':      c.source               || '',
+    };
+  });
   S.rawData   = rows;
   S.headers   = ['Name','Email','Company','Designation','Phone','Phone 2','Website','Address','City','Pincode','Domain','Source'];
   S.fileName  = EML.parsed?.fileName || 'Email Import';
@@ -2245,3 +2278,431 @@ function emlSendToCRM() {
 }
 
 function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ══════════════════════════════════════════════════════════════
+   BULK EML PROCESSOR — handles 100–200 .eml files at once
+   ══════════════════════════════════════════════════════════════ */
+
+const BULK = {
+  files: [],
+  rows: [],       // master flat rows — one row per contact per email
+  processed: 0,
+  errors: 0,
+};
+
+async function handleBulkEml(fileList) {
+  BULK.files = Array.from(fileList);
+  BULK.rows = [];
+  BULK.processed = 0;
+  BULK.errors = 0;
+
+  showBulkProgress(BULK.files.length);
+
+  for (let i = 0; i < BULK.files.length; i++) {
+    const file = BULK.files[i];
+    try {
+      const text = await readFileAsText(file);
+      const parsed = parseSingleEml(text, file.name);
+
+      // Build one row per unique contact in this email
+      parsed.contacts.forEach(c => {
+        BULK.rows.push({
+          'File Name':    file.name,
+          'Subject':      parsed.subject,
+          'Date':         parsed.date,
+          'From Name':    parsed.from[0]?.name  || '',
+          'From Email':   parsed.from[0]?.email || '',
+          'Contact Name': c.name,
+          'Email':        c.email,
+          'Domain':       c.domain,
+          'Source':       c.source,
+          'Phone':        parsed.phones[0] || '',
+          'All Phones':   parsed.phones.join(', '),
+          'Attachments':  parsed.attachments.join(', '),
+          'Is Reply':     parsed.isReply  ? 'Yes' : 'No',
+          'Is Forward':   parsed.isForwarded ? 'Yes' : 'No',
+          'Links':        parsed.urls.slice(0, 3).join(', '),
+        });
+      });
+
+      BULK.processed++;
+    } catch (e) {
+      BULK.errors++;
+      BULK.processed++;
+    }
+
+    updateBulkProgress(BULK.processed, BULK.files.length);
+  }
+
+  showBulkDashboard();
+}
+
+/* ── Reusable single-EML parser (no side effects on EML global) ── */
+function parseSingleEml(raw, fileName) {
+  const splitIdx = raw.indexOf('\r\n\r\n') !== -1 ? raw.indexOf('\r\n\r\n') : raw.indexOf('\n\n');
+  const headerBlock = raw.slice(0, splitIdx);
+  let body = raw.slice(splitIdx + (raw.indexOf('\r\n\r\n') !== -1 ? 4 : 2));
+  const headers = {};
+  const unfolded = headerBlock.replace(/\r?\n([ \t]+)/g, ' ');
+  unfolded.split(/\r?\n/).forEach(line => {
+    const idx = line.indexOf(':');
+    if (idx > 0) {
+      const key = line.slice(0, idx).trim().toLowerCase();
+      const val = line.slice(idx + 1).trim();
+      headers[key] = headers[key] ? headers[key] + ', ' + val : val;
+    }
+  });
+
+  const ct = headers['content-type'] || '';
+  const bMatch = ct.match(/boundary="?([^";\s]+)"?/i);
+  let plainBody = '', htmlBody = '';
+
+  if (bMatch) {
+    const boundary = bMatch[1];
+    const parts = body.split('--' + boundary).filter(p => p.trim() && !p.trim().startsWith('--'));
+    for (const part of parts) {
+      const ps = part.indexOf('\r\n\r\n') !== -1 ? part.indexOf('\r\n\r\n') : part.indexOf('\n\n');
+      if (ps === -1) continue;
+      const ph = part.slice(0, ps).toLowerCase();
+      let pb = part.slice(ps + (part.indexOf('\r\n\r\n') !== -1 ? 4 : 2));
+      pb = decodePartBody(pb, ph);
+      if (ph.includes('text/plain') && !plainBody) plainBody = pb;
+      else if (ph.includes('text/html') && !htmlBody) htmlBody = pb;
+    }
+  } else {
+    const cte = (headers['content-transfer-encoding'] || '').toLowerCase();
+    if (cte.includes('base64')) { try { body = decodeURIComponent(escape(atob(body.replace(/\s/g, '')))); } catch(e) {} }
+    else if (cte.includes('quoted-printable')) { body = body.replace(/=\r?\n/g, '').replace(/=([0-9A-Fa-f]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16))); }
+    if (ct.includes('text/html')) htmlBody = body; else plainBody = body;
+  }
+
+  let bodyText = '';
+  if (plainBody) {
+    bodyText = plainBody.replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+  } else if (htmlBody) {
+    bodyText = htmlBody
+      .replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n\n').replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .replace(/ {2,}/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+  }
+
+  function emailToName(e) { return e.split('@')[0].replace(/[._\-+]/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '); }
+  function parseAddresses(str) {
+    if (!str) return [];
+    const results = [], re = /(?:"?([^"<,]+)"?\s*)?<([^>]+@[^>]+)>|([^\s,<]+@[^\s,>]+)/g; let m;
+    while ((m = re.exec(str)) !== null) {
+      const name = (m[1] || '').trim().replace(/^"|"$/g, '');
+      const email = (m[2] || m[3] || '').trim().toLowerCase();
+      if (email) results.push({ name: name || emailToName(email), email });
+    }
+    return results;
+  }
+
+  const attachments = [];
+  const ar = /Content-Disposition:\s*attachment[^\n]*\n\s*filename[*]?="?([^"\n]+)"?/gi; let am;
+  while ((am = ar.exec(raw)) !== null) attachments.push(am[1].trim());
+  const ar2 = /filename="([^"]+)"/gi;
+  while ((am = ar2.exec(raw)) !== null) { if (!attachments.includes(am[1])) attachments.push(am[1].trim()); }
+
+  const phones = [];
+  const phoneRe = /(?:\+?\d{1,3}[\-.\s]?)?\(?\d{2,4}\)?[\-.\s]?\d{3,4}[\-.\s]?\d{3,4}/g; let pm;
+  while ((pm = phoneRe.exec(bodyText)) !== null) {
+    const cleaned = pm[0].replace(/[\s\-().]/g, '');
+    if (cleaned.length >= 10 && cleaned.length <= 15 && /\d{10,}/.test(cleaned) && !phones.includes(pm[0].trim())) phones.push(pm[0].trim());
+  }
+
+  const urls = [];
+  const urlRe = /https?:\/\/[^\s<>"')]+/gi; let um;
+  while ((um = urlRe.exec(bodyText)) !== null) {
+    const url = um[0].replace(/[.,;:!?)]+$/, '');
+    if (!urls.includes(url) && urls.length < 10) urls.push(url);
+  }
+
+  const from = parseAddresses(headers['from'] || '');
+  const to   = parseAddresses(headers['to']   || '');
+  const cc   = parseAddresses(headers['cc']   || '');
+  const bcc  = parseAddresses(headers['bcc']  || '');
+  const replyTo = parseAddresses(headers['reply-to'] || '');
+
+  const seen = new Set();
+  const contacts = [];
+  function addC(list, source) { list.forEach(c => { if (!seen.has(c.email)) { seen.add(c.email); contacts.push({ ...c, source, domain: c.email.split('@')[1] || '' }); } }); }
+  addC(from, 'FROM'); addC(to, 'TO'); addC(cc, 'CC'); addC(bcc, 'BCC'); addC(replyTo, 'REPLY-TO');
+  const bre = /\b([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})\b/g; let be;
+  while ((be = bre.exec(bodyText)) !== null) {
+    const email = be[1].toLowerCase();
+    if (!seen.has(email)) { seen.add(email); contacts.push({ name: emailToName(email), email, source: 'BODY', domain: email.split('@')[1] || '' }); }
+  }
+
+  return {
+    fileName, subject: decodeEmlEncoding(headers['subject'] || '(No Subject)'),
+    date: headers['date'] || '',
+    from, to, cc, bcc, replyTo,
+    attachments, phones, urls,
+    contacts,
+    isReply: !!(headers['in-reply-to'] || headers['references'] || /^re:/i.test(headers['subject'] || '')),
+    isForwarded: /^(?:fwd?|fw):/i.test(headers['subject'] || '') || /[-]+\s*Forwarded message/i.test(bodyText),
+  };
+}
+
+function readFileAsText(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = () => rej(new Error('Read failed'));
+    r.readAsText(file, 'utf-8');
+  });
+}
+
+/* ── Progress overlay ── */
+function showBulkProgress(total) {
+  let overlay = document.getElementById('bulkProgressOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'bulkProgressOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:16px;padding:36px 44px;min-width:340px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.18)">
+        <div style="font-size:36px;margin-bottom:12px">📧</div>
+        <div style="font-size:17px;font-weight:600;color:#111;margin-bottom:6px">Processing EML files…</div>
+        <div style="font-size:13px;color:#888;margin-bottom:18px" id="bulkProgressText">0 / ${total}</div>
+        <div style="background:#f0f0f0;border-radius:99px;height:8px;overflow:hidden;margin-bottom:8px">
+          <div id="bulkProgressBar" style="height:8px;background:linear-gradient(90deg,#378ADD,#6C5CE7);border-radius:99px;width:0%;transition:width 0.2s"></div>
+        </div>
+        <div style="font-size:12px;color:#aaa" id="bulkProgressSub">Reading files…</div>
+      </div>`;
+    document.body.appendChild(overlay);
+  } else {
+    overlay.style.display = 'flex';
+    document.getElementById('bulkProgressBar').style.width = '0%';
+    document.getElementById('bulkProgressText').textContent = `0 / ${total}`;
+  }
+}
+
+function updateBulkProgress(done, total) {
+  const pct = Math.round((done / total) * 100);
+  const bar = document.getElementById('bulkProgressBar');
+  const txt = document.getElementById('bulkProgressText');
+  const sub = document.getElementById('bulkProgressSub');
+  if (bar) bar.style.width = pct + '%';
+  if (txt) txt.textContent = `${done} / ${total}`;
+  if (sub) sub.textContent = done < total ? `Processing ${BULK.files[done]?.name || ''}…` : 'Building table…';
+}
+
+function hideBulkProgress() {
+  const o = document.getElementById('bulkProgressOverlay');
+  if (o) o.style.display = 'none';
+}
+
+/* ── Bulk dashboard ── */
+function showBulkDashboard() {
+  hideBulkProgress();
+
+  // Unique contacts by email
+  const uniqueEmails = [...new Map(BULK.rows.map(r => [r['Email'], r])).values()];
+  const uniqueDomains = [...new Set(BULK.rows.map(r => r['Domain']).filter(Boolean))];
+  const totalPhones = BULK.rows.filter(r => r['Phone']).length;
+
+  // Update KPIs reusing existing elements
+  animateCount('emlKpiContacts', uniqueEmails.length);
+  animateCount('emlKpiEmails',   BULK.rows.length);
+  animateCount('emlKpiDomains',  uniqueDomains.length);
+  animateCount('emlKpiAttach',   BULK.processed);
+  const phonesKpi = document.getElementById('emlKpiPhones');
+  if (phonesKpi) animateCount('emlKpiPhones', totalPhones);
+  const urlsKpi = document.getElementById('emlKpiUrls');
+  if (urlsKpi) animateCount('emlKpiUrls', BULK.errors);
+
+  // Update labels to match bulk context
+  const labels = document.querySelectorAll('.eml-kpi-label');
+  if (labels[0]) labels[0].textContent = 'Unique Contacts';
+  if (labels[1]) labels[1].textContent = 'Total Rows';
+  if (labels[2]) labels[2].textContent = 'Unique Domains';
+  if (labels[3]) labels[3].textContent = 'Files Processed';
+  if (labels[4]) labels[4].textContent = 'Rows with Phone';
+  if (labels[5]) labels[5].textContent = 'Errors';
+
+  document.getElementById('emlFileName').textContent = `Bulk EML — ${BULK.processed} files`;
+  document.getElementById('emlFileSub').innerHTML = `${BULK.rows.length} total rows · ${uniqueEmails.length} unique contacts · ${BULK.errors > 0 ? `<span style="color:#F43F5E">${BULK.errors} errors</span>` : 'no errors'}`;
+
+  // Replace message preview panel with bulk data table
+  const emailPanel = document.querySelector('.eml-email-panel');
+  if (emailPanel) {
+    emailPanel.innerHTML = `
+      <div class="eml-panel-title">📊 Bulk Data Table
+        <span style="margin-left:auto;display:flex;gap:8px">
+          <input id="bulkSearch" placeholder="🔍 Search…" class="eml-search" style="width:180px" oninput="filterBulkTable()">
+        </span>
+      </div>
+      <div style="overflow-x:auto;max-height:520px;overflow-y:auto">
+        <table id="bulkTable" style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead id="bulkTableHead"></thead>
+          <tbody id="bulkTableBody"></tbody>
+        </table>
+      </div>
+      <div style="padding:8px 0;font-size:12px;color:#888" id="bulkTableMeta"></div>`;
+  }
+
+  // Replace contacts panel with domain breakdown
+  const contactsPanel = document.querySelector('.eml-contacts-panel');
+  if (contactsPanel) {
+    contactsPanel.innerHTML = `
+      <div class="eml-panel-title">🌐 Domain breakdown</div>
+      <div id="bulkDomainList" style="overflow-y:auto;max-height:540px"></div>`;
+    renderBulkDomains();
+  }
+
+  // Update header buttons for bulk mode
+  const actions = document.querySelector('.eml-header-actions');
+  if (actions) {
+    actions.innerHTML = `
+      <button class="btn btn-secondary btn-sm" onclick="exportBulkExcel()">⬇ Export Excel</button>
+      <button class="btn btn-primary btn-sm"   onclick="pushBulkToCRM()">💾 Push to CRM</button>
+      <button class="btn btn-secondary btn-sm" onclick="exitEmlDashboard()">✕ Close</button>`;
+  }
+
+  renderBulkTable(BULK.rows);
+
+  document.getElementById('emlFileName').textContent = `Bulk EML — ${BULK.processed} files`;
+  document.getElementById('topTitle').textContent = '📧 Bulk Email Intelligence';
+  document.getElementById('topSub').textContent = `${BULK.processed} files · ${BULK.rows.length} rows · ${uniqueEmails.length} unique contacts`;
+
+  // Hide domains section (we moved it inline)
+  const domSec = document.querySelector('.eml-domains-section');
+  if (domSec) domSec.style.display = 'none';
+
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-eml').classList.add('active');
+  document.body.classList.add('eml-mode');
+}
+
+const BULK_COLS = ['File Name','Subject','Date','From Name','From Email','Contact Name','Email','Domain','Source','Phone','All Phones','Attachments','Is Reply','Is Forward'];
+
+let bulkFiltered = [];
+
+function renderBulkTable(rows) {
+  bulkFiltered = rows;
+  const thead = document.getElementById('bulkTableHead');
+  const tbody = document.getElementById('bulkTableBody');
+  const meta  = document.getElementById('bulkTableMeta');
+  if (!thead || !tbody) return;
+
+  thead.innerHTML = `<tr style="position:sticky;top:0;background:#f8f8f8">${BULK_COLS.map(c => `<th style="padding:7px 10px;text-align:left;font-size:11px;font-weight:600;color:#555;border-bottom:1.5px solid #e5e5e5;white-space:nowrap">${c}</th>`).join('')}</tr>`;
+
+  const display = rows.slice(0, 500); // cap at 500 for DOM perf
+  tbody.innerHTML = display.map((row, i) => `<tr style="background:${i % 2 === 0 ? '#fff' : '#fafafa'}" onmouseover="this.style.background='#EEF5FF'" onmouseout="this.style.background='${i % 2 === 0 ? '#fff' : '#fafafa'}'">
+    ${BULK_COLS.map(c => `<td style="padding:6px 10px;border-bottom:0.5px solid #f0f0f0;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis;color:${c==='Email'?'#378ADD':'#333'}">${escHtml(row[c] || '')}</td>`).join('')}
+  </tr>`).join('');
+
+  if (meta) meta.textContent = `Showing ${Math.min(display.length, 500)} of ${rows.length} rows${rows.length > 500 ? ' (export Excel to see all)' : ''}`;
+}
+
+function filterBulkTable() {
+  const q = (document.getElementById('bulkSearch')?.value || '').toLowerCase();
+  const filtered = q ? BULK.rows.filter(r => BULK_COLS.some(c => (r[c] || '').toLowerCase().includes(q))) : BULK.rows;
+  renderBulkTable(filtered);
+}
+
+function renderBulkDomains() {
+  const domainCounts = {};
+  BULK.rows.forEach(r => { if (r['Domain']) domainCounts[r['Domain']] = (domainCounts[r['Domain']] || 0) + 1; });
+  const sorted = Object.entries(domainCounts).sort((a, b) => b[1] - a[1]);
+  const total = BULK.rows.length;
+  const colors = ['#378ADD','#6C5CE7','#1D9E75','#EF9F27','#D4537E','#3B82F6','#F97316','#14B8A6'];
+  const el = document.getElementById('bulkDomainList');
+  if (!el) return;
+  el.innerHTML = sorted.map(([d, n], i) => {
+    const pct = Math.round(n / total * 100);
+    const color = colors[i % colors.length];
+    return `<div style="display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:0.5px solid #f0f0f0">
+      <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></div>
+      <span style="font-size:12px;color:#444;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@${escHtml(d)}</span>
+      <div style="background:#f0f0f0;border-radius:99px;height:5px;width:80px;flex-shrink:0"><div style="height:5px;border-radius:99px;width:${pct}%;background:${color}"></div></div>
+      <span style="font-size:11px;color:#888;min-width:24px;text-align:right">${n}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ── Export all rows to Excel ── */
+function exportBulkExcel() {
+  if (!BULK.rows.length) { showNotification('No data to export.', 'error'); return; }
+
+  const wb = XLSX.utils.book_new();
+
+  // Sheet 1 — all rows
+  const headers = BULK_COLS;
+  const dataRows = BULK.rows.map(r => headers.map(h => r[h] || ''));
+  const ws1 = XLSX.utils.aoa_to_sheet([headers, ...dataRows]);
+  ws1['!cols'] = headers.map(h => ({
+    wch: h === 'Subject' || h === 'All Phones' || h === 'Links' ? 50 : h === 'File Name' ? 35 : h === 'Email' || h === 'From Email' ? 32 : h === 'Domain' ? 25 : 18
+  }));
+  XLSX.utils.book_append_sheet(wb, ws1, 'All Contacts');
+
+  // Sheet 2 — deduplicated by email
+  const seen = new Set();
+  const deduped = BULK.rows.filter(r => { if (seen.has(r['Email'])) return false; seen.add(r['Email']); return true; });
+  const ws2 = XLSX.utils.aoa_to_sheet([headers, ...deduped.map(r => headers.map(h => r[h] || ''))]);
+  ws2['!cols'] = ws1['!cols'];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Unique Contacts');
+
+  // Sheet 3 — summary by domain
+  const domCounts = {};
+  BULK.rows.forEach(r => { if (r['Domain']) domCounts[r['Domain']] = (domCounts[r['Domain']] || 0) + 1; });
+  const domRows = Object.entries(domCounts).sort((a, b) => b[1] - a[1]).map(([d, n]) => [d, n]);
+  const ws3 = XLSX.utils.aoa_to_sheet([['Domain', 'Count'], ...domRows]);
+  ws3['!cols'] = [{ wch: 30 }, { wch: 10 }];
+  XLSX.utils.book_append_sheet(wb, ws3, 'Domain Summary');
+
+  const date = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(wb, `bulk_eml_export_${date}.xlsx`);
+  showNotification(`✅ Exported ${BULK.rows.length} rows (${deduped.length} unique) across 3 sheets`, 'success');
+}
+
+/* ── Push all unique contacts into the CRM data table ── */
+function pushBulkToCRM() {
+  if (!BULK.rows.length) { showNotification('No data to push.', 'error'); return; }
+
+  // Deduplicate by email
+  const seen = new Set();
+  const deduped = BULK.rows.filter(r => { if (seen.has(r['Email'])) return false; seen.add(r['Email']); return true; });
+
+  const crmRows = deduped.map(r => ({
+    'Name':       r['Contact Name'],
+    'Email':      r['Email'],
+    'Domain':     r['Domain'],
+    'Phone':      r['Phone'],
+    'From':       r['From Email'],
+    'Subject':    r['Subject'],
+    'Source':     r['Source'],
+    'File':       r['File Name'],
+    'Date':       r['Date'],
+  }));
+
+  S.rawData = crmRows;
+  S.headers = ['Name','Email','Domain','Phone','From','Subject','Source','File','Date'];
+  S.fileName = `Bulk EML — ${BULK.processed} files`;
+  S.sheetName = 'EML Bulk Import';
+  S.mapping = {
+    'Name':    { type: 'contact', keep: true },
+    'Email':   { type: 'email',   keep: true },
+    'Domain':  { type: 'website', keep: true },
+    'Phone':   { type: 'phone',   keep: true },
+    'From':    { type: 'email',   keep: true },
+    'Subject': { type: 'other',   keep: true },
+    'Source':  { type: 'other',   keep: true },
+    'File':    { type: 'other',   keep: true },
+    'Date':    { type: 'other',   keep: true },
+  };
+  S.clean = crmRows;
+  S.filtered = [...crmRows];
+  S.page = 1;
+
+  document.body.classList.remove('eml-mode');
+  const domSec = document.querySelector('.eml-domains-section');
+  if (domSec) domSec.style.display = '';
+  showNotification(`✅ ${deduped.length} unique contacts pushed to CRM table`, 'success');
+  const ta = document.getElementById('topActions');
+  if (ta) ta.style.display = 'flex';
+  showView('table');
+}

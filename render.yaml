@@ -8,6 +8,6 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.8
       - key: ALLOWED_ORIGINS
-        value: "*" # Remember to change this to your Vercel URL!
+        value: "https://crmdevloper.vercel.app,http://localhost:3000"
       - key: API_KEY
         generateValue: true # Render will automatically generate a secure secret key for you

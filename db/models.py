@@ -6,9 +6,9 @@ from .database import Base
 class User(Base):
     __tablename__ = "users"
     id           = Column(Integer, primary_key=True, index=True)
-    email        = Column(String, unique=True, index=True, nullable=False)
-    name         = Column(String)
-    provider_uid = Column(String, index=True)  # Supabase user.id
+    email        = Column(String(255), unique=True, index=True, nullable=False)
+    name         = Column(String(255))
+    provider_uid = Column(String(255), index=True)  # Supabase user.id
     last_login   = Column(DateTime)
     created_at   = Column(DateTime, default=datetime.utcnow)
     sessions     = relationship("SessionData", back_populates="user", cascade="all, delete-orphan")
@@ -17,13 +17,13 @@ class Company(Base):
     __tablename__ = "companies"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
+    name = Column(String(255), index=True)
     address = Column(Text)
-    city = Column(String, index=True)
-    pincode = Column(String)
-    website = Column(String)
-    industry = Column(String)
-    product = Column(String)
+    city = Column(String(255), index=True)
+    pincode = Column(String(20))
+    website = Column(String(255))
+    industry = Column(String(255))
+    product = Column(String(255))
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -38,14 +38,14 @@ class Contact(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey("companies.id"))
-    name = Column(String)
-    email_primary = Column(String)
-    email_secondary = Column(String)
-    phone_primary = Column(String)
-    phone_secondary = Column(String)
-    phone_country = Column(String, default="IN")  # "IN" for Indian, "+1" for US, etc.
-    whatsapp = Column(String)
-    position = Column(String)
+    name = Column(String(255))
+    email_primary = Column(String(255))
+    email_secondary = Column(String(255))
+    phone_primary = Column(String(50))
+    phone_secondary = Column(String(50))
+    phone_country = Column(String(10), default="IN")  # "IN" for Indian, "+1" for US, etc.
+    whatsapp = Column(String(50))
+    position = Column(String(255))
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -63,12 +63,12 @@ class CallLog(Base):
     company_id = Column(Integer, ForeignKey("companies.id"))
     call_date = Column(DateTime, default=datetime.utcnow)
     duration_minutes = Column(Integer)
-    call_type = Column(String)  # Incoming, Outgoing, Follow-up
-    outcome = Column(String)  # Connected, Voicemail, No Answer, Callback Scheduled, etc.
+    call_type = Column(String(50))  # Incoming, Outgoing, Follow-up
+    outcome = Column(String(100))  # Connected, Voicemail, No Answer, Callback Scheduled, etc.
     notes = Column(Text)
-    next_action = Column(String)
+    next_action = Column(String(255))
     next_action_date = Column(DateTime)
-    created_by = Column(String)
+    created_by = Column(String(255))
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships
@@ -81,8 +81,8 @@ class SessionData(Base):
     __tablename__ = "session_data"
 
     id = Column(Integer, primary_key=True, index=True)
-    file_name = Column(String)
-    sheet_name = Column(String)
+    file_name = Column(String(255))
+    sheet_name = Column(String(255))
     upload_date = Column(DateTime, default=datetime.utcnow)
     mapping = Column(JSON)  # Store field mapping configuration
     is_active = Column(Boolean, default=True)
