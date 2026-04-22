@@ -655,17 +655,38 @@ function processData() {
 }
 
 function findDuplicates() {
+  S.dupGroups = [];
   const companyCols = colsByType('company');
-  if (!companyCols.length) { S.dupGroups = []; return; }
-  const cc = companyCols[0];
-  const groups = {};
-  S.clean.forEach((row, idx) => {
-    const name = (row[cc]||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,20);
-    if (!name || name.length < 4) return;
-    if (!groups[name]) groups[name] = [];
-    groups[name].push(idx);
-  });
-  S.dupGroups = Object.values(groups).filter(g => g.length > 1).slice(0, 50);
+  if (companyCols.length) {
+    const cc = companyCols[0];
+    const groups = {};
+    S.clean.forEach((row, idx) => {
+      const name = (row[cc]||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,20);
+      if (!name || name.length < 4) return;
+      if (!groups[name]) groups[name] = [];
+      groups[name].push(idx);
+    });
+    S.dupGroups = Object.values(groups).filter(g => g.length > 1).slice(0, 50);
+  }
+
+  // Also deduplicate by email across all records
+  const emailCols = colsByType('email');
+  if (emailCols.length) {
+    const ec = emailCols[0];
+    const emailGroups = {};
+    S.clean.forEach((row, idx) => {
+      const email = (row[ec] || '').toLowerCase().trim();
+      if (!email) return;
+      if (!emailGroups[email]) emailGroups[email] = [];
+      emailGroups[email].push(idx);
+    });
+    Object.values(emailGroups).forEach(indices => {
+      if (indices.length > 1) {
+        const rows = indices.map(i => S.clean[i]);
+        S.dupGroups.push(rows);
+      }
+    });
+  }
 }
 
 function keepCols()    { return S.headers.filter(h=>S.mapping[h]&&S.mapping[h].keep&&S.mapping[h].type!=='skip'); }
@@ -2258,7 +2279,7 @@ function emlSendToCRM() {
     'Name':        { type:'contact',  keep:true  },
     'Email':       { type:'email',    keep:true  },
     'Company':     { type:'company',  keep:true  },
-    'Designation': { type:'other',    keep:true  },
+    'Designation': { type:'keyword',  keep:true  },
     'Phone':       { type:'phone',    keep:true  },
     'Phone 2':     { type:'phone',    keep:true  },
     'Website':     { type:'website',  keep:true  },
@@ -2316,8 +2337,12 @@ async function handleBulkEml(fileList) {
           'Email':        c.email,
           'Domain':       c.domain,
           'Source':       c.source,
-          'Phone':        parsed.phones[0] || '',
-          'All Phones':   parsed.phones.join(', '),
+          'Company':        c.company        || '',
+          'Designation':    c.designation    || '',
+          'Phone Primary':  c.phone_primary  || parsed.phones[0] || '',
+          'Phone Secondary':c.phone_secondary|| '',
+          'Website':        c.website        || '',
+          'City':           c.city           || '',
           'Attachments':  parsed.attachments.join(', '),
           'Is Reply':     parsed.isReply  ? 'Yes' : 'No',
           'Is Forward':   parsed.isForwarded ? 'Yes' : 'No',
@@ -2577,7 +2602,7 @@ function showBulkDashboard() {
   document.body.classList.add('eml-mode');
 }
 
-const BULK_COLS = ['File Name','Subject','Date','From Name','From Email','Contact Name','Email','Domain','Source','Phone','All Phones','Attachments','Is Reply','Is Forward'];
+const BULK_COLS = ['File Name','Subject','Date','From Name','From Email','Contact Name','Email','Company','Designation','Phone Primary','Phone Secondary','Website','City','Domain','Source','Attachments','Is Reply','Is Forward'];
 
 let bulkFiltered = [];
 
@@ -2670,8 +2695,13 @@ function pushBulkToCRM() {
   const crmRows = deduped.map(r => ({
     'Name':       r['Contact Name'],
     'Email':      r['Email'],
+    'Company':    r['Company'],
+    'Designation':r['Designation'],
     'Domain':     r['Domain'],
-    'Phone':      r['Phone'],
+    'Phone Primary': r['Phone Primary'],
+    'Phone Secondary': r['Phone Secondary'],
+    'Website':    r['Website'],
+    'City':       r['City'],
     'From':       r['From Email'],
     'Subject':    r['Subject'],
     'Source':     r['Source'],
@@ -2680,19 +2710,24 @@ function pushBulkToCRM() {
   }));
 
   S.rawData = crmRows;
-  S.headers = ['Name','Email','Domain','Phone','From','Subject','Source','File','Date'];
+  S.headers = ['Name','Email','Company','Designation','Domain','Phone Primary','Phone Secondary','Website','City','From','Subject','Source','File','Date'];
   S.fileName = `Bulk EML — ${BULK.processed} files`;
   S.sheetName = 'EML Bulk Import';
   S.mapping = {
-    'Name':    { type: 'contact', keep: true },
-    'Email':   { type: 'email',   keep: true },
-    'Domain':  { type: 'website', keep: true },
-    'Phone':   { type: 'phone',   keep: true },
-    'From':    { type: 'email',   keep: true },
-    'Subject': { type: 'other',   keep: true },
-    'Source':  { type: 'other',   keep: true },
-    'File':    { type: 'other',   keep: true },
-    'Date':    { type: 'other',   keep: true },
+    'Name':       { type: 'contact', keep: true },
+    'Email':      { type: 'email',   keep: true },
+    'Company':    { type: 'company', keep: true },
+    'Designation':{ type: 'keyword', keep: true },
+    'Domain':     { type: 'website', keep: true },
+    'Phone Primary': { type: 'phone',   keep: true },
+    'Phone Secondary': { type: 'phone',   keep: true },
+    'Website':    { type: 'website', keep: true },
+    'City':       { type: 'city',    keep: true },
+    'From':       { type: 'email',   keep: true },
+    'Subject':    { type: 'other',   keep: true },
+    'Source':     { type: 'other',   keep: true },
+    'File':       { type: 'other',   keep: true },
+    'Date':       { type: 'other',   keep: true },
   };
   S.clean = crmRows;
   S.filtered = [...crmRows];
