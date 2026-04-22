@@ -2319,68 +2319,110 @@ async function handleBulkEml(fileList) {
 
   showBulkProgress(BULK.files.length);
 
+  // Phase 1: Local Parse
+  const parsedFiles = [];
   for (let i = 0; i < BULK.files.length; i++) {
     const file = BULK.files[i];
     try {
       const text = await readFileAsText(file);
       const parsed = parseSingleEml(text, file.name);
-
-      if (i > 0) await new Promise(r => setTimeout(r, 50));
-
-      let aiData = [];
-      try {
-        const aiResp = await fetch('/api/parse-signature', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-API-Key': window.CRM_API_KEY || '' },
-          body: JSON.stringify({ body_text: parsed.bodyText, subject: parsed.subject })
-        });
-        const resJson = await aiResp.json();
-        if (resJson.ok && Array.isArray(resJson.fields)) {
-          aiData = resJson.fields;
-        } else if (resJson.ok && resJson.fields && typeof resJson.fields === 'object') {
-          aiData = [resJson.fields];
-        }
-      } catch (err) {
-        console.error('AI parse failed for', file.name, err);
-      }
-
-      // Build one row per unique contact in this email
-      parsed.contacts.forEach(c => {
-        const matchingAi = aiData.find(a => a.email && a.email.toLowerCase() === c.email.toLowerCase()) || 
-                           (aiData.length === 1 ? aiData[0] : {});
-
-        BULK.rows.push({
-          'File Name':    file.name,
-          'Subject':      parsed.subject,
-          'Date':         parsed.date,
-          'From Name':    parsed.from[0]?.name  || '',
-          'From Email':   parsed.from[0]?.email || '',
-          'Contact Name': matchingAi.name || c.name,
-          'Email':        c.email,
-          'Domain':       c.domain,
-          'Source':       c.source,
-          'Company':        matchingAi.company || c.company || '',
-          'Designation':    matchingAi.designation || c.designation || '',
-          'Phone Primary':  matchingAi.phone_primary || c.phone_primary || parsed.phones[0] || '',
-          'Phone Secondary':matchingAi.phone_secondary || c.phone_secondary|| '',
-          'Website':        matchingAi.website || c.website || '',
-          'City':           matchingAi.city || c.city || '',
-          'Attachments':  parsed.attachments.join(', '),
-          'Is Reply':     parsed.isReply  ? 'Yes' : 'No',
-          'Is Forward':   parsed.isForwarded ? 'Yes' : 'No',
-          'Links':        parsed.urls.slice(0, 3).join(', '),
-        });
-      });
-
-      BULK.processed++;
+      parsedFiles.push({ file, parsed });
     } catch (e) {
       console.error(e);
       BULK.errors++;
-      BULK.processed++;
+    }
+    updateBulkProgress(i + 1, BULK.files.length, `Reading & parsing file ${i + 1} of ${BULK.files.length} locally…`);
+  }
+
+  // Phase 2: AI Parsing (Parallel with Concurrency Limit)
+  let aiSent = 0;
+  let aiReceived = 0;
+  const total = parsedFiles.length;
+  const CONCURRENCY = 5;
+
+  const updateAiProgress = () => {
+    updateBulkProgress(aiReceived, total, `AI Extraction<br>Sent to AI: <span style="color:#6C5CE7;font-weight:600">${aiSent}</span> / ${total} &nbsp;|&nbsp; Received: <span style="color:#2ECC71;font-weight:600">${aiReceived}</span> / ${total}`);
+  };
+
+  updateAiProgress();
+
+  let currentIndex = 0;
+
+  async function processNext() {
+    if (currentIndex >= total) return;
+    const idx = currentIndex++;
+    const item = parsedFiles[idx];
+    
+    aiSent++;
+    updateAiProgress();
+
+    try {
+      const apiKey = localStorage.getItem('CRM_API_KEY') || window.CRM_API_KEY || '';
+      const aiResp = await fetch('/api/parse-signature', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+        body: JSON.stringify({ body_text: item.parsed.bodyText, subject: item.parsed.subject })
+      });
+      const resJson = await aiResp.json();
+      if (resJson.ok && Array.isArray(resJson.fields)) {
+        item.aiData = resJson.fields;
+      } else if (resJson.ok && resJson.fields && typeof resJson.fields === 'object') {
+        item.aiData = [resJson.fields];
+      } else {
+        item.aiData = [];
+      }
+    } catch (err) {
+      console.error('AI parse failed for', item.file.name, err);
+      item.aiData = [];
+      BULK.errors++;
     }
 
-    updateBulkProgress(BULK.processed, BULK.files.length);
+    aiReceived++;
+    updateAiProgress();
+    
+    await new Promise(r => setTimeout(r, 50)); // 50ms delay
+    await processNext();
   }
+
+  const workers = [];
+  for (let i = 0; i < Math.min(CONCURRENCY, total); i++) {
+    workers.push(processNext());
+  }
+  await Promise.all(workers);
+
+  // Phase 3: Build Rows
+  updateBulkProgress(total, total, 'Building tabular data…');
+  parsedFiles.forEach(item => {
+    const { file, parsed, aiData } = item;
+    
+    parsed.contacts.forEach(c => {
+      const matchingAi = (aiData || []).find(a => a.email && a.email.toLowerCase() === c.email.toLowerCase()) || 
+                         ((aiData || []).length === 1 ? aiData[0] : {});
+
+      BULK.rows.push({
+        'File Name':    file.name,
+        'Subject':      parsed.subject,
+        'Date':         parsed.date,
+        'From Name':    parsed.from[0]?.name  || '',
+        'From Email':   parsed.from[0]?.email || '',
+        'Contact Name': matchingAi.name || c.name,
+        'Email':        c.email,
+        'Domain':       c.domain,
+        'Source':       c.source,
+        'Company':        matchingAi.company || c.company || '',
+        'Designation':    matchingAi.designation || c.designation || '',
+        'Phone Primary':  matchingAi.phone_primary || c.phone_primary || parsed.phones[0] || '',
+        'Phone Secondary':matchingAi.phone_secondary || c.phone_secondary|| '',
+        'Website':        matchingAi.website || c.website || '',
+        'City':           matchingAi.city || c.city || '',
+        'Attachments':  parsed.attachments.join(', '),
+        'Is Reply':     parsed.isReply  ? 'Yes' : 'No',
+        'Is Forward':   parsed.isForwarded ? 'Yes' : 'No',
+        'Links':        parsed.urls.slice(0, 3).join(', '),
+      });
+    });
+    BULK.processed++;
+  });
 
   showBulkDashboard();
 }
@@ -2529,14 +2571,20 @@ function showBulkProgress(total) {
   }
 }
 
-function updateBulkProgress(done, total) {
+function updateBulkProgress(done, total, customSub = null) {
   const pct = Math.round((done / total) * 100);
   const bar = document.getElementById('bulkProgressBar');
   const txt = document.getElementById('bulkProgressText');
   const sub = document.getElementById('bulkProgressSub');
   if (bar) bar.style.width = pct + '%';
   if (txt) txt.textContent = `${done} / ${total}`;
-  if (sub) sub.textContent = done < total ? `Processing ${BULK.files[done]?.name || ''}…` : 'Building table…';
+  if (sub) {
+    if (customSub) {
+      sub.innerHTML = customSub;
+    } else {
+      sub.textContent = done < total ? `Processing ${BULK.files[done]?.name || ''}…` : 'Building table…';
+    }
+  }
 }
 
 function hideBulkProgress() {
