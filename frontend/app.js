@@ -2325,24 +2325,46 @@ async function handleBulkEml(fileList) {
       const text = await readFileAsText(file);
       const parsed = parseSingleEml(text, file.name);
 
+      if (i > 0) await new Promise(r => setTimeout(r, 50));
+
+      let aiData = [];
+      try {
+        const aiResp = await fetch('/api/parse-signature', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-API-Key': window.CRM_API_KEY || '' },
+          body: JSON.stringify({ body_text: parsed.bodyText, subject: parsed.subject })
+        });
+        const resJson = await aiResp.json();
+        if (resJson.ok && Array.isArray(resJson.fields)) {
+          aiData = resJson.fields;
+        } else if (resJson.ok && resJson.fields && typeof resJson.fields === 'object') {
+          aiData = [resJson.fields];
+        }
+      } catch (err) {
+        console.error('AI parse failed for', file.name, err);
+      }
+
       // Build one row per unique contact in this email
       parsed.contacts.forEach(c => {
+        const matchingAi = aiData.find(a => a.email && a.email.toLowerCase() === c.email.toLowerCase()) || 
+                           (aiData.length === 1 ? aiData[0] : {});
+
         BULK.rows.push({
           'File Name':    file.name,
           'Subject':      parsed.subject,
           'Date':         parsed.date,
           'From Name':    parsed.from[0]?.name  || '',
           'From Email':   parsed.from[0]?.email || '',
-          'Contact Name': c.name,
+          'Contact Name': matchingAi.name || c.name,
           'Email':        c.email,
           'Domain':       c.domain,
           'Source':       c.source,
-          'Company':        c.company        || '',
-          'Designation':    c.designation    || '',
-          'Phone Primary':  c.phone_primary  || parsed.phones[0] || '',
-          'Phone Secondary':c.phone_secondary|| '',
-          'Website':        c.website        || '',
-          'City':           c.city           || '',
+          'Company':        matchingAi.company || c.company || '',
+          'Designation':    matchingAi.designation || c.designation || '',
+          'Phone Primary':  matchingAi.phone_primary || c.phone_primary || parsed.phones[0] || '',
+          'Phone Secondary':matchingAi.phone_secondary || c.phone_secondary|| '',
+          'Website':        matchingAi.website || c.website || '',
+          'City':           matchingAi.city || c.city || '',
           'Attachments':  parsed.attachments.join(', '),
           'Is Reply':     parsed.isReply  ? 'Yes' : 'No',
           'Is Forward':   parsed.isForwarded ? 'Yes' : 'No',
@@ -2352,6 +2374,7 @@ async function handleBulkEml(fileList) {
 
       BULK.processed++;
     } catch (e) {
+      console.error(e);
       BULK.errors++;
       BULK.processed++;
     }
@@ -2466,6 +2489,7 @@ function parseSingleEml(raw, fileName) {
     from, to, cc, bcc, replyTo,
     attachments, phones, urls,
     contacts,
+    bodyText,
     isReply: !!(headers['in-reply-to'] || headers['references'] || /^re:/i.test(headers['subject'] || '')),
     isForwarded: /^(?:fwd?|fw):/i.test(headers['subject'] || '') || /[-]+\s*Forwarded message/i.test(bodyText),
   };
