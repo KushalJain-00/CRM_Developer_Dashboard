@@ -2358,7 +2358,7 @@ async function handleBulkEml(fileList) {
 
     try {
       const apiKey = localStorage.getItem('CRM_API_KEY') || window.CRM_API_KEY || '';
-      const aiResp = await fetch((window.API_BASE || '') + '/api/parse-signature', {
+      const aiResp = await fetch(`${API_BASE}/api/parse-signature`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
         body: JSON.stringify({ body_text: item.parsed.bodyText, subject: item.parsed.subject })
