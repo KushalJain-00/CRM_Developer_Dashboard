@@ -11,36 +11,34 @@ import os, hashlib, json
 router = APIRouter()
 _cache: dict = {}   # in-memory cache: signature_hash → parsed fields
 
-SYSTEM_PROMPT = """You are a contact information extractor. Given a raw email signature block, extract structured fields.
+SYSTEM_PROMPT = """You are an expert contact information extractor specialized in parsing email signatures. 
 
-Return ONLY a valid JSON array of objects, where each object represents a distinct contact/signature found. Use null if a field is not found:
+Your task is to identify and extract structured data for EVERY distinct individual found in the signature block.
+
+Return ONLY a valid JSON array of objects. Use null if a field is not found.
+
+Rules for accuracy:
+1. **Association**: Strictly associate phone numbers, job titles, and companies with the person they belong to. 
+2. **Multiple Contacts**: If you see multiple signatures (e.g., from a thread or a shared signature), return one object per person.
+3. **Phones**: Only assign a phone number to a person if it is physically near their name or clearly belongs to their specific signature block.
+4. **Name**: Extract the full name. 
+5. **JSON Schema**:
 [
   {
-    "name": null,
-    "company": null,
-    "designation": null,
-    "phone_primary": null,
-    "phone_secondary": null,
-    "email": null,
-    "website": null,
-    "address": null,
-    "city": null,
-    "pincode": null
+    "name": "Full Name",
+    "company": "Company Name",
+    "designation": "Job Title",
+    "phone_primary": "Main Phone",
+    "phone_secondary": "Alt Phone",
+    "email": "Email Address",
+    "website": "URL",
+    "address": "Full Address",
+    "city": "City",
+    "pincode": "PIN/Zip"
   }
 ]
 
-Rules:
-- name: full name of the person signing
-- company: organization/company name (look for Ltd, Pvt, Inc, LLP, Industries, etc.)
-- designation: job title/role (CEO, Manager, Director, Founder, etc.)
-- phone_primary: first/main phone number with country code if present
-- phone_secondary: second phone number if present
-- email: email address found in signature
-- website: company website URL
-- address: street/plot/office address
-- city: city name
-- pincode: 6-digit PIN code
-- Return ONLY the JSON array. No explanation. No markdown. No code blocks."""
+Do not include any intro, outro, or markdown code blocks. Just the raw JSON array."""
 
 
 class SignatureRequest(BaseModel):
@@ -63,13 +61,14 @@ def extract_signature_block(body_text: str) -> str:
 
     for i, line in enumerate(lines):
         stripped = line.strip()
-        if any(stripped.startswith(d.strip()) or stripped == d.strip()
-               for d in delimiters):
+        # Look for signature delimiters
+        if any(stripped.startswith(d.strip()) or stripped == d.strip() for d in delimiters):
+            # Take from the delimiter to the end, but cap at 100 lines for safety
             sig_lines = lines[i:]
-            return '\n'.join(sig_lines[:40]).strip()
+            return '\n'.join(sig_lines[:100]).strip()
 
-    # No delimiter — take last 35 lines as likely signature zone
-    return '\n'.join(lines[-35:]).strip()
+    # If no delimiter, take the last 50 lines to catch multi-person signatures in long threads
+    return '\n'.join(lines[-50:]).strip()
 
 
 @router.post("/parse-signature")

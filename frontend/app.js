@@ -2390,39 +2390,41 @@ async function handleBulkEml(fileList) {
   }
   await Promise.all(workers);
 
-  // Phase 3: Build Rows
-  updateBulkProgress(total, total, 'Building tabular data…');
-  parsedFiles.forEach(item => {
-    const { file, parsed, aiData } = item;
-    
-    parsed.contacts.forEach(c => {
-      const matchingAi = (aiData || []).find(a => a.email && a.email.toLowerCase() === c.email.toLowerCase()) || 
-                         ((aiData || []).length === 1 ? aiData[0] : {});
+      // Build one row per unique contact in this email
+      parsedFiles.forEach(item => {
+        const { file, parsed, aiData } = item;
+        
+        parsed.contacts.forEach(c => {
+          const matchingAi = (aiData || []).find(a => a.email && a.email.toLowerCase() === c.email.toLowerCase()) || 
+                             ((aiData || []).length === 1 ? aiData[0] : {});
 
-      BULK.rows.push({
-        'File Name':    file.name,
-        'Subject':      parsed.subject,
-        'Date':         parsed.date,
-        'From Name':    parsed.from[0]?.name  || '',
-        'From Email':   parsed.from[0]?.email || '',
-        'Contact Name': matchingAi.name || c.name,
-        'Email':        c.email,
-        'Domain':       c.domain,
-        'Source':       c.source,
-        'Company':        matchingAi.company || c.company || '',
-        'Designation':    matchingAi.designation || c.designation || '',
-        'Phone Primary':  matchingAi.phone_primary || c.phone_primary || parsed.phones[0] || '',
-        'Phone Secondary':matchingAi.phone_secondary || c.phone_secondary|| '',
-        'Website':        matchingAi.website || c.website || '',
-        'City':           matchingAi.city || c.city || '',
-        'Attachments':  parsed.attachments.join(', '),
-        'Is Reply':     parsed.isReply  ? 'Yes' : 'No',
-        'Is Forward':   parsed.isForwarded ? 'Yes' : 'No',
-        'Links':        parsed.urls.slice(0, 3).join(', '),
+          // Only fallback to parsed.phones[0] if it's the sender or there's only one contact
+          const phoneFallback = (parsed.contacts.length === 1 || c.source === 'FROM') ? (parsed.phones[0] || '') : '';
+
+          BULK.rows.push({
+            'File Name':    file.name,
+            'Subject':      parsed.subject,
+            'Date':         parsed.date,
+            'From Name':    parsed.from[0]?.name  || '',
+            'From Email':   parsed.from[0]?.email || '',
+            'Contact Name': matchingAi.name || c.name,
+            'Email':        c.email,
+            'Domain':       c.domain,
+            'Source':       c.source,
+            'Company':        matchingAi.company || c.company || '',
+            'Designation':    matchingAi.designation || c.designation || '',
+            'Phone Primary':  matchingAi.phone_primary || c.phone_primary || phoneFallback,
+            'Phone Secondary':matchingAi.phone_secondary || c.phone_secondary|| '',
+            'Website':        matchingAi.website || c.website || '',
+            'City':           matchingAi.city || c.city || '',
+            'Attachments':  parsed.attachments.join(', '),
+            'Is Reply':     parsed.isReply  ? 'Yes' : 'No',
+            'Is Forward':   parsed.isForwarded ? 'Yes' : 'No',
+            'Links':        parsed.urls.slice(0, 3).join(', '),
+          });
+        });
+        BULK.processed++;
       });
-    });
-    BULK.processed++;
-  });
 
   showBulkDashboard();
 }
