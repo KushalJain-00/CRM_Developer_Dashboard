@@ -51,8 +51,8 @@ async def export_session_with_calls(session_id: int, db: Session = Depends(get_d
     phones = []
     for r in records:
         row = dict(r.data or {})
-        e = row.get('email') or row.get('Email') or row.get('email_primary')
-        p = row.get('phone') or row.get('Phone') or row.get('phone_primary')
+        e = row.get('Email 1') or row.get('email') or row.get('Email') or row.get('email_primary')
+        p = row.get('Mobile 1') or row.get('phone') or row.get('Phone') or row.get('phone_primary')
         if e: emails.append(e)
         if p: phones.append(p)
 
@@ -82,8 +82,8 @@ async def export_session_with_calls(session_id: int, db: Session = Depends(get_d
     result = []
     for r in records:
         row = dict(r.data or {})
-        email = row.get('email') or row.get('Email') or row.get('email_primary')
-        phone = row.get('phone') or row.get('Phone') or row.get('phone_primary')
+        email = row.get('Email 1') or row.get('email') or row.get('Email') or row.get('email_primary')
+        phone = row.get('Mobile 1') or row.get('phone') or row.get('Phone') or row.get('phone_primary')
         
         contact = contact_by_email.get(email)
         if not contact and phone:

@@ -185,6 +185,12 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
             if c[0]: existing_phones.add(c[0])
 
     for item in body.contacts:
+        # ── Archive raw record FIRST (before any skip/continue) ───
+        # This ensures all uploaded rows are persisted for audit,
+        # even if they are later skipped as duplicates or invalid.
+        if item.raw_data:
+            db.add(Record(session_id=session.id, data=item.raw_data))
+
         # ── Validate email ────────────────────────────────────────
         email_ok = validate_email(item.email_primary) if item.email_primary else False
         if not email_ok:
@@ -244,10 +250,6 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
             position=item.position,
         )
         db.add(contact)
-
-        # ── Archive raw record ────────────────────────────────────
-        if item.raw_data:
-            db.add(Record(session_id=session.id, data=item.raw_data))
 
         imported += 1
 
@@ -368,6 +370,21 @@ async def update_contact(contact_id: int, body: ContactUpdate, db: Session = Dep
                 company.industry = body.industry
             if body.product is not None:
                 company.product = body.product
+    else:
+        # Contact has no company — create one if company_name is provided
+        if body.company_name:
+            new_company = Company(
+                name=body.company_name,
+                address=body.address,
+                city=body.city,
+                pincode=body.pincode,
+                website=body.website,
+                industry=body.industry,
+                product=body.product,
+            )
+            db.add(new_company)
+            db.flush()
+            contact.company_id = new_company.id
 
     db.commit()
     db.refresh(contact)
@@ -386,10 +403,20 @@ async def delete_contact(contact_id: int, db: Session = Depends(get_db)):
 
 @router.delete("/contacts", dependencies=[Depends(verify_api_key)])
 async def delete_multiple(ids: List[int] = Query(...), db: Session = Depends(get_db)):
-    """Delete multiple contacts at once."""
-    deleted = db.query(Contact).filter(Contact.id.in_(ids)).delete(synchronize_session=False)
+    """Delete multiple contacts at once. Handles empty lists and chunks
+    large batches to avoid exceeding SQL bind-parameter limits."""
+    if not ids:
+        return JSONResponse(content={"ok": True, "deleted": 0})
+
+    CHUNK_SIZE = 5000
+    total_deleted = 0
+    for i in range(0, len(ids), CHUNK_SIZE):
+        chunk = ids[i : i + CHUNK_SIZE]
+        total_deleted += db.query(Contact).filter(
+            Contact.id.in_(chunk)
+        ).delete(synchronize_session=False)
     db.commit()
-    return JSONResponse(content={"ok": True, "deleted": deleted})
+    return JSONResponse(content={"ok": True, "deleted": total_deleted})
 
 
 @router.get("/contacts/stats/summary", dependencies=[Depends(verify_api_key)])

@@ -42,6 +42,7 @@ const FT = {
   fax:     {label:'Fax Number',         icon:'📠', color:'#94A3B8'},
   whatsapp:{label:'WhatsApp',           icon:'💬', color:'#10B981'},
   stdcode: {label:'STD Code',           icon:'☎️', color:'#94A3B8'},
+  landline:{label:'Landline (Skipped)', icon:'☎️', color:'#94A3B8'},
   other:   {label:'Other / Custom',     icon:'📌', color:'#64748B'},
   skip:    {label:'✕ Skip Field',      icon:'✕',  color:'#F43F5E'},
 };
@@ -92,8 +93,10 @@ function detectField(col, samples) {
   if (/whatsapp|whats|wa\.?no/.test(n)) return ['whatsapp',98];
   if (/fax/.test(n)) return ['fax',98];
   if (/stdcode|std/.test(n)) return ['stdcode',95];
-  if (/mob|mobile|cell|phone|tel|ph\.?no|phno|contact.*no|landline|fmob|fcontact.*mob/.test(n)) return ['phone',96];
-  if (strs.some(v => /^[\+]?[\d\s\-\/\.]{8,18}$/.test(v.trim()))) return ['phone',82];
+  if (/landline/.test(n)) return ['landline',96];
+  if (/^telephone$|^telno$|^tel$/.test(n)) return ['landline',90];
+  if (/mob|mobile|cell|phone|ph\.?no|phno|contact.*no|fmob|fcontact.*mob/.test(n)) return ['phone',96];
+  if (strs.some(v => /^[\+]?[\d\s\-\/\.]{8,18}$/.test(v.trim()) && /^[\+]?[6-9]/.test(v.trim()))) return ['phone',82];
   if (/pin|zip|postal/.test(n)) return ['pincode',96];
   if (nonEmpty.every(v => /^\d{5,6}$/.test(String(v).trim()))) return ['pincode',88];
   if (/amount|value|price|cost|revenue|sales|deal|invoice|payment|total|salary|ctc/.test(n)) return ['amount',92];
@@ -651,7 +654,89 @@ function processData() {
     return true;
   });
 
+  // Step 3: Normalize to standard 10 fields (auto-detect, sheet-name independent)
+  normalizeToStandardFields();
+
   S.filtered = [...S.clean];
+}
+
+/**
+ * Normalizes cleaned data into 10 standard CRM fields regardless of
+ * original sheet column names. This ensures consistent data segregation
+ * across any uploaded file.
+ */
+function normalizeToStandardFields() {
+  // Collect columns by type from the original mapping
+  const typeMap = {};
+  keepCols().forEach(h => {
+    const t = S.mapping[h].type;
+    if (!typeMap[t]) typeMap[t] = [];
+    typeMap[t].push(h);
+  });
+
+  // Define the 10 standard output fields + their source types
+  const STANDARD = [
+    { key: 'Company Name',   types: ['company'],                      multi: false },
+    { key: 'Location',       types: ['city','location','address'],    multi: false },
+    { key: 'Website',        types: ['website'],                      multi: false },
+    { key: 'Person Name 1',  types: ['contact'],                      idx: 0 },
+    { key: 'Person Name 2',  types: ['contact'],                      idx: 1 },
+    { key: 'Mobile 1',       types: ['phone','whatsapp'],             idx: 0 },
+    { key: 'Mobile 2',       types: ['phone','whatsapp'],             idx: 1 },
+    { key: 'Email 1',        types: ['email'],                        idx: 0 },
+    { key: 'Email 2',        types: ['email'],                        idx: 1 },
+    { key: 'Products / Misc',types: ['product','industry','keyword'], multi: true },
+  ];
+
+  // Build source-column lists per standard field
+  const fieldDefs = STANDARD.map(std => {
+    const srcCols = [];
+    std.types.forEach(t => { if (typeMap[t]) srcCols.push(...typeMap[t]); });
+    return { ...std, srcCols };
+  });
+
+  // Map each cleaned row to standard fields
+  S.clean = S.clean.map(row => {
+    const out = { _phoneCountry: row._phoneCountry || 'IN' };
+
+    fieldDefs.forEach(fd => {
+      if (fd.idx !== undefined) {
+        // Indexed field — collect all non-empty values from source cols + _2 suffixes
+        const allVals = [];
+        fd.srcCols.forEach(col => {
+          if (row[col] && row[col] !== '') allVals.push(row[col]);
+          if (row[col + '_2'] && row[col + '_2'] !== '') allVals.push(row[col + '_2']);
+        });
+        out[fd.key] = allVals[fd.idx] || '';
+      } else if (fd.multi) {
+        // Multi-value — concatenate all non-empty values
+        const parts = [];
+        fd.srcCols.forEach(col => {
+          if (row[col] && row[col] !== '') parts.push(row[col]);
+        });
+        out[fd.key] = parts.join(', ');
+      } else {
+        // Single value — take first non-empty
+        let val = '';
+        for (const col of fd.srcCols) {
+          if (row[col] && row[col] !== '') { val = row[col]; break; }
+        }
+        out[fd.key] = val;
+      }
+    });
+
+    return out;
+  });
+
+  // Update S.headers and S.mapping to the standard fields
+  S.headers = STANDARD.map(s => s.key);
+  S.mapping = {};
+  S.headers.forEach((h, i) => {
+    const std = STANDARD[i];
+    const primaryType = std.types[0];
+    const fill = Math.round(S.clean.filter(r => r[h] && r[h] !== '').length / (S.clean.length || 1) * 100);
+    S.mapping[h] = { type: primaryType, confidence: 100, fill, keep: true };
+  });
 }
 
 function findDuplicates() {
@@ -714,6 +799,12 @@ const STRICT_EMAIL_RE  = /^[\w.+%-]+@[\w.-]+\.[a-z]{2,}$/i;
 
 function isValidEmail(v) {
   return v ? STRICT_EMAIL_RE.test(v.trim()) : false;
+}
+
+/** Escape HTML special characters to prevent XSS in innerHTML injections */
+function escapeHTML(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function classifyPhone(v) {
@@ -1063,16 +1154,16 @@ function renderTable() {
   const start=(S.page-1)*S.pageSize, page=data.slice(start,start+S.pageSize);
   body.innerHTML=page.map((row,ri)=>{
     const idx = start + ri;
-    return `<tr>${keep.map(c=>{ const type=S.mapping[c].type; let v=row[c]||'';
+    return `<tr>${keep.map(c=>{ const type=S.mapping[c].type; let v=escapeHTML(row[c]||'');
     if(type==='email'&&v) v=`<a href="mailto:${v}" style="color:var(--blue)">${v}</a>`;
-    else if(type==='website'&&v) v=`<a href="${v}" target="_blank" style="color:var(--emerald)">${v.replace(/https?:\/\//,'').slice(0,36)}</a>`;
-    else if(type==='phone'||type==='whatsapp') { const cls=row._phoneCountry&&row._phoneCountry!=='IN'?'foreign-flag':''; v=`<span class="mono ${cls}" style="color:var(--emerald)">${v}${row._phoneCountry&&row._phoneCountry!=='IN'?' <span class="badge b-amber" style="font-size:9px">'+row._phoneCountry+'</span>':''}</span>`; }
+    else if(type==='website'&&v) v=`<a href="${escapeHTML(row[c])}" target="_blank" style="color:var(--emerald)">${v.replace(/https?:\/\//,'').slice(0,36)}</a>`;
+    else if(type==='phone'||type==='whatsapp') { const cls=row._phoneCountry&&row._phoneCountry!=='IN'?'foreign-flag':''; v=`<span class="mono ${cls}" style="color:var(--emerald)">${v}${row._phoneCountry&&row._phoneCountry!=='IN'?' <span class="badge b-amber" style="font-size:9px">'+escapeHTML(row._phoneCountry)+'</span>':''}</span>`; }
     else if(type==='id') v=v?`<span class="badge b-slate">#${v}</span>`:'';
     else if(type==='member'&&v) v=`<span class="badge b-emerald">✓ ${v}</span>`;
     else if(type==='company') v=`<span style="font-weight:700;color:var(--text)">${v}</span>`;
     else if(type==='industry'||type==='keyword') v=v?`<span class="badge b-violet">${v.slice(0,30)}</span>`:'';
     else if(type==='status') v=v?`<span class="badge b-amber">${v.slice(0,20)}</span>`:'';
-    return `<td title="${String(row[c]||'').replace(/"/g,'')}">${v}</td>`; }).join('')}<td class="row-actions"><button class="act-btn act-view" onclick="showContactPanel(${idx})" title="View & Call Logs">👁</button><button class="act-btn act-edit" onclick="editRow(${idx})" title="Edit">✏️</button><button class="act-btn act-del" onclick="deleteRow(${idx})" title="Delete">🗑</button></td></tr>`;
+    return `<td title="${escapeHTML(String(row[c]||''))}">${v}</td>`; }).join('')}<td class="row-actions"><button class="act-btn act-view" onclick="showContactPanel(${idx})" title="View & Call Logs">👁</button><button class="act-btn act-edit" onclick="editRow(${idx})" title="Edit">✏️</button><button class="act-btn act-del" onclick="deleteRow(${idx})" title="Delete">🗑</button></td></tr>`;
   }).join('');
   document.getElementById('tblMeta').textContent=`${S.filtered.length.toLocaleString()} records`;
   document.getElementById('tblCount').textContent=`Showing ${start+1}–${Math.min(start+S.pageSize,data.length)} of ${S.filtered.length.toLocaleString()}`;
@@ -1288,9 +1379,9 @@ async function saveToCRM() {
     company_name: companyCols.length ? row[companyCols[0]] || null : null,
     contact_name: contactCols.length ? row[contactCols[0]] || null : null,
     email_primary: emailCols.length ? row[emailCols[0]] || null : null,
-    email_secondary: emailCols.length && row[emailCols[0]+'_2'] ? row[emailCols[0]+'_2'] : null,
+    email_secondary: emailCols.length > 1 ? row[emailCols[1]] || null : (emailCols.length && row[emailCols[0]+'_2'] ? row[emailCols[0]+'_2'] : null),
     phone_primary: phoneCols.length ? row[phoneCols[0]] || null : null,
-    phone_secondary: phoneCols.length && row[phoneCols[0]+'_2'] ? row[phoneCols[0]+'_2'] : null,
+    phone_secondary: phoneCols.length > 1 ? row[phoneCols[1]] || null : (phoneCols.length && row[phoneCols[0]+'_2'] ? row[phoneCols[0]+'_2'] : null),
     phone_country: row._phoneCountry || 'IN',
     whatsapp: colsByType('whatsapp').length ? row[colsByType('whatsapp')[0]] || null : null,
     address: addressCols.length ? row[addressCols[0]] || null : null,
@@ -1482,27 +1573,41 @@ function saveEdit() {
   if (_editIdx === null) return;
   const row = S.filtered[_editIdx];
   const inputs = document.querySelectorAll('#editFields input');
-  inputs.forEach(inp => {
+  let hasError = false;
+
+  // Validate all fields first using for...of to allow early exit
+  for (const inp of inputs) {
     const col = inp.dataset.col;
     const type = S.mapping[col] ? S.mapping[col].type : 'other';
-    let val = inp.value.trim();
+    const val = inp.value.trim();
+    inp.style.border = ''; // reset previous error highlight
+
     // Validate email on edit
     if (type === 'email' && val && !isValidEmail(val)) {
       inp.style.border = '2px solid var(--rose)';
       showNotification('Invalid email: ' + val, 'error');
-      return;
+      hasError = true;
+      break;
     }
-    // Validate phone on edit
+    // Validate phone on edit — only accept mobile numbers
     if ((type === 'phone' || type === 'whatsapp') && val) {
       const cls = classifyPhone(val);
       if (!cls.valid) {
         inp.style.border = '2px solid var(--rose)';
-        showNotification('Invalid/landline number: ' + val, 'error');
-        return;
+        showNotification('Invalid/landline number: ' + val + '. Only mobile numbers are accepted.', 'error');
+        hasError = true;
+        break;
       }
     }
-    row[col] = val;
-  });
+  }
+
+  if (hasError) return; // Abort save — do NOT close the modal
+
+  // All validations passed — apply values
+  for (const inp of inputs) {
+    row[inp.dataset.col] = inp.value.trim();
+  }
+
   S.filtered[_editIdx] = row;
   closeEditModal();
   renderTable();

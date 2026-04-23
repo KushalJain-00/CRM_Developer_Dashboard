@@ -34,11 +34,15 @@ async def export_pdf(body: PDFRequest):
     except Exception as e:
         raise HTTPException(500, f"PDF generation failed: {str(e)}")
 
+    # Sanitize filename to prevent header injection
+    import re
+    safe_name = re.sub(r'[^\w\s\-\.]', '', body.fileName or 'export').strip() or 'export'
+
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
         headers={
-            "Content-Disposition": f'attachment; filename="{body.fileName}_CRM_Report.pdf"',
+            "Content-Disposition": f'attachment; filename="{safe_name}_CRM_Report.pdf"',
             "Content-Length": str(len(pdf_bytes)),
         }
     )
