@@ -13,7 +13,11 @@ async def list_history(email: Optional[str] = Query(None), limit: int = 50, db: 
     q = db.query(SessionData)
     if email:
         u = db.query(User).filter(User.email == email).first()
-        if u: q = q.filter(SessionData.user_id == u.id)
+        if u:
+            # Show sessions owned by this user OR sessions with no owner (user_id=None)
+            from sqlalchemy import or_
+            q = q.filter(or_(SessionData.user_id == u.id, SessionData.user_id.is_(None)))
+        # If user not found in DB, don't filter — show all sessions
     sessions = q.order_by(SessionData.upload_date.desc()).limit(limit).all()
     return JSONResponse({"ok": True, "sessions": [
         {"id": s.id, "file_name": s.file_name, "sheet_name": s.sheet_name,

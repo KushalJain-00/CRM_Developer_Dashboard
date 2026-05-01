@@ -169,20 +169,20 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
     db.add(session)
     db.flush()
 
-    # Pre-fetch existing emails and phones for duplicate detection
-    existing_emails = set()
-    existing_phones = set()
-    
+    # Fetch existing contacts that share the same email or phone to check for full duplicates later
     batch_emails = [item.email_primary for item in body.contacts if item.email_primary]
     batch_phones = [item.phone_primary for item in body.contacts if item.phone_primary]
     
-    if batch_emails:
-        for c in db.query(Contact.email_primary).filter(Contact.email_primary.in_(batch_emails)).all():
-            if c[0]: existing_emails.add(c[0])
-            
-    if batch_phones:
-        for c in db.query(Contact.phone_primary).filter(Contact.phone_primary.in_(batch_phones)).all():
-            if c[0]: existing_phones.add(c[0])
+    existing_contacts_data = []
+    if batch_emails or batch_phones:
+        q = db.query(Contact, Company).outerjoin(Company, Contact.company_id == Company.id)
+        from sqlalchemy import or_
+        filters = []
+        if batch_emails: filters.append(Contact.email_primary.in_(batch_emails))
+        if batch_phones: filters.append(Contact.phone_primary.in_(batch_phones))
+        if filters:
+            q = q.filter(or_(*filters))
+            existing_contacts_data = q.all()
 
     for item in body.contacts:
         # ── Archive raw record FIRST (before any skip/continue) ───
@@ -219,16 +219,31 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
             skipped += 1
             continue
 
-        # ── Duplicate check ───────────────────────────────────────
-        if has_email and item.email_primary in existing_emails:
-            skipped += 1
-            continue
-        if has_phone and item.phone_primary in existing_phones:
-            skipped += 1
-            continue
+        # ── Exact Duplicate check ───────────────────────────────────────
+        is_exact_dup = False
+        for existing_contact, existing_company in existing_contacts_data:
+            # Check if this contact matches ALL provided fields
+            match = True
+            if item.email_primary and existing_contact.email_primary != item.email_primary: match = False
+            if match and item.phone_primary and existing_contact.phone_primary != item.phone_primary: match = False
+            if match and item.contact_name and existing_contact.name != item.contact_name: match = False
+            if match and item.whatsapp and existing_contact.whatsapp != item.whatsapp: match = False
+            if match and item.position and existing_contact.position != item.position: match = False
             
-        if has_email: existing_emails.add(item.email_primary)
-        if has_phone: existing_phones.add(item.phone_primary)
+            if match and item.company_name:
+                if not existing_company or existing_company.name != item.company_name: match = False
+            if match and item.city:
+                if not existing_company or existing_company.city != item.city: match = False
+            if match and item.industry:
+                if not existing_company or existing_company.industry != item.industry: match = False
+                
+            if match:
+                is_exact_dup = True
+                break
+                
+        if is_exact_dup:
+            skipped += 1
+            continue
 
         # ── Flag foreign numbers ──────────────────────────────────
         if item.phone_country and item.phone_country not in ("IN", "INVALID"):
@@ -252,11 +267,16 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
         db.add(contact)
 
         imported += 1
+        existing_contacts_data.append((contact, company))
 
     session.imported = imported
     session.skipped  = skipped
 
-    db.commit()
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(500, f"Database error during save: {str(e)}")
 
     return JSONResponse(content={
         "ok": True,

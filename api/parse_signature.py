@@ -55,14 +55,13 @@ def extract_signature_block(body_text: str) -> str:
     lines = body_text.replace('\r\n', '\n').split('\n')
 
     # Common signature delimiters
-    delimiters = ['-- ', '--\n', '___', '---', 'Best regards', 'Best Regards',
-                  'Thanks & Regards', 'Regards,', 'Warm regards', 'Sincerely,',
-                  'Thanks,', 'Thank you,', 'Cheers,', 'With regards']
+    delimiters = ['--', '___', '---', 'best regards', 'thanks & regards', 'thanks and regards',
+                  'regards,', 'warm regards', 'sincerely,', 'thanks,', 'thank you,', 'cheers,', 'with regards']
 
     for i, line in enumerate(lines):
-        stripped = line.strip()
+        stripped = line.strip().lower()
         # Look for signature delimiters
-        if any(stripped.startswith(d.strip()) or stripped == d.strip() for d in delimiters):
+        if any(stripped.startswith(d) for d in delimiters):
             # Take from the delimiter to the end, but cap at 100 lines for safety
             sig_lines = lines[i:]
             return '\n'.join(sig_lines[:100]).strip()
@@ -96,7 +95,7 @@ async def parse_signature(body: SignatureRequest):
                 {"role": "user",   "content": f"Extract contact info from this email signature:\n\n{sig_block}"}
             ],
             temperature=0.1,
-            max_tokens=500,
+            max_tokens=1024,
         )
         raw = response.choices[0].message.content.strip()
 

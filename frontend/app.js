@@ -1244,7 +1244,7 @@ async function downloadPDF() {
           total, fields: keep.length, completeness,
           withEmail, withPhone,
           fieldQuality,
-          records: S.clean.slice(0, 300),
+          records: S.clean,
           columns: keep.slice(0, 8),
         }),
       });
@@ -1364,33 +1364,24 @@ async function saveToCRM() {
   const btn = document.getElementById('btnSaveCRM');
   if (btn) { btn.innerHTML = '<span class="spinner-inline"></span> Saving…'; btn.disabled = true; }
 
-  const companyCols = colsByType('company');
-  const contactCols = colsByType('contact');
-  const emailCols = colsByType('email');
-  const phoneCols = [...colsByType('phone'), ...colsByType('whatsapp')];
-  const cityCols = colsByType('city');
-  const addressCols = colsByType('address');
-  const pinCols = colsByType('pincode');
-  const webCols = colsByType('website');
-  const indCols = [...colsByType('industry'), ...colsByType('keyword')];
-  const prodCols = colsByType('product');
-
+  // After normalizeToStandardFields(), columns are fixed standard names.
+  // Use them directly for maximum reliability.
   const contacts = S.clean.map(row => ({
-    company_name: companyCols.length ? row[companyCols[0]] || null : null,
-    contact_name: contactCols.length ? row[contactCols[0]] || null : null,
-    email_primary: emailCols.length ? row[emailCols[0]] || null : null,
-    email_secondary: emailCols.length > 1 ? row[emailCols[1]] || null : (emailCols.length && row[emailCols[0]+'_2'] ? row[emailCols[0]+'_2'] : null),
-    phone_primary: phoneCols.length ? row[phoneCols[0]] || null : null,
-    phone_secondary: phoneCols.length > 1 ? row[phoneCols[1]] || null : (phoneCols.length && row[phoneCols[0]+'_2'] ? row[phoneCols[0]+'_2'] : null),
-    phone_country: row._phoneCountry || 'IN',
-    whatsapp: colsByType('whatsapp').length ? row[colsByType('whatsapp')[0]] || null : null,
-    address: addressCols.length ? row[addressCols[0]] || null : null,
-    city: cityCols.length ? row[cityCols[0]] || null : null,
-    pincode: pinCols.length ? row[pinCols[0]] || null : null,
-    website: webCols.length ? row[webCols[0]] || null : null,
-    industry: indCols.length ? row[indCols[0]] || null : null,
-    product: prodCols.length ? row[prodCols[0]] || null : null,
-    raw_data: row,
+    company_name:    row['Company Name'] || null,
+    contact_name:    row['Person Name 1'] || null,
+    email_primary:   row['Email 1'] || null,
+    email_secondary: row['Email 2'] || null,
+    phone_primary:   row['Mobile 1'] || null,
+    phone_secondary: row['Mobile 2'] || null,
+    phone_country:   row._phoneCountry || 'IN',
+    whatsapp:        null,
+    address:         null,
+    city:            row['Location'] || null,
+    pincode:         null,
+    website:         row['Website'] || null,
+    industry:        null,
+    product:         row['Products / Misc'] || null,
+    raw_data:        row,
   }));
 
   try {
@@ -1405,14 +1396,19 @@ async function saveToCRM() {
         user_email: S.userEmail || null,
       }),
     });
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('Save to CRM failed:', res.status, errText);
+      throw new Error(`HTTP ${res.status}: ${errText.slice(0, 200)}`);
+    }
     const data = await res.json();
     S.sessionId = data.session_id;
     const msg = `✅ Saved ${data.imported} contacts to CRM.`
-      + (data.skipped ? ` ${data.skipped} skipped (no email/phone).` : '')
+      + (data.skipped ? ` ${data.skipped} skipped (duplicates/invalid).` : '')
       + (data.flagged_foreign ? ` ${data.flagged_foreign} foreign numbers flagged.` : '');
     showNotification(msg, 'success');
   } catch(err) {
+    console.error('Save to CRM error:', err);
     showNotification('Failed to save: ' + err.message, 'error');
   }
   if (btn) { btn.innerHTML = '💾 Save to CRM'; btn.disabled = false; }
@@ -1544,7 +1540,8 @@ function showNotification(msg, type='info') {
   n.className = `crm-notification ${type}`;
   n.textContent = msg;
   n.style.display = 'block';
-  setTimeout(() => { n.style.display = 'none'; }, 5000);
+  const duration = type === 'error' ? 10000 : 5000;
+  setTimeout(() => { n.style.display = 'none'; }, duration);
 }
 
 /* ── Edit Row ─────────────────────────────────────────────────────── */
@@ -1753,6 +1750,112 @@ function downloadVCF() {
   URL.revokeObjectURL(url);
   showNotification(`📱 Downloaded ${S.clean.length} contacts as VCF`, 'success');
 }
+
+async function downloadZip() {
+  if (!S.clean.length) { alert('No data to export.'); return; }
+  const btn = document.querySelector('button[onclick="downloadZip()"]');
+  if (btn) { btn.innerHTML = '<span class="spinner-inline"></span> ZIP…'; btn.disabled = true; }
+  
+  try {
+    const zip = new window.JSZip();
+    const baseName = (S.fileName || 'export').replace(/\.[^.]+$/, '');
+    
+    // 1. Generate Excel Blob
+    const wb = XLSX.utils.book_new();
+    const keep = keepCols();
+    const cols = [];
+    keep.forEach(c => { cols.push(c); if (S.clean.some(r => r[c + '_2'])) cols.push(c + '_2'); });
+    const headers = cols.map(c => c.endsWith('_2') ? c.replace(/_2$/, '') + ' 2' : c);
+    const rows = S.clean.map(row => cols.map(c => (row[c] !== undefined && row[c] !== null) ? row[c] : ''));
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    ws['!cols'] = cols.map(c => {
+      const base = c.replace(/_2$/, '');
+      const t = S.mapping[base] ? S.mapping[base].type : 'other';
+      return { wch: t === 'address' || t === 'product' ? 55 : t === 'company' ? 35 : t === 'phone' ? 20 : t === 'email' ? 35 : t === 'website' ? 40 : t === 'id' ? 8 : 22 };
+    });
+    XLSX.utils.book_append_sheet(wb, ws, 'Data');
+    const excelBuf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    zip.file(`${baseName}_CRM_Export.xlsx`, excelBuf);
+    
+    // 2. Generate VCF String
+    const companyCols = colsByType('company');
+    const contactCols = colsByType('contact');
+    const emailCols = colsByType('email');
+    const phoneCols = [...colsByType('phone'), ...colsByType('whatsapp')];
+    const addressCols = colsByType('address');
+    const cityCols = colsByType('city');
+    const webCols = colsByType('website');
+
+    let vcf = '';
+    S.clean.forEach(row => {
+      const name = contactCols.length ? row[contactCols[0]] || '' : '';
+      const company = companyCols.length ? row[companyCols[0]] || '' : '';
+      const email = emailCols.length ? row[emailCols[0]] || '' : '';
+      const phone = phoneCols.length ? row[phoneCols[0]] || '' : '';
+      const phone2 = phoneCols.length && row[phoneCols[0]+'_2'] ? row[phoneCols[0]+'_2'] : '';
+      const addr = addressCols.length ? row[addressCols[0]] || '' : '';
+      const city = cityCols.length ? row[cityCols[0]] || '' : '';
+      const web = webCols.length ? row[webCols[0]] || '' : '';
+
+      const displayName = name || company || 'Unknown';
+      const parts = displayName.split(' ');
+      const firstName = parts[0] || '';
+      const lastName = parts.slice(1).join(' ') || '';
+
+      vcf += 'BEGIN:VCARD\nVERSION:3.0\n';
+      vcf += `N:${lastName};${firstName};;;\nFN:${displayName}\n`;
+      if (company) vcf += `ORG:${company}\n`;
+      if (phone) vcf += `TEL;TYPE=CELL:${phone}\n`;
+      if (phone2) vcf += `TEL;TYPE=CELL:${phone2}\n`;
+      if (email) vcf += `EMAIL;TYPE=INTERNET:${email}\n`;
+      if (addr || city) vcf += `ADR;TYPE=WORK:;;${addr};${city};;;;\n`;
+      if (web) vcf += `URL:${web}\n`;
+      vcf += 'END:VCARD\n\n';
+    });
+    zip.file(`${baseName}_Contacts.vcf`, vcf);
+
+    // 3. Fetch PDF from backend
+    if (API_BASE) {
+      const total = S.clean.length;
+      const completeness = Math.round(S.clean.reduce((sum,row)=>{ const f=keep.filter(c=>row[c]&&row[c]!=='').length; return sum+f/keep.length; },0)/total*100);
+      const fieldQuality = keep.map(col=>{ const filled=S.clean.filter(r=>r[col]&&r[col]!=='').length; const ft=FT[S.mapping[col].type]; return {label:`${ft?ft.icon:''} ${col}`,pct:Math.round(filled/total*100)}; });
+      const withEmail = emailCols.length ? countWithAny(emailCols) : null;
+      const withPhone = phoneCols.length ? countWithAny(phoneCols) : null;
+
+      const res = await fetch(`${API_BASE}/api/export/pdf`, {
+        method: 'POST',
+        headers: apiHeaders(),
+        body: JSON.stringify({
+          fileName: S.fileName,
+          sheetName: S.sheetName,
+          total, fields: keep.length, completeness,
+          withEmail, withPhone,
+          fieldQuality,
+          records: S.clean,
+          columns: keep.slice(0, 8),
+        }),
+      });
+      if (res.ok) {
+        const pdfBlob = await res.blob();
+        zip.file(`${baseName}_Report.pdf`, pdfBlob);
+      }
+    }
+    
+    // Generate ZIP file
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(zipBlob);
+    a.download = `${baseName}_CRM_Archive.zip`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    
+    showNotification(`📦 Downloaded ZIP Archive`, 'success');
+  } catch (err) {
+    showNotification('Export ZIP failed: ' + err.message, 'error');
+  }
+  if (btn) { btn.innerHTML = '📦 ZIP'; btn.disabled = false; }
+}
+
 /* ══════════════════════════════════════════════════════════════════════
    EML EMAIL EXTRACTOR — v2.0 Enhanced
    ══════════════════════════════════════════════════════════════════════ */
@@ -2264,7 +2367,8 @@ function exitEmlDashboard() {
 function emlExportCSV() {
   if (!EML.contacts.length) { showNotification('No contacts to export.','error'); return; }
   const sd = EML.sigData || {};
-  const rows = [['Name','Email','Company','Designation','Phone','Phone 2','Website','Address','City','Pincode','Domain','Source']];
+  const rows = [['Name','Email','Company','Designation','Phone','Phone 2','Website','Address','City','Pincode','Domain','Source','Attachments']];
+  const attachmentsText = (EML.parsed && EML.parsed.attachments && EML.parsed.attachments.length) ? EML.parsed.attachments.join('; ') : '';
   EML.contacts.forEach(c => {
     const csd = sd[c.email] || {};
     rows.push([
@@ -2272,7 +2376,7 @@ function emlExportCSV() {
       csd.company||'', csd.designation||'',
       csd.phone_primary||'', csd.phone_secondary||'',
       csd.website||'', csd.address||'', csd.city||'', csd.pincode||'',
-      c.domain, c.source,
+      c.domain, c.source, attachmentsText,
     ]);
   });
   const csv = rows.map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
@@ -2287,7 +2391,8 @@ function emlExportCSV() {
 function emlExportExcel() {
   if (!EML.contacts.length) { showNotification('No contacts to export.','error'); return; }
   const sd = EML.sigData || {};
-  const headers = ['Name','Email','Company','Designation','Phone','Phone 2','Website','Address','City','Pincode','Domain','Source'];
+  const headers = ['Name','Email','Company','Designation','Phone','Phone 2','Website','Address','City','Pincode','Domain','Source','Attachments'];
+  const attachmentsText = (EML.parsed && EML.parsed.attachments && EML.parsed.attachments.length) ? EML.parsed.attachments.join('; ') : '';
   const rows = EML.contacts.map(c => {
     const csd = sd[c.email] || {};
     return [
@@ -2295,7 +2400,7 @@ function emlExportExcel() {
       csd.company||'', csd.designation||'',
       csd.phone_primary||'', csd.phone_secondary||'',
       csd.website||'', csd.address||'', csd.city||'', csd.pincode||'',
-      c.domain, c.source,
+      c.domain, c.source, attachmentsText,
     ];
   });
   const wb = XLSX.utils.book_new();

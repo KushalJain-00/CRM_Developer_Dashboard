@@ -167,7 +167,7 @@ def generate_pdf(payload: dict) -> bytes:
     story.append(qual_table)
     story.append(PageBreak())
 
-    story.append(Paragraph(f"CRM Data  —  First {min(len(records), 300)} Records", h2_style))
+    story.append(Paragraph(f"CRM Data  —  {len(records)} Records", h2_style))
     story.append(HRFlowable(width=W, thickness=1, color=BORDER, spaceAfter=12))
 
     if columns and records:
@@ -177,7 +177,7 @@ def generate_pdf(payload: dict) -> bytes:
         hdr_style = ParagraphStyle("th", fontName="Helvetica-Bold", fontSize=7.5,
                                    textColor=WHITE, leading=10, alignment=TA_CENTER)
         tbl_data = [[Paragraph(c, hdr_style) for c in display_cols]]
-        for row in records[:300]:
+        for row in records:
             tbl_data.append([
                 Paragraph(str(row.get(c, "") or "")[:80], cell_style)
                 for c in display_cols
@@ -195,14 +195,6 @@ def generate_pdf(payload: dict) -> bytes:
             ("VALIGN",        (0,0), (-1,-1), "TOP"),
         ]))
         story.append(data_table)
-
-        if len(records) > 300:
-            story.append(Spacer(1, 10))
-            story.append(Paragraph(
-                f"Showing 300 of {len(records):,} records. Download Excel for the full dataset.",
-                ParagraphStyle("note", fontName="Helvetica-Oblique", fontSize=8,
-                               textColor=SLATE, leading=12)
-            ))
 
     footer_style = ParagraphStyle("footer", fontName="Helvetica", fontSize=7.5,
                                   textColor=SLATE, leading=12, alignment=TA_CENTER,

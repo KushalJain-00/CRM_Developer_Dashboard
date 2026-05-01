@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="style.css?v=5.0">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -76,6 +77,9 @@
     <div class="nav-item" title="Export VCF" onclick="downloadVCF(); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">📱</span> <span class="ni-label">Export .VCF</span>
     </div>
+    <div class="nav-item" title="Export ZIP" onclick="downloadZip(); if(window.innerWidth<=768)toggleSidebar()">
+      <span class="ni-icon">📦</span> <span class="ni-label">Export ZIP</span>
+    </div>
   </nav>
   <div id="sbFileCard" class="sb-file-card hidden">
     <div class="fc-label">Loaded File</div>
@@ -108,6 +112,7 @@
         <button class="btn btn-success btn-sm" onclick="downloadExcel()">⬇ Excel</button>
         <button class="btn btn-warning btn-sm" id="btnPDF" onclick="downloadPDF()">📄 PDF</button>
         <button class="btn btn-secondary btn-sm" onclick="downloadVCF()">📱 VCF</button>
+        <button class="btn btn-secondary btn-sm" onclick="downloadZip()">📦 ZIP</button>
       </div>
       <div class="theme-picker" id="themePicker" title="Switch Theme">
         <div class="theme-dot active" data-theme="nexus-light" onclick="setTheme('nexus-light')" title="Nexus Light"></div>
