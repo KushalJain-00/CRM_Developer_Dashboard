@@ -741,36 +741,28 @@ function normalizeToStandardFields() {
 
 function findDuplicates() {
   S.dupGroups = [];
-  const companyCols = colsByType('company');
-  if (companyCols.length) {
-    const cc = companyCols[0];
-    const groups = {};
-    S.clean.forEach((row, idx) => {
-      const name = (row[cc]||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,20);
-      if (!name || name.length < 4) return;
-      if (!groups[name]) groups[name] = [];
-      groups[name].push(idx);
-    });
-    S.dupGroups = Object.values(groups).filter(g => g.length > 1).slice(0, 50);
-  }
+  const keep = keepCols();
+  if (!keep.length || !S.clean.length) return;
 
-  // Also deduplicate by email across all records
-  const emailCols = colsByType('email');
-  if (emailCols.length) {
-    const ec = emailCols[0];
-    const emailGroups = {};
-    S.clean.forEach((row, idx) => {
-      const email = (row[ec] || '').toLowerCase().trim();
-      if (!email) return;
-      if (!emailGroups[email]) emailGroups[email] = [];
-      emailGroups[email].push(idx);
-    });
-    Object.values(emailGroups).forEach(indices => {
-      if (indices.length > 1) {
-        S.dupGroups.push(indices);
+  // Build a full-row fingerprint from ALL kept fields (+ _2 suffixes)
+  const groups = {};
+  S.clean.forEach((row, idx) => {
+    const parts = [];
+    keep.forEach(col => {
+      parts.push(String(row[col] || '').toLowerCase().trim());
+      // Include _2 suffix fields if they exist
+      if (row[col + '_2'] !== undefined) {
+        parts.push(String(row[col + '_2'] || '').toLowerCase().trim());
       }
     });
-  }
+    const fingerprint = parts.join('||');
+    // Skip rows that are essentially empty
+    if (parts.every(p => !p)) return;
+    if (!groups[fingerprint]) groups[fingerprint] = [];
+    groups[fingerprint].push(idx);
+  });
+
+  S.dupGroups = Object.values(groups).filter(g => g.length > 1).slice(0, 100);
 }
 
 function keepCols()    { return S.headers.filter(h=>S.mapping[h]&&S.mapping[h].keep&&S.mapping[h].type!=='skip'); }
