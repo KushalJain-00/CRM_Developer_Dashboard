@@ -1,9 +1,10 @@
 import xlrd
-import pdfplumber
 import openpyxl
 import io
 import re
 import time
+import os
+import fitz  # PyMuPDF
 from typing import Any
 
 
@@ -17,10 +18,11 @@ def parse_xls(content: bytes) -> dict:
     all_rows = []
     all_headers = []
     sheet_names_used = []
+    timeout_sec = int(os.getenv("PARSER_TIMEOUT", 15))
 
     for name in wb.sheet_names():
-        if time.time() - start_time > 15:
-            raise TimeoutError("XLS processing exceeded 15 seconds limit")
+        if time.time() - start_time > timeout_sec:
+            raise TimeoutError(f"XLS processing exceeded {timeout_sec} seconds limit")
             
         # Skip lookup / index sheets
         lname = name.lower()
@@ -41,27 +43,29 @@ def parse_xls(content: bytes) -> dict:
                     all_headers.append(h)
 
         for r in range(1, sheet.nrows):
-            if time.time() - start_time > 15:
-                raise TimeoutError("XLS processing exceeded 15 seconds limit")
+            if time.time() - start_time > timeout_sec:
+                raise TimeoutError(f"XLS processing exceeded {timeout_sec} seconds limit")
                 
             row = {}
             for c, h in header_map.items():
                 if c >= sheet.ncols:
                     break
-                cell = sheet.cell(r, c)
-                val = cell.value
-                if cell.ctype == xlrd.XL_CELL_NUMBER:
-                    val = int(val) if val == int(val) else val
-                elif cell.ctype == xlrd.XL_CELL_DATE:
-                    from xlrd import xldate_as_tuple
-                    import datetime
-                    try:
+                
+                try:
+                    cell = sheet.cell(r, c)
+                    val = cell.value
+                    if cell.ctype == xlrd.XL_CELL_NUMBER:
+                        val = int(val) if val == int(val) else val
+                    elif cell.ctype == xlrd.XL_CELL_DATE:
+                        from xlrd import xldate_as_tuple
+                        import datetime
                         t = xldate_as_tuple(val, wb.datemode)
                         val = str(datetime.date(*t[:3]))
-                    except Exception:
-                        val = str(val)
-                else:
-                    val = str(val).strip() if val else ""
+                    else:
+                        val = str(val).strip() if val else ""
+                except Exception:
+                    val = ""
+                    
                 row[h] = val if val != "" else None
             if any(v for v in row.values() if v is not None):
                 all_rows.append(row)
@@ -78,58 +82,58 @@ def parse_pdf(content: bytes) -> dict:
     start_time = time.time()
     rows = []
     headers = None
-    MAX_PAGES = 200  # Memory safety: limit pages processed
-    all_text_pages = []  # Collect text from all pages for fallback
+    max_pages = int(os.getenv("PDF_MAX_PAGES", 200))
+    timeout_sec = int(os.getenv("PARSER_TIMEOUT", 30))
+    all_text_pages = []  
 
-    with pdfplumber.open(io.BytesIO(content)) as pdf:
-        for page_num, page in enumerate(pdf.pages):
-            if time.time() - start_time > 30:
-                raise TimeoutError("PDF processing exceeded 30 seconds limit")
-            if page_num >= MAX_PAGES:
-                break
+    doc = fitz.open(stream=content, filetype="pdf")
+    for page_num, page in enumerate(doc):
+        if time.time() - start_time > timeout_sec:
+            raise TimeoutError(f"PDF processing exceeded {timeout_sec} seconds limit")
+        if page_num >= max_pages:
+            break
 
-            tables = page.extract_tables()
-            table_found = False
-            if tables:
-                for table in tables:
-                    if not table:
-                        continue
-                    # Filter out rows that are completely empty
-                    table = [r for r in table if r and any(c for c in r if c)]
-                    if not table:
-                        continue
-                    table_found = True
-                    if headers is None and len(table) > 1:
-                        # First table: row 0 = headers
-                        raw_headers = [str(c).strip() if c else f"Col_{i}" for i, c in enumerate(table[0])]
-                        headers = _dedupe_headers(raw_headers)
-                        data_rows = table[1:]
-                    else:
-                        # Subsequent tables: check if row 0 repeats the header
-                        if headers and len(table) > 0:
-                            first_row_cleaned = [str(c).strip() if c else '' for c in table[0]]
-                            header_cleaned = [h.strip() for h in headers]
-                            if first_row_cleaned == header_cleaned:
-                                data_rows = table[1:]  # Skip repeated header row
-                            else:
-                                data_rows = table
+        tables = page.find_tables()
+        table_found = False
+        if tables and tables.tables:
+            for tab in tables.tables:
+                table = tab.extract()
+                if not table:
+                    continue
+                table = [r for r in table if r and any(c for c in r if c)]
+                if not table:
+                    continue
+                table_found = True
+                if headers is None and len(table) > 1:
+                    raw_headers = [str(c).strip() if c else f"Col_{i}" for i, c in enumerate(table[0])]
+                    headers = _dedupe_headers(raw_headers)
+                    data_rows = table[1:]
+                else:
+                    if headers and len(table) > 0:
+                        first_row_cleaned = [str(c).strip() if c else '' for c in table[0]]
+                        header_cleaned = [h.strip() for h in headers]
+                        if first_row_cleaned == header_cleaned:
+                            data_rows = table[1:]
                         else:
                             data_rows = table
-                    for raw_row in data_rows:
-                        if not any(c for c in raw_row if c):
-                            continue
-                        if headers:
-                            row = {headers[i]: str(raw_row[i]).strip() if i < len(raw_row) and raw_row[i] else None
-                                   for i in range(len(headers))}
-                        else:
-                            row = {f"Col_{i}": str(v).strip() if v else None for i, v in enumerate(raw_row)}
-                        if any(v for v in row.values() if v):
-                            rows.append(row)
+                    else:
+                        data_rows = table
+                for raw_row in data_rows:
+                    if not any(c for c in raw_row if c):
+                        continue
+                    if headers:
+                        row = {headers[i]: str(raw_row[i]).strip() if i < len(raw_row) and raw_row[i] else None
+                               for i in range(len(headers))}
+                    else:
+                        row = {f"Col_{i}": str(v).strip() if v else None for i, v in enumerate(raw_row)}
+                    if any(v for v in row.values() if v):
+                        rows.append(row)
 
-            # Collect page text for fallback
-            text = page.extract_text()
-            if text and not table_found:
-                all_text_pages.append(text)
+        text = page.get_text()
+        if text and not table_found:
+            all_text_pages.append(text)
+            
+    doc.close()
 
     # If tables produced enough rows, return them
     if rows and len(rows) >= 2:

@@ -39,9 +39,9 @@ class Contact(Base):
     id = Column(Integer, primary_key=True, index=True)
     company_id = Column(Integer, ForeignKey("companies.id"))
     name = Column(String(255))
-    email_primary = Column(String(255))
+    email_primary = Column(String(255), index=True)
     email_secondary = Column(String(255))
-    phone_primary = Column(String(50))
+    phone_primary = Column(String(50), index=True)
     phone_secondary = Column(String(50))
     phone_country = Column(String(10), default="IN")  # "IN" for Indian, "+1" for US, etc.
     whatsapp = Column(String(50))

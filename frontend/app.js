@@ -132,6 +132,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('crm-theme') || 'nexus-light';
   setTheme(savedTheme, true);
 
+  // Initialize AI Settings
+  initAiSettings();
+
   // BUG FIX: Restore sidebar collapsed state across page reloads
   if (localStorage.getItem('crm-sb-collapsed') === '1') {
     document.body.classList.add('sb-collapsed');
@@ -228,6 +231,93 @@ function toggleSidebar() {
   sb.classList.toggle('open');
   ov.classList.toggle('open');
 }
+
+/* ── AI Settings Modal ─────────────────────────────────────────────────── */
+const AI_MODELS = {
+  openrouter: [
+    { value: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B Instruct' },
+    { value: 'anthropic/claude-3.5-sonnet', label: 'Claude 3.5 Sonnet' },
+    { value: 'anthropic/claude-3.5-haiku', label: 'Claude 3.5 Haiku' },
+    { value: 'openai/gpt-4o', label: 'GPT-4o' },
+    { value: 'openai/gpt-4o-mini', label: 'GPT-4o Mini' },
+    { value: 'google/gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+    { value: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+  ],
+  groq: [
+    { value: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
+    { value: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B' },
+    { value: 'gemma2-9b-it', label: 'Gemma 2 9B' },
+  ],
+  openai: [
+    { value: 'gpt-4o', label: 'GPT-4o' },
+    { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+  ]
+};
+
+function initAiSettings() {
+  const settings = getAiSettings();
+  const providerEl = document.getElementById('aiProviderSelect');
+  if (providerEl) {
+    providerEl.value = settings.provider || 'openrouter';
+    updateModelOptions(settings.model);
+    document.getElementById('aiApiKeyInput').value = settings.apiKey || '';
+  }
+}
+
+function getAiSettings() {
+  try {
+    return JSON.parse(localStorage.getItem('CRM_AI_SETTINGS') || '{}');
+  } catch (e) { return {}; }
+}
+
+function openAiSettingsModal() {
+  initAiSettings();
+  document.getElementById('aiSettingsModal').style.display = 'flex';
+}
+
+function closeAiSettingsModal() {
+  document.getElementById('aiSettingsModal').style.display = 'none';
+}
+
+async function updateModelOptions(selectedModel = null) {
+  const provider = document.getElementById('aiProviderSelect').value;
+  const modelSelect = document.getElementById('aiModelSelect');
+  
+  if (provider === 'openrouter') {
+    modelSelect.innerHTML = '<option>Loading OpenRouter models...</option>';
+    try {
+      const res = await fetch('https://openrouter.ai/api/v1/models');
+      const data = await res.json();
+      const models = data.data.sort((a,b) => a.name.localeCompare(b.name));
+      modelSelect.innerHTML = models.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+    } catch(err) {
+      console.warn("Failed to load OpenRouter models", err);
+      modelSelect.innerHTML = AI_MODELS.openrouter.map(m => `<option value="${m.value}">${m.label}</option>`).join('');
+    }
+  } else {
+    modelSelect.innerHTML = AI_MODELS[provider].map(m => `<option value="${m.value}">${m.label}</option>`).join('');
+  }
+  
+  if (selectedModel) {
+    modelSelect.value = selectedModel;
+  }
+}
+
+function saveAiSettings() {
+  const provider = document.getElementById('aiProviderSelect').value;
+  const model = document.getElementById('aiModelSelect').value;
+  const apiKey = document.getElementById('aiApiKeyInput').value.trim();
+  
+  if (!apiKey) {
+    alert('Please enter your API Key.');
+    return;
+  }
+  
+  localStorage.setItem('CRM_AI_SETTINGS', JSON.stringify({ provider, model, apiKey }));
+  closeAiSettingsModal();
+  showNotification('AI Settings saved successfully', 'success');
+}
+
 
 async function handleFile(file) {
   if (!file) return;
@@ -796,7 +886,7 @@ function isValidEmail(v) {
 /** Escape HTML special characters to prevent XSS in innerHTML injections */
 function escapeHTML(str) {
   if (!str) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  return typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(String(str)) : String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function classifyPhone(v) {
@@ -2039,10 +2129,17 @@ function parseEml(fileName) {
   EML.sigData = {};
   if (API_BASE && EML.parsed?.body) {
     EML.sigLoading = true;
+    const aiConfig = getAiSettings();
     fetch(`${API_BASE}/api/parse-signature`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
-      body: JSON.stringify({ body_text: EML.parsed.body, subject: EML.parsed.subject }),
+      body: JSON.stringify({ 
+        body_text: EML.parsed.body, 
+        subject: EML.parsed.subject,
+        provider: aiConfig.provider || 'groq',
+        model: aiConfig.model || 'llama-3.3-70b-versatile',
+        api_key: aiConfig.apiKey || ''
+      }),
     })
     .then(r => r.json())
     .then(data => {
@@ -2499,7 +2596,9 @@ function emlSendToCRM() {
   showView('table');
 }
 
-function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escHtml(s) {
+  return escapeHTML(s);
+}
 
 /* ══════════════════════════════════════════════════════════════
    BULK EML PROCESSOR — handles 100–200 .eml files at once
@@ -2559,10 +2658,17 @@ async function handleBulkEml(fileList) {
 
     try {
       const apiKey = localStorage.getItem('CRM_API_KEY') || window.CRM_API_KEY || '';
+      const aiConfig = getAiSettings();
       const aiResp = await fetch(`${API_BASE}/api/parse-signature`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
-        body: JSON.stringify({ body_text: item.parsed.bodyText, subject: item.parsed.subject })
+        body: JSON.stringify({ 
+          body_text: item.parsed.bodyText, 
+          subject: item.parsed.subject,
+          provider: aiConfig.provider || 'groq',
+          model: aiConfig.model || 'llama-3.3-70b-versatile',
+          api_key: aiConfig.apiKey || ''
+        })
       });
       const resJson = await aiResp.json();
       if (resJson.ok && Array.isArray(resJson.fields)) {

@@ -63,11 +63,22 @@ async def export_session_with_calls(session_id: int, db: Session = Depends(get_d
     contacts = []
     if emails or phones:
         q = db.query(Contact)
-        filters = []
-        if emails: filters.append(Contact.email_primary.in_(emails))
-        if phones: filters.append(Contact.phone_primary.in_(phones))
-        from sqlalchemy import or_
-        contacts = q.filter(or_(*filters)).all()
+        if emails:
+            # Chunking to avoid SQL variable limits
+            for i in range(0, len(emails), 2000):
+                contacts.extend(q.filter(Contact.email_primary.in_(emails[i:i+2000])).all())
+        if phones:
+            for i in range(0, len(phones), 2000):
+                contacts.extend(q.filter(Contact.phone_primary.in_(phones[i:i+2000])).all())
+
+    # Deduplicate contacts fetched from DB
+    seen_ids = set()
+    unique_contacts = []
+    for c in contacts:
+        if c.id not in seen_ids:
+            seen_ids.add(c.id)
+            unique_contacts.append(c)
+    contacts = unique_contacts
 
     contact_by_email = {c.email_primary: c for c in contacts if c.email_primary}
     contact_by_phone = {c.phone_primary: c for c in contacts if c.phone_primary}
@@ -76,11 +87,14 @@ async def export_session_with_calls(session_id: int, db: Session = Depends(get_d
     contact_ids = [c.id for c in contacts]
     logs_by_contact = {}
     if contact_ids:
-        logs = db.query(CallLog).filter(CallLog.contact_id.in_(contact_ids)).order_by(CallLog.call_date.desc()).all()
-        for log in logs:
-            if log.contact_id not in logs_by_contact:
-                logs_by_contact[log.contact_id] = []
-            logs_by_contact[log.contact_id].append(log)
+        # Chunk call log queries
+        for i in range(0, len(contact_ids), 2000):
+            chunk = contact_ids[i:i+2000]
+            logs = db.query(CallLog).filter(CallLog.contact_id.in_(chunk)).order_by(CallLog.call_date.desc()).all()
+            for log in logs:
+                if log.contact_id not in logs_by_contact:
+                    logs_by_contact[log.contact_id] = []
+                logs_by_contact[log.contact_id].append(log)
 
     # For each record, try to find its contact and attach call logs
     result = []

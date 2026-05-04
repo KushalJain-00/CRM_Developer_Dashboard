@@ -170,19 +170,46 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
     db.flush()
 
     # Fetch existing contacts that share the same email or phone to check for full duplicates later
-    batch_emails = [item.email_primary for item in body.contacts if item.email_primary]
-    batch_phones = [item.phone_primary for item in body.contacts if item.phone_primary]
+    batch_emails = list(set([item.email_primary for item in body.contacts if item.email_primary]))
+    batch_phones = list(set([item.phone_primary for item in body.contacts if item.phone_primary]))
     
     existing_contacts_data = []
-    if batch_emails or batch_phones:
+    
+    def chunked_query(db_sess, q, attr, values, chunk_size=3000):
+        result = []
+        for i in range(0, len(values), chunk_size):
+            chunk = values[i:i+chunk_size]
+            result.extend(q.filter(attr.in_(chunk)).all())
+        return result
+
+    if batch_emails:
         q = db.query(Contact, Company).outerjoin(Company, Contact.company_id == Company.id)
-        from sqlalchemy import or_
-        filters = []
-        if batch_emails: filters.append(Contact.email_primary.in_(batch_emails))
-        if batch_phones: filters.append(Contact.phone_primary.in_(batch_phones))
-        if filters:
-            q = q.filter(or_(*filters))
-            existing_contacts_data = q.all()
+        existing_contacts_data.extend(chunked_query(db, q, Contact.email_primary, batch_emails))
+    if batch_phones:
+        q = db.query(Contact, Company).outerjoin(Company, Contact.company_id == Company.id)
+        existing_contacts_data.extend(chunked_query(db, q, Contact.phone_primary, batch_phones))
+
+    # Deduplicate existing list
+    seen_ids = set()
+    unique_existing = []
+    for c, comp in existing_contacts_data:
+        if c.id not in seen_ids:
+            seen_ids.add(c.id)
+            unique_existing.append((c, comp))
+    existing_contacts_data = unique_existing
+
+    # Build hash maps for O(1) duplicate checks
+    from collections import defaultdict
+    existing_by_email = defaultdict(list)
+    existing_by_phone = defaultdict(list)
+    for c, comp in existing_contacts_data:
+        if c.email_primary:
+            existing_by_email[c.email_primary.lower()].append((c, comp))
+        if c.phone_primary:
+            existing_by_phone[c.phone_primary].append((c, comp))
+
+    # Cache for companies during this batch to avoid repeated DB flushes
+    company_cache = {}
 
     for item in body.contacts:
         # ── Archive raw record FIRST (before any skip/continue) ───
@@ -221,7 +248,13 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
 
         # ── Exact Duplicate check ───────────────────────────────────────
         is_exact_dup = False
-        for existing_contact, existing_company in existing_contacts_data:
+        candidates = []
+        if item.email_primary and item.email_primary.lower() in existing_by_email:
+            candidates.extend(existing_by_email[item.email_primary.lower()])
+        if item.phone_primary and item.phone_primary in existing_by_phone:
+            candidates.extend(existing_by_phone[item.phone_primary])
+            
+        for existing_contact, existing_company in candidates:
             # Check if this contact matches ALL provided fields
             match = True
             if item.email_primary and existing_contact.email_primary != item.email_primary: match = False
@@ -250,7 +283,14 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
             flagged_foreign += 1
 
         # ── Find or create company ────────────────────────────────
-        company = _find_or_create_company(db, item.company_name, item)
+        company = None
+        if item.company_name:
+            comp_key = item.company_name.strip().lower()
+            if comp_key in company_cache:
+                company = company_cache[comp_key]
+            else:
+                company = _find_or_create_company(db, item.company_name, item)
+                company_cache[comp_key] = company
 
         # ── Create contact ────────────────────────────────────────
         contact = Contact(

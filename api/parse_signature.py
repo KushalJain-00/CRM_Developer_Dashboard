@@ -1,15 +1,33 @@
 """
 Signature Intelligence — uses email-reply-parser to isolate the signature
-block, then Groq Llama 3.3 70B to extract structured contact fields from it.
+block, then a chosen LLM to extract structured contact fields from it.
 """
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from groq import Groq
-import os, hashlib, json
+import os, hashlib, json, httpx, re
+from collections import OrderedDict
 
 router = APIRouter()
-_cache: dict = {}   # in-memory cache: signature_hash → parsed fields
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.cache = OrderedDict()
+        self.capacity = capacity
+
+    def get(self, key):
+        if key not in self.cache:
+            return None
+        self.cache.move_to_end(key)
+        return self.cache[key]
+
+    def put(self, key, value):
+        self.cache[key] = value
+        self.cache.move_to_end(key)
+        if len(self.cache) > self.capacity:
+            self.cache.popitem(last=False)
+
+_cache = LRUCache(500)
 
 SYSTEM_PROMPT = """You are an expert contact information extractor specialized in parsing email signatures. 
 
@@ -40,17 +58,24 @@ Rules for accuracy:
 
 Do not include any intro, outro, or markdown code blocks. Just the raw JSON array."""
 
-
 class SignatureRequest(BaseModel):
-    body_text: str        # full email body text
+    body_text: str
     subject: str = ""
+    provider: str = "openrouter"
+    model: str = "meta-llama/llama-3.3-70b-instruct"
+    api_key: str = ""
 
+PROVIDERS = {
+    "openrouter": "https://openrouter.ai/api/v1/chat/completions",
+    "groq": "https://api.groq.com/openai/v1/chat/completions",
+    "openai": "https://api.openai.com/v1/chat/completions"
+}
 
 def extract_signature_block(body_text: str) -> str:
     """
     Isolate signature from email body.
     Strategy: look for common signature delimiters, take everything after.
-    Falls back to last 40 lines if no delimiter found.
+    Falls back to last 200 lines if no delimiter found to ensure we don't miss long thread signatures.
     """
     lines = body_text.replace('\r\n', '\n').split('\n')
 
@@ -60,62 +85,90 @@ def extract_signature_block(body_text: str) -> str:
 
     for i, line in enumerate(lines):
         stripped = line.strip().lower()
-        # Look for signature delimiters
         if any(stripped.startswith(d) for d in delimiters):
-            # Take from the delimiter to the end, but cap at 100 lines for safety
             sig_lines = lines[i:]
-            return '\n'.join(sig_lines[:100]).strip()
+            return '\n'.join(sig_lines[:200]).strip()
 
-    # If no delimiter, take the last 50 lines to catch multi-person signatures in long threads
-    return '\n'.join(lines[-50:]).strip()
-
+    # If no delimiter, take the last 200 lines to catch multi-person signatures in long threads
+    return '\n'.join(lines[-200:]).strip()
 
 @router.post("/parse-signature")
 async def parse_signature(body: SignatureRequest):
-    api_key = os.getenv("GROQ_API_KEY", "")
+    # Use user provided API key or fallback to environment variables
+    api_key = body.api_key.strip()
     if not api_key:
-        raise HTTPException(500, "GROQ_API_KEY not configured")
+        if body.provider == "groq":
+            api_key = os.getenv("GROQ_API_KEY", "")
+        elif body.provider == "openai":
+            api_key = os.getenv("OPENAI_API_KEY", "")
+        elif body.provider == "openrouter":
+            api_key = os.getenv("OPENROUTER_API_KEY", "")
+            
+    if not api_key:
+        raise HTTPException(400, f"API Key for {body.provider} not provided and no fallback found.")
 
     sig_block = extract_signature_block(body.body_text)
 
     if not sig_block or len(sig_block) < 10:
         return JSONResponse({"ok": True, "fields": [], "cached": False})
 
-    # Cache check
-    cache_key = hashlib.md5(sig_block.encode()).hexdigest()
-    if cache_key in _cache:
-        return JSONResponse({"ok": True, "fields": _cache[cache_key], "cached": True})
+    # Cache check (incorporating model so weak models don't poison the cache)
+    cache_string = f"{body.model}_{sig_block}"
+    cache_key = hashlib.md5(cache_string.encode()).hexdigest()
+    cached_val = _cache.get(cache_key)
+    if cached_val is not None:
+        return JSONResponse({"ok": True, "fields": cached_val, "cached": True})
+
+    url = PROVIDERS.get(body.provider, PROVIDERS["openrouter"])
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    
+    if body.provider == "openrouter":
+        headers["HTTP-Referer"] = "https://crm.engine"
+        headers["X-Title"] = "CRM Engine"
+
+    payload = {
+        "model": body.model,
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": f"Extract contact info from this email signature:\n\n{sig_block}"}
+        ],
+        "temperature": 0.1,
+        "max_tokens": 1024,
+    }
 
     try:
-        client = Groq(api_key=api_key)
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user",   "content": f"Extract contact info from this email signature:\n\n{sig_block}"}
-            ],
-            temperature=0.1,
-            max_tokens=1024,
-        )
-        raw = response.choices[0].message.content.strip()
-
-        # Clean up in case model wraps in markdown
-        if raw.startswith("```"):
-            raw = raw.split("```")[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
-        raw = raw.strip()
-
-        fields = json.loads(raw)
-        
-        # Cache limit
-        if len(_cache) > 500:
-            _cache.clear()
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(url, headers=headers, json=payload)
             
-        _cache[cache_key] = fields
+            if response.status_code != 200:
+                print(f"AI API Error: {response.text}")
+                raise HTTPException(500, f"AI API Error ({response.status_code})")
+                
+            data = response.json()
+            raw = data["choices"][0]["message"]["content"].strip()
+
+        # Robust JSON extraction
+        fields = None
+        try:
+            fields = json.loads(raw)
+        except json.JSONDecodeError:
+            # Fallback regex to find JSON arrays
+            json_match = re.search(r'\[.*\]', raw, re.DOTALL)
+            if json_match:
+                try:
+                    fields = json.loads(json_match.group(0))
+                except Exception:
+                    pass
+                    
+        if fields is None:
+            return JSONResponse({"ok": True, "fields": [], "error": "Parse failed"})
+        
+        _cache.put(cache_key, fields)
         return JSONResponse({"ok": True, "fields": fields, "cached": False})
 
-    except json.JSONDecodeError:
-        return JSONResponse({"ok": True, "fields": [], "error": "Parse failed"})
     except Exception as e:
-        raise HTTPException(500, f"Groq error: {str(e)}")
+        raise HTTPException(500, f"AI Error: {str(e)}")
