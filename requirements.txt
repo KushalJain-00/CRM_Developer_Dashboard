@@ -18,3 +18,4 @@ pytest
 pytest-asyncio
 aiofiles
 aiosqlite
+PyMuPDF
