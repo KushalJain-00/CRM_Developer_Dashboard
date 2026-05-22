@@ -1,5 +1,4 @@
 const API_BASE = (window.CRM_API_BASE || '').replace(/\/$/, '');
-const API_KEY  = window.CRM_API_KEY || '';
 const SUPABASE_URL = window.CRM_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = window.CRM_SUPABASE_ANON_KEY || '';
 // FIX: Renamed from "supabase" to "crmClient" to avoid SyntaxError conflict
@@ -41,6 +40,7 @@ const FT = {
   member:  {label:'Member Flag',        icon:'✅', color:'#10B981'},
   fax:     {label:'Fax Number',         icon:'📠', color:'#94A3B8'},
   whatsapp:{label:'WhatsApp',           icon:'💬', color:'#10B981'},
+  files:   {label:'Attachment Files',   icon:'📎', color:'#94A3B8'},
   stdcode: {label:'STD Code',           icon:'☎️', color:'#94A3B8'},
   landline:{label:'Landline (Skipped)', icon:'☎️', color:'#94A3B8'},
   other:   {label:'Other / Custom',     icon:'📌', color:'#64748B'},
@@ -49,15 +49,28 @@ const FT = {
 
 const PALETTE = ['#3B82F6','#8B5CF6','#10B981','#F59E0B','#F43F5E','#F97316','#06B6D4','#6366F1','#34D399','#FCD34D','#A78BFA','#60A5FA'];
 
-function apiHeaders() {
+async function getAuthToken() {
+  if (!crmClient) return null;
+  try {
+    const { data } = await crmClient.auth.getSession();
+    return data?.session?.access_token || null;
+  } catch (e) {
+    console.warn('Failed to get auth token:', e);
+    return null;
+  }
+}
+
+async function apiHeaders() {
   const h = {'Content-Type':'application/json'};
-  if (API_KEY) h['X-API-Key'] = API_KEY;
+  const token = await getAuthToken();
+  if (token) h['Authorization'] = `Bearer ${token}`;
   return h;
 }
 
-function apiUploadHeaders() {
+async function apiUploadHeaders() {
   const h = {};
-  if (API_KEY) h['X-API-Key'] = API_KEY;
+  const token = await getAuthToken();
+  if (token) h['Authorization'] = `Bearer ${token}`;
   return h;
 }
 
@@ -178,6 +191,23 @@ async function syncAuthSession() {
     };
     S.userEmail = user.email || null;
     localStorage.setItem('crm-session', JSON.stringify(session));
+
+    const API_BASE_URL = (window.CRM_API_BASE || '').replace(/\/$/, '');
+    const API_KEY = window.CRM_API_KEY || '';
+    if (API_BASE_URL && user.email) {
+      fetch(`${API_BASE_URL}/api/auth/upsert`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': API_KEY
+        },
+        body: JSON.stringify({
+          email: user.email,
+          name: fullName || user.email,
+          provider_uid: user.id,
+        })
+      }).catch(err => console.warn('Failed to upsert user to backend:', err));
+    }
   } catch (e) {
     console.warn('Supabase session sync failed:', e);
   }
@@ -463,7 +493,8 @@ async function handleMultipleFiles(fileList) {
         if (API_BASE) {
           const fd = new FormData();
           fd.append('file', file);
-          const res = await fetch(`${API_BASE}/api/parse`, { method:'POST', headers:{'x-api-key':API_KEY}, body:fd });
+          const uploadH = await apiUploadHeaders();
+          const res = await fetch(`${API_BASE}/api/parse`, { method:'POST', headers:uploadH, body:fd });
           if (res.ok) {
             const result = await res.json();
             if (result.headers) result.headers.forEach(h => { if (!mergedHeaders.includes(h)) mergedHeaders.push(h); });
@@ -513,9 +544,10 @@ async function handleViaBackend(file, ext) {
   const fd = new FormData();
   fd.append('file', file);
   try {
+    const uploadH = await apiUploadHeaders();
     const res = await fetch(`${API_BASE}/api/parse`, {
       method: 'POST',
-      headers: apiUploadHeaders(),
+      headers: uploadH,
       body: fd,
     });
     if (!res.ok) {
@@ -764,18 +796,23 @@ function normalizeToStandardFields() {
     typeMap[t].push(h);
   });
 
-  // Define the 10 standard output fields + their source types
+  // Define the standard output fields + their source types
   const STANDARD = [
     { key: 'Company Name',   types: ['company'],                      multi: false },
-    { key: 'Location',       types: ['city','location','address'],    multi: false },
+    { key: 'Location',       types: ['city','location'],              multi: false },
+    { key: 'Address',        types: ['address'],                      multi: false },
+    { key: 'Pincode',        types: ['pincode'],                      multi: false },
     { key: 'Website',        types: ['website'],                      multi: false },
     { key: 'Person Name 1',  types: ['contact'],                      idx: 0 },
     { key: 'Person Name 2',  types: ['contact'],                      idx: 1 },
+    { key: 'Designation',    types: ['keyword'],                      multi: false },
     { key: 'Mobile 1',       types: ['phone','whatsapp'],             idx: 0 },
     { key: 'Mobile 2',       types: ['phone','whatsapp'],             idx: 1 },
+    { key: 'WhatsApp',       types: ['whatsapp'],                     multi: false },
     { key: 'Email 1',        types: ['email'],                        idx: 0 },
     { key: 'Email 2',        types: ['email'],                        idx: 1 },
-    { key: 'Products / Misc',types: ['product','industry','keyword'], multi: true },
+    { key: 'Files',          types: ['files'],                        multi: false },
+    { key: 'Products / Misc',types: ['product','industry'],           multi: true },
   ];
 
   // Build source-column lists per standard field
@@ -1317,9 +1354,10 @@ async function downloadPDF() {
 
   if (API_BASE) {
     try {
+      const pdfH = await apiHeaders();
       const res = await fetch(`${API_BASE}/api/export/pdf`, {
         method: 'POST',
-        headers: apiHeaders(),
+        headers: pdfH,
         body: JSON.stringify({
           fileName: S.fileName,
           sheetName: S.sheetName,
@@ -1456,20 +1494,23 @@ async function saveToCRM() {
     phone_primary:   row['Mobile 1'] || null,
     phone_secondary: row['Mobile 2'] || null,
     phone_country:   row._phoneCountry || 'IN',
-    whatsapp:        null,
-    address:         null,
+    whatsapp:        row['WhatsApp'] || null,
+    address:         row['Address'] || null,
     city:            row['Location'] || null,
-    pincode:         null,
+    pincode:         row['Pincode'] || null,
     website:         row['Website'] || null,
     industry:        null,
     product:         row['Products / Misc'] || null,
+    position:        row['Designation'] || null,
+    files:           row['Files'] || null,
     raw_data:        row,
   }));
 
   try {
+    const batchH = await apiHeaders();
     const res = await fetch(`${API_BASE}/api/contacts/batch`, {
       method: 'POST',
-      headers: apiHeaders(),
+      headers: batchH,
       body: JSON.stringify({
         file_name: S.fileName,
         sheet_name: S.sheetName,
@@ -1505,7 +1546,8 @@ async function loadHistory() {
   }
   try {
     const email = S.userEmail || '';
-    const res = await fetch(`${API_BASE}/api/history?email=${encodeURIComponent(email)}`, { headers: apiHeaders() });
+    const histH = await apiHeaders();
+    const res = await fetch(`${API_BASE}/api/history?email=${encodeURIComponent(email)}`, { headers: histH });
     const data = await res.json();
     if (!data.sessions?.length) {
       content.innerHTML = '<div class="empty-state">No saved sessions yet. Import a file and click Save to CRM.</div>';
@@ -1542,7 +1584,8 @@ async function loadHistory() {
 async function reloadSession(sessionId, fileName, btnEl) {
   try {
     if (btnEl) btnEl.innerHTML = `<span class="spinner-inline"></span> Loading…`;
-    const res = await fetch(`${API_BASE}/api/history/${sessionId}?page_size=1000`, { headers: apiHeaders() });
+    const sessH = await apiHeaders();
+    const res = await fetch(`${API_BASE}/api/history/${sessionId}?page_size=1000`, { headers: sessH });
     const data = await res.json();
     if (!data.ok || !data.records.length) { showNotification('No records found.', 'error'); return; }
     S.rawData = data.records;
@@ -1563,7 +1606,8 @@ async function reloadSession(sessionId, fileName, btnEl) {
 async function deleteSession(sessionId) {
   if (!confirm('Delete this history entry?')) return;
   try {
-    await fetch(`${API_BASE}/api/history/${sessionId}`, { method: 'DELETE', headers: apiHeaders() });
+    const delH = await apiHeaders();
+    await fetch(`${API_BASE}/api/history/${sessionId}`, { method: 'DELETE', headers: delH });
     loadHistory();
   } catch (err) {
     showNotification(`Delete failed: ${err.message}`, 'error');
@@ -1573,7 +1617,8 @@ async function deleteSession(sessionId) {
 async function exportSessionWithCalls(sessionId, fileName) {
   showNotification('Building export with call logs…', 'info');
   try {
-    const res = await fetch(`${API_BASE}/api/history/${sessionId}/export`, { headers: apiHeaders() });
+    const expH = await apiHeaders();
+    const res = await fetch(`${API_BASE}/api/history/${sessionId}/export`, { headers: expH });
     const data = await res.json();
     if (!data.ok || !data.records.length) { alert('No records found.'); return; }
 
@@ -1620,7 +1665,7 @@ function showNotification(msg, type='info') {
     document.body.appendChild(n);
   }
   n.className = `crm-notification ${type}`;
-  n.textContent = msg;
+  n.innerText = msg; // Support newlines
   n.style.display = 'block';
   const duration = type === 'error' ? 10000 : 5000;
   setTimeout(() => { n.style.display = 'none'; }, duration);
@@ -1904,9 +1949,10 @@ async function downloadZip() {
       const withEmail = emailCols.length ? countWithAny(emailCols) : null;
       const withPhone = phoneCols.length ? countWithAny(phoneCols) : null;
 
+      const crmPdfH = await apiHeaders();
       const res = await fetch(`${API_BASE}/api/export/pdf`, {
         method: 'POST',
-        headers: apiHeaders(),
+        headers: crmPdfH,
         body: JSON.stringify({
           fileName: S.fileName,
           sheetName: S.sheetName,
@@ -2130,9 +2176,10 @@ function parseEml(fileName) {
   if (API_BASE && EML.parsed?.body) {
     EML.sigLoading = true;
     const aiConfig = getAiSettings();
+    const sigH = await apiHeaders();
     fetch(`${API_BASE}/api/parse-signature`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
+      headers: sigH,
       body: JSON.stringify({ 
         body_text: EML.parsed.body, 
         subject: EML.parsed.subject,
@@ -2375,16 +2422,8 @@ function renderEmlContacts() {
 function renderSigPanel() {
   const el = document.getElementById('emlSigData');
   if (!el) return;
-  const sd = EML.sigData || {};
-  const hasAny = Object.values(sd).some(v => v);
-
-  if (EML.sigLoading) {
-    el.style.display = '';
-    el.innerHTML = `<div class="eml-section-label">🪪 Signature Intelligence</div>
-      <div class="eml-sig-loading"><span class="spinner-inline"></span> AI extracting signature data…</div>`;
-    return;
-  }
-  if (!hasAny) { el.style.display = 'none'; return; }
+  const sdArray = Array.isArray(EML.sigData) ? EML.sigData : (Object.keys(EML.sigData || {}).length ? [EML.sigData] : []);
+  if (!sdArray.length) { el.style.display = 'none'; return; }
 
   const row = (icon, label, val) => val
     ? `<div class="eml-sig-row">
@@ -2394,19 +2433,22 @@ function renderSigPanel() {
 
   el.style.display = '';
   el.innerHTML = `
-    <div class="eml-section-label">🪪 Signature Intelligence <span class="eml-sig-badge">AI</span></div>
-    <div class="eml-sig-grid">
-      ${row('👤','Name',        sd.name)}
-      ${row('🏢','Company',     sd.company)}
-      ${row('💼','Designation', sd.designation)}
-      ${row('📞','Phone',       sd.phone_primary)}
-      ${row('📞','Phone 2',     sd.phone_secondary)}
-      ${row('📧','Email',       sd.email)}
-      ${row('🌐','Website',     sd.website)}
-      ${row('📍','Address',     sd.address)}
-      ${row('🏙','City',        sd.city)}
-      ${row('🔢','Pincode',     sd.pincode)}
-    </div>`;
+    <div class="eml-section-label">🪪 AI Contact Extraction <span class="eml-sig-badge">AI</span></div>
+    ${sdArray.map(sd => `
+      <div class="eml-sig-grid" style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border)">
+        ${row('👤','Name',        sd.name)}
+        ${row('🏢','Company',     sd.company)}
+        ${row('💼','Designation', sd.designation)}
+        ${row('📞','Phone',       sd.phone_primary)}
+        ${row('📞','Phone 2',     sd.phone_secondary)}
+        ${row('📧','Email',       sd.email)}
+        ${row('🌐','Website',     sd.website)}
+        ${row('📍','Address',     sd.address)}
+        ${row('🏙','City',        sd.city)}
+        ${row('🔢','Pincode',     sd.pincode)}
+      </div>
+    `).join('')}
+  `;
 }
 
 function emlFilterContacts() {
@@ -2455,11 +2497,16 @@ function exitEmlDashboard() {
 /* ── Export CSV ───────────────────────────────────────────────────── */
 function emlExportCSV() {
   if (!EML.contacts.length) { showNotification('No contacts to export.','error'); return; }
-  const sd = EML.sigData || {};
+  const sdArray = Array.isArray(EML.sigData) ? EML.sigData : (Object.keys(EML.sigData || {}).length ? [EML.sigData] : []);
+  const getCsd = (c) => {
+    let match = sdArray.find(s => s.email && c.email && s.email.toLowerCase() === c.email.toLowerCase());
+    if (!match) match = sdArray.find(s => s.name && c.name && s.name.toLowerCase().includes(c.name.toLowerCase()));
+    return match || {};
+  };
   const rows = [['Name','Email','Company','Designation','Phone','Phone 2','Website','Address','City','Pincode','Domain','Source','Attachments']];
   const attachmentsText = (EML.parsed && EML.parsed.attachments && EML.parsed.attachments.length) ? EML.parsed.attachments.join('; ') : '';
   EML.contacts.forEach(c => {
-    const csd = sd[c.email] || {};
+    const csd = getCsd(c);
     rows.push([
       c.name, c.email,
       csd.company||'', csd.designation||'',
@@ -2479,11 +2526,16 @@ function emlExportCSV() {
 /* ── Export Excel ───────────────────────────────────────────────────── */
 function emlExportExcel() {
   if (!EML.contacts.length) { showNotification('No contacts to export.','error'); return; }
-  const sd = EML.sigData || {};
+  const sdArray2 = Array.isArray(EML.sigData) ? EML.sigData : (Object.keys(EML.sigData || {}).length ? [EML.sigData] : []);
+  const getCsd2 = (c) => {
+    let match = sdArray2.find(s => s.email && c.email && s.email.toLowerCase() === c.email.toLowerCase());
+    if (!match) match = sdArray2.find(s => s.name && c.name && s.name.toLowerCase().includes(c.name.toLowerCase()));
+    return match || {};
+  };
   const headers = ['Name','Email','Company','Designation','Phone','Phone 2','Website','Address','City','Pincode','Domain','Source','Attachments'];
   const attachmentsText = (EML.parsed && EML.parsed.attachments && EML.parsed.attachments.length) ? EML.parsed.attachments.join('; ') : '';
   const rows = EML.contacts.map(c => {
-    const csd = sd[c.email] || {};
+    const csd = getCsd2(c);
     return [
       c.name, c.email,
       csd.company||'', csd.designation||'',
@@ -2521,9 +2573,15 @@ async function emlSaveToSupabase() {
     }).select().single();
     if(emailErr) throw emailErr;
     // 2. Insert all extracted contacts
-    const sd = EML.sigData || {};
+    const sdArray = Array.isArray(EML.sigData) ? EML.sigData : (Object.keys(EML.sigData || {}).length ? [EML.sigData] : []);
+    const getCsd = (c) => {
+      let match = sdArray.find(s => s.email && c.email && s.email.toLowerCase() === c.email.toLowerCase());
+      if (!match) match = sdArray.find(s => s.name && c.name && s.name.toLowerCase().includes(c.name.toLowerCase()));
+      return match || {};
+    };
+
     const contactRows = EML.contacts.map(c=>{
-      const csd = sd[c.email] || {};
+      const csd = getCsd(c);
       return {
         email_id:      emailRow.id,
         name:          c.name,
@@ -2551,43 +2609,59 @@ async function emlSaveToSupabase() {
 /* ── Push contacts into main CRM table ───────────────────────────── */
 function emlSendToCRM() {
   if (!EML.contacts.length) { alert('No contacts to push.'); return; }
-  const sd = EML.sigData || {};
+  const sdArray = Array.isArray(EML.sigData) ? EML.sigData : (Object.keys(EML.sigData || {}).length ? [EML.sigData] : []);
+  const getCsd = (c) => {
+    let match = sdArray.find(s => s.email && c.email && s.email.toLowerCase() === c.email.toLowerCase());
+    if (!match) match = sdArray.find(s => s.name && c.name && s.name.toLowerCase().includes(c.name.toLowerCase()));
+    return match || {};
+  };
+  
+  const attachmentsText = (EML.parsed && EML.parsed.attachments && EML.parsed.attachments.length) ? EML.parsed.attachments.join(', ') : '';
+
   const rows = EML.contacts.map(c => {
-    const csd = sd[c.email] || {};
+    const csd = getCsd(c);
     return {
-      'Name':        c.name                  || '',
-      'Email':       c.email                 || '',
-      'Company':     csd.company              || '',
-      'Designation': csd.designation          || '',
-      'Phone':       csd.phone_primary        || '',
-      'Phone 2':     csd.phone_secondary      || '',
-      'Website':     csd.website              || '',
-      'Address':     csd.address              || '',
-      'City':        csd.city                 || '',
-      'Pincode':     csd.pincode              || '',
-      'Domain':      c.domain               || '',
-      'Source':      c.source               || '',
+      'Person Name 1': c.name                  || '',
+      'Email 1':       c.email                 || '',
+      'Company Name':  csd.company              || '',
+      'Designation':   csd.designation          || '',
+      'Mobile 1':      csd.phone_primary        || '',
+      'Mobile 2':      csd.phone_secondary      || '',
+      'Website':       csd.website              || '',
+      'Address':       csd.address              || '',
+      'City':          csd.city                 || '',
+      'Location':      csd.city                 || '',
+      'Pincode':       csd.pincode              || '',
+      'Domain':        c.domain               || '',
+      'Source':        c.source               || '',
+      'Files':         attachmentsText,
     };
   });
   S.rawData   = rows;
-  S.headers   = ['Name','Email','Company','Designation','Phone','Phone 2','Website','Address','City','Pincode','Domain','Source'];
+  S.headers   = ['Person Name 1','Email 1','Company Name','Designation','Mobile 1','Mobile 2','Website','Address','City','Location','Pincode','Domain','Source','Files'];
   S.fileName  = EML.parsed?.fileName || 'Email Import';
   S.sheetName = 'EML Contacts';
   S.mapping   = {
-    'Name':        { type:'contact',  keep:true  },
-    'Email':       { type:'email',    keep:true  },
-    'Company':     { type:'company',  keep:true  },
-    'Designation': { type:'keyword',  keep:true  },
-    'Phone':       { type:'phone',    keep:true  },
-    'Phone 2':     { type:'phone',    keep:true  },
-    'Website':     { type:'website',  keep:true  },
-    'Address':     { type:'address',  keep:true  },
-    'City':        { type:'city',     keep:true  },
-    'Pincode':     { type:'pincode',  keep:true  },
-    'Domain':      { type:'website',  keep:false },
-    'Source':      { type:'other',    keep:false },
+    'Person Name 1': { type:'contact',  keep:true  },
+    'Email 1':       { type:'email',    keep:true  },
+    'Company Name':  { type:'company',  keep:true  },
+    'Designation':   { type:'keyword',  keep:true  },
+    'Mobile 1':      { type:'phone',    keep:true  },
+    'Mobile 2':      { type:'phone',    keep:true  },
+    'Website':       { type:'website',  keep:true  },
+    'Address':       { type:'address',  keep:true  },
+    'City':          { type:'city',     keep:true  },
+    'Location':      { type:'location', keep:true  },
+    'Pincode':       { type:'pincode',  keep:true  },
+    'Domain':        { type:'website',  keep:false },
+    'Source':        { type:'other',    keep:false },
+    'Files':         { type:'files',    keep:true  },
   };
   S.clean    = rows.filter(r => r.Email);
+  
+  // NORMALIZE HEADERS SO IT CAN BE SAVED TO DB
+  normalizeToStandardFields();
+
   S.filtered = [...S.clean];
   S.page     = 1;
   document.body.classList.remove('eml-mode');
@@ -2609,6 +2683,7 @@ const BULK = {
   rows: [],       // master flat rows — one row per contact per email
   processed: 0,
   errors: 0,
+  errorList: [],
 };
 
 async function handleBulkEml(fileList) {
@@ -2616,6 +2691,7 @@ async function handleBulkEml(fileList) {
   BULK.rows = [];
   BULK.processed = 0;
   BULK.errors = 0;
+  BULK.errorList = [];
 
   showBulkProgress(BULK.files.length);
 
@@ -2657,11 +2733,11 @@ async function handleBulkEml(fileList) {
     updateAiProgress();
 
     try {
-      const apiKey = localStorage.getItem('CRM_API_KEY') || window.CRM_API_KEY || '';
       const aiConfig = getAiSettings();
+      const bulkSigH = await apiHeaders();
       const aiResp = await fetch(`${API_BASE}/api/parse-signature`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+        headers: bulkSigH,
         body: JSON.stringify({ 
           body_text: item.parsed.bodyText, 
           subject: item.parsed.subject,
@@ -2682,12 +2758,13 @@ async function handleBulkEml(fileList) {
       console.error('AI parse failed for', item.file.name, err);
       item.aiData = [];
       BULK.errors++;
+      BULK.errorList.push(`${item.file.name}: ${err.message || 'Extraction failed'}`);
     }
 
     aiReceived++;
     updateAiProgress();
     
-    await new Promise(r => setTimeout(r, 50)); // 50ms delay
+    await new Promise(r => setTimeout(r, 500)); // 500ms delay
     await processNext();
   }
 
@@ -2974,6 +3051,10 @@ function showBulkDashboard() {
   document.getElementById('topTitle').textContent = '📧 Bulk Email Intelligence';
   document.getElementById('topSub').textContent = `${BULK.processed} files · ${BULK.rows.length} rows · ${uniqueEmails.length} unique contacts`;
 
+  if (BULK.errors > 0) {
+    showNotification(`Encountered ${BULK.errors} errors.\n${BULK.errorList.join('\n')}`, 'error');
+  }
+
   // Hide domains section (we moved it inline)
   const domSec = document.querySelector('.eml-domains-section');
   if (domSec) domSec.style.display = 'none';
@@ -3074,44 +3155,52 @@ function pushBulkToCRM() {
   const deduped = BULK.rows.filter(r => { if (seen.has(r['Email'])) return false; seen.add(r['Email']); return true; });
 
   const crmRows = deduped.map(r => ({
-    'Name':       r['Contact Name'],
-    'Email':      r['Email'],
-    'Company':    r['Company'],
-    'Designation':r['Designation'],
-    'Domain':     r['Domain'],
-    'Phone Primary': r['Phone Primary'],
-    'Phone Secondary': r['Phone Secondary'],
-    'Website':    r['Website'],
-    'City':       r['City'],
-    'From':       r['From Email'],
-    'Subject':    r['Subject'],
-    'Source':     r['Source'],
-    'File':       r['File Name'],
-    'Date':       r['Date'],
+    'Person Name 1': r['Contact Name'],
+    'Email 1':       r['Email'],
+    'Company Name':  r['Company'],
+    'Designation':   r['Designation'],
+    'Domain':        r['Domain'],
+    'Mobile 1':      r['Phone Primary'],
+    'Mobile 2':      r['Phone Secondary'],
+    'Website':       r['Website'],
+    'City':          r['City'],
+    'Location':      r['City'],
+    'From':          r['From Email'],
+    'Subject':       r['Subject'],
+    'Source':        r['Source'],
+    'File':          r['File Name'],
+    'Files':         r['Attachments'] || '',
+    'Date':          r['Date'],
   }));
 
   S.rawData = crmRows;
-  S.headers = ['Name','Email','Company','Designation','Domain','Phone Primary','Phone Secondary','Website','City','From','Subject','Source','File','Date'];
+  S.headers = ['Person Name 1','Email 1','Company Name','Designation','Domain','Mobile 1','Mobile 2','Website','City','Location','From','Subject','Source','File','Files','Date'];
   S.fileName = `Bulk EML — ${BULK.processed} files`;
   S.sheetName = 'EML Bulk Import';
   S.mapping = {
-    'Name':       { type: 'contact', keep: true },
-    'Email':      { type: 'email',   keep: true },
-    'Company':    { type: 'company', keep: true },
-    'Designation':{ type: 'keyword', keep: true },
-    'Domain':     { type: 'website', keep: true },
-    'Phone Primary': { type: 'phone',   keep: true },
-    'Phone Secondary': { type: 'phone',   keep: true },
-    'Website':    { type: 'website', keep: true },
-    'City':       { type: 'city',    keep: true },
-    'From':       { type: 'email',   keep: true },
-    'Subject':    { type: 'other',   keep: true },
-    'Source':     { type: 'other',   keep: true },
-    'File':       { type: 'other',   keep: true },
-    'Date':       { type: 'other',   keep: true },
+    'Person Name 1': { type: 'contact', keep: true },
+    'Email 1':       { type: 'email',   keep: true },
+    'Company Name':  { type: 'company', keep: true },
+    'Designation':   { type: 'keyword', keep: true },
+    'Domain':        { type: 'website', keep: true },
+    'Mobile 1':      { type: 'phone',   keep: true },
+    'Mobile 2':      { type: 'phone',   keep: true },
+    'Website':       { type: 'website', keep: true },
+    'City':          { type: 'city',    keep: true },
+    'Location':      { type: 'location',keep: true },
+    'From':          { type: 'email',   keep: true },
+    'Subject':       { type: 'other',   keep: true },
+    'Source':        { type: 'other',   keep: true },
+    'File':          { type: 'other',   keep: true },
+    'Files':         { type: 'files',   keep: true },
+    'Date':          { type: 'other',   keep: true },
   };
   S.clean = crmRows;
-  S.filtered = [...crmRows];
+  
+  // NORMALIZE HEADERS SO IT CAN BE SAVED TO DB
+  normalizeToStandardFields();
+
+  S.filtered = [...S.clean];
   S.page = 1;
 
   document.body.classList.remove('eml-mode');

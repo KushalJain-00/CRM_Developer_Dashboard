@@ -1,7 +1,10 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, JSON
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from .database import Base
+
+def _utcnow():
+    return datetime.now(timezone.utc)
 
 class User(Base):
     __tablename__ = "users"
@@ -10,8 +13,8 @@ class User(Base):
     name         = Column(String(255))
     provider_uid = Column(String(255), index=True)  # Supabase user.id
     last_login   = Column(DateTime)
-    created_at   = Column(DateTime, default=datetime.utcnow)
-    sessions     = relationship("SessionData", back_populates="user", cascade="all, delete-orphan")
+    created_at   = Column(DateTime, default=_utcnow)
+    sessions     = relationship("SessionData", back_populates="user", cascade="all, delete-orphan", lazy="selectin")
 class Company(Base):
     """Company/Organization table"""
     __tablename__ = "companies"
@@ -24,12 +27,12 @@ class Company(Base):
     website = Column(String(255))
     industry = Column(String(255))
     product = Column(String(255))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow)
+    updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
 
     # Relationships
-    contacts = relationship("Contact", back_populates="company", cascade="all, delete-orphan")
-    call_logs = relationship("CallLog", back_populates="company", cascade="all, delete-orphan")
+    contacts = relationship("Contact", back_populates="company", cascade="all, delete-orphan", lazy="selectin")
+    call_logs = relationship("CallLog", back_populates="company", cascade="all, delete-orphan", lazy="selectin")
 
 
 class Contact(Base):
@@ -46,12 +49,13 @@ class Contact(Base):
     phone_country = Column(String(10), default="IN")  # "IN" for Indian, "+1" for US, etc.
     whatsapp = Column(String(50))
     position = Column(String(255))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    files = Column(Text)
+    created_at = Column(DateTime, default=_utcnow)
+    updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
 
     # Relationships
-    company = relationship("Company", back_populates="contacts")
-    call_logs = relationship("CallLog", back_populates="contact", cascade="all, delete-orphan")
+    company = relationship("Company", back_populates="contacts", lazy="selectin")
+    call_logs = relationship("CallLog", back_populates="contact", cascade="all, delete-orphan", lazy="selectin")
 
 
 class CallLog(Base):
@@ -61,7 +65,7 @@ class CallLog(Base):
     id = Column(Integer, primary_key=True, index=True)
     contact_id = Column(Integer, ForeignKey("contacts.id"))
     company_id = Column(Integer, ForeignKey("companies.id"))
-    call_date = Column(DateTime, default=datetime.utcnow)
+    call_date = Column(DateTime, default=_utcnow)
     duration_minutes = Column(Integer)
     call_type = Column(String(50))  # Incoming, Outgoing, Follow-up
     outcome = Column(String(100))  # Connected, Voicemail, No Answer, Callback Scheduled, etc.
@@ -69,11 +73,11 @@ class CallLog(Base):
     next_action = Column(String(255))
     next_action_date = Column(DateTime)
     created_by = Column(String(255))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow)
 
     # Relationships
-    contact = relationship("Contact", back_populates="call_logs")
-    company = relationship("Company", back_populates="call_logs")
+    contact = relationship("Contact", back_populates="call_logs", lazy="selectin")
+    company = relationship("Company", back_populates="call_logs", lazy="selectin")
 
 
 class SessionData(Base):
@@ -83,7 +87,7 @@ class SessionData(Base):
     id = Column(Integer, primary_key=True, index=True)
     file_name = Column(String(255))
     sheet_name = Column(String(255))
-    upload_date = Column(DateTime, default=datetime.utcnow)
+    upload_date = Column(DateTime, default=_utcnow)
     mapping = Column(JSON)  # Store field mapping configuration
     is_active = Column(Boolean, default=True)
     user_id       = Column(Integer, ForeignKey("users.id"), nullable=True)
@@ -92,8 +96,8 @@ class SessionData(Base):
     skipped       = Column(Integer, default=0)
 
     # Relationships
-    user = relationship("User", back_populates="sessions")
-    records = relationship("Record", back_populates="session", cascade="all, delete-orphan")
+    user = relationship("User", back_populates="sessions", lazy="selectin")
+    records = relationship("Record", back_populates="session", cascade="all, delete-orphan", lazy="selectin")
 
 
 class Record(Base):
@@ -103,7 +107,7 @@ class Record(Base):
     id = Column(Integer, primary_key=True, index=True)
     session_id = Column(Integer, ForeignKey("session_data.id"))
     data = Column(JSON)  # Store all record data as JSON
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow)
 
     # Relationships
-    session = relationship("SessionData", back_populates="records")
+    session = relationship("SessionData", back_populates="records", lazy="selectin")

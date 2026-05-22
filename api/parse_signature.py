@@ -1,11 +1,12 @@
 """
-Signature Intelligence — uses email-reply-parser to isolate the signature
-block, then a chosen LLM to extract structured contact fields from it.
+Signature Intelligence — extracts structured contact fields from email body.
 """
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-import os, hashlib, json, httpx, re
+from core.rate_limit import limiter
+from core.auth import verify_token
+import os, hashlib, json, httpx, re, asyncio
 from collections import OrderedDict
 
 router = APIRouter()
@@ -29,15 +30,15 @@ class LRUCache:
 
 _cache = LRUCache(500)
 
-SYSTEM_PROMPT = """You are an expert contact information extractor specialized in parsing email signatures. 
+SYSTEM_PROMPT = """You are an expert contact information extractor specialized in parsing emails. 
 
-Your task is to identify and extract structured data for EVERY distinct individual found in the signature block.
+Your task is to identify and extract structured data for EVERY distinct individual found in the email, including senders, recipients, and signatures.
 
 Return ONLY a valid JSON array of objects. Use null if a field is not found.
 
 Rules for accuracy:
 1. **Association**: Strictly associate phone numbers, job titles, and companies with the person they belong to. 
-2. **Multiple Contacts**: If you see multiple signatures (e.g., from a thread or a shared signature), return one object per person.
+2. **Multiple Contacts**: If you see multiple signatures or people, return one object per person.
 3. **Phones**: Only assign a phone number to a person if it is physically near their name or clearly belongs to their specific signature block.
 4. **Name**: Extract the full name. 
 5. **JSON Schema**:
@@ -71,104 +72,110 @@ PROVIDERS = {
     "openai": "https://api.openai.com/v1/chat/completions"
 }
 
-def extract_signature_block(body_text: str) -> str:
-    """
-    Isolate signature from email body.
-    Strategy: look for common signature delimiters, take everything after.
-    Falls back to last 200 lines if no delimiter found to ensure we don't miss long thread signatures.
-    """
-    lines = body_text.replace('\r\n', '\n').split('\n')
+def clean_email_text(text: str) -> str:
+    """Basic cleaning to save tokens (removes long continuous non-space strings like base64)."""
+    text = re.sub(r'([A-Za-z0-9+/=]{100,})', '', text)
+    return text[:20000] # Limit to 20k chars
 
-    # Common signature delimiters
-    delimiters = ['--', '___', '---', 'best regards', 'thanks & regards', 'thanks and regards',
-                  'regards,', 'warm regards', 'sincerely,', 'thanks,', 'thank you,', 'cheers,', 'with regards']
+async def call_llm(provider, model, api_key, payload):
+    url = PROVIDERS.get(provider, PROVIDERS["openrouter"])
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    if provider == "openrouter":
+        headers["HTTP-Referer"] = "https://crm.engine"
+        headers["X-Title"] = "CRM Engine"
 
-    for i, line in enumerate(lines):
-        stripped = line.strip().lower()
-        if any(stripped.startswith(d) for d in delimiters):
-            sig_lines = lines[i:]
-            return '\n'.join(sig_lines[:200]).strip()
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        response = await client.post(url, headers=headers, json=payload)
+        if response.status_code != 200:
+            raise Exception(f"AI API Error ({response.status_code}): {response.text}")
+        data = response.json()
+        return data["choices"][0]["message"]["content"].strip()
 
-    # If no delimiter, take the last 200 lines to catch multi-person signatures in long threads
-    return '\n'.join(lines[-200:]).strip()
+@router.post("/parse-signature", dependencies=[Depends(verify_token)])
+@limiter.limit("200/minute")
+async def parse_signature(request: Request, body: SignatureRequest):
+    email_text = clean_email_text(body.body_text)
 
-@router.post("/parse-signature")
-async def parse_signature(body: SignatureRequest):
-    # Use user provided API key or fallback to environment variables
-    api_key = body.api_key.strip()
-    if not api_key:
-        if body.provider == "groq":
-            api_key = os.getenv("GROQ_API_KEY", "")
-        elif body.provider == "openai":
-            api_key = os.getenv("OPENAI_API_KEY", "")
-        elif body.provider == "openrouter":
-            api_key = os.getenv("OPENROUTER_API_KEY", "")
-            
-    if not api_key:
-        raise HTTPException(400, f"API Key for {body.provider} not provided and no fallback found.")
-
-    sig_block = extract_signature_block(body.body_text)
-
-    if not sig_block or len(sig_block) < 10:
+    if not email_text or len(email_text) < 10:
         return JSONResponse({"ok": True, "fields": [], "cached": False})
 
-    # Cache check (incorporating model so weak models don't poison the cache)
-    cache_string = f"{body.model}_{sig_block}"
+    # Cache check
+    cache_string = f"{body.model}_{email_text}"
     cache_key = hashlib.md5(cache_string.encode()).hexdigest()
     cached_val = _cache.get(cache_key)
     if cached_val is not None:
         return JSONResponse({"ok": True, "fields": cached_val, "cached": True})
 
-    url = PROVIDERS.get(body.provider, PROVIDERS["openrouter"])
-
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-    
-    if body.provider == "openrouter":
-        headers["HTTP-Referer"] = "https://crm.engine"
-        headers["X-Title"] = "CRM Engine"
-
     payload = {
         "model": body.model,
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": f"Extract contact info from this email signature:\n\n{sig_block}"}
+            {"role": "user", "content": f"Extract contact info from this email (Subject: {body.subject}):\n\n{email_text}"}
         ],
         "temperature": 0.1,
         "max_tokens": 1024,
     }
 
-    try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(url, headers=headers, json=payload)
-            
-            if response.status_code != 200:
-                print(f"AI API Error: {response.text}")
-                raise HTTPException(500, f"AI API Error ({response.status_code})")
-                
-            data = response.json()
-            raw = data["choices"][0]["message"]["content"].strip()
+    # Fallback chain: Initial provider -> Groq -> OpenRouter -> OpenAI
+    chain = [
+        {"provider": body.provider, "model": body.model, "api_key": body.api_key.strip() or os.getenv(f"{body.provider.upper()}_API_KEY", "")},
+        {"provider": "groq", "model": "llama-3.3-70b-versatile", "api_key": os.getenv("GROQ_API_KEY", "")},
+        {"provider": "openrouter", "model": "meta-llama/llama-3.3-70b-instruct", "api_key": os.getenv("OPENROUTER_API_KEY", "")},
+        {"provider": "openai", "model": "gpt-4o-mini", "api_key": os.getenv("OPENAI_API_KEY", "")}
+    ]
 
-        # Robust JSON extraction
-        fields = None
-        try:
-            fields = json.loads(raw)
-        except json.JSONDecodeError:
-            # Fallback regex to find JSON arrays
-            json_match = re.search(r'\[.*\]', raw, re.DOTALL)
-            if json_match:
-                try:
-                    fields = json.loads(json_match.group(0))
-                except Exception:
-                    pass
-                    
-        if fields is None:
-            return JSONResponse({"ok": True, "fields": [], "error": "Parse failed"})
+    raw = None
+    last_err = None
+    for attempt in chain:
+        prov = attempt["provider"]
+        mod = attempt["model"]
+        key = attempt["api_key"]
         
-        _cache.put(cache_key, fields)
-        return JSONResponse({"ok": True, "fields": fields, "cached": False})
+        if not key:
+            continue
+            
+        payload["model"] = mod
+        
+        # Enforce JSON mode for supported providers
+        if prov in ["openai", "groq"]:
+            payload["response_format"] = {"type": "json_object"}
+        elif "response_format" in payload:
+            del payload["response_format"]
+        
+        # 5 Retries with exponential backoff for each provider in chain
+        success = False
+        for i in range(5):
+            try:
+                raw = await call_llm(prov, mod, key, payload)
+                success = True
+                break
+            except Exception as e:
+                last_err = str(e)
+                await asyncio.sleep(2 ** i) # 1, 2, 4, 8, 16
+        
+        if success:
+            break
 
-    except Exception as e:
-        raise HTTPException(500, f"AI Error: {str(e)}")
+    if raw is None:
+        raise HTTPException(500, f"All models/retries failed. Last error: {last_err}")
+
+    # Robust JSON extraction
+    fields = None
+    try:
+        fields = json.loads(raw)
+    except json.JSONDecodeError:
+        json_match = re.search(r'\[.*\]', raw, re.DOTALL)
+        if json_match:
+            try:
+                fields = json.loads(json_match.group(0))
+            except Exception:
+                pass
+                
+    if fields is None:
+        return JSONResponse({"ok": True, "fields": [], "error": "Parse failed"})
+    
+    _cache.put(cache_key, fields)
+    return JSONResponse({"ok": True, "fields": fields, "cached": False})

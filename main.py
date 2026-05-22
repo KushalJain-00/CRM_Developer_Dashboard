@@ -23,7 +23,7 @@ from db.database import init_db
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize database tables on startup"""
-    init_db()
+    await init_db()
     yield
 
 
@@ -35,6 +35,13 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+from slowapi.errors import RateLimitExceeded
+from slowapi import _rate_limit_exceeded_handler
+from core.rate_limit import limiter
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
 
 app.add_middleware(
@@ -45,6 +52,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi.staticfiles import StaticFiles
+
 app.include_router(parse_router, prefix="/api")
 app.include_router(pdf_router, prefix="/api")
 app.include_router(contacts_router, prefix="/api")
@@ -52,6 +61,8 @@ app.include_router(calls_router, prefix="/api")
 app.include_router(auth_router,    prefix="/api")
 app.include_router(history_router, prefix="/api")
 app.include_router(sig_router, prefix="/api")
+
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
 
 
 @app.get("/health")

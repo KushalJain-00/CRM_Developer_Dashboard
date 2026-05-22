@@ -1,5 +1,4 @@
 window.CRM_API_BASE = 'https://crm-developer-dashboard.onrender.com';
-window.CRM_API_KEY  = '06f618cab6632be0071ef34007f981e3';
 
 // ── Supabase credentials ──────────────────────────────────────────────
 // NOTE: Supabase Anon Keys are designed to be public. Security is handled

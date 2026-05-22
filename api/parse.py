@@ -6,7 +6,7 @@ import os
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core.auth import verify_api_key
+from core.auth import verify_token
 from services.parser import parse_xls, parse_pdf
 
 router = APIRouter()
@@ -14,7 +14,7 @@ router = APIRouter()
 MAX_SIZE = 30 * 1024 * 1024  # 30 MB
 
 
-@router.post("/parse", dependencies=[Depends(verify_api_key)])
+@router.post("/parse", dependencies=[Depends(verify_token)])
 async def parse_file(file: UploadFile = File(...)):
     content = await file.read()
     if len(content) > MAX_SIZE:

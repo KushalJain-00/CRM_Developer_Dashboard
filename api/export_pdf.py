@@ -1,15 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
-import sys
-import os
-
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from core.auth import verify_api_key
+from core.auth import verify_token
 from services.pdf_exporter import generate_pdf
 from pydantic import BaseModel
 from typing import Any, Optional
+import re
 
 router = APIRouter()
 
@@ -27,7 +22,7 @@ class PDFRequest(BaseModel):
     columns: list[str]
 
 
-@router.post("/export/pdf", dependencies=[Depends(verify_api_key)])
+@router.post("/export/pdf", dependencies=[Depends(verify_token)])
 async def export_pdf(body: PDFRequest):
     try:
         pdf_bytes = generate_pdf(body.model_dump())
@@ -35,7 +30,6 @@ async def export_pdf(body: PDFRequest):
         raise HTTPException(500, f"PDF generation failed: {str(e)}")
 
     # Sanitize filename to prevent header injection
-    import re
     safe_name = re.sub(r'[^\w\s\-\.]', '', body.fileName or 'export').strip() or 'export'
 
     return Response(

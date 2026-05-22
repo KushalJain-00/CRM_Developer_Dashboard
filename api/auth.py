@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime
+from core.auth import verify_token
 from db.database import get_db
-from db.models import User
+from crud.auth import upsert_user as crud_upsert_user
 
 router = APIRouter()
 
@@ -14,17 +14,7 @@ class UserUpsertRequest(BaseModel):
     name: Optional[str] = None
     provider_uid: Optional[str] = None
 
-@router.post("/auth/upsert")
-async def upsert_user(body: UserUpsertRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == body.email).first()
-    if user:
-        user.last_login = datetime.utcnow()
-        if body.name: user.name = body.name
-        if body.provider_uid: user.provider_uid = body.provider_uid
-    else:
-        user = User(email=body.email, name=body.name,
-                    provider_uid=body.provider_uid, last_login=datetime.utcnow())
-        db.add(user)
-    db.commit()
-    db.refresh(user)
+@router.post("/auth/upsert", dependencies=[Depends(verify_token)])
+async def upsert_user(body: UserUpsertRequest, db: AsyncSession = Depends(get_db)):
+    user = await crud_upsert_user(db, email=body.email, name=body.name, provider_uid=body.provider_uid)
     return JSONResponse({"ok": True, "user_id": user.id, "email": user.email})

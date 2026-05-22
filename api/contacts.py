@@ -1,16 +1,17 @@
 """
 Contacts CRUD API — Handles batch import from parser, listing, editing, and deletion.
 """
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy import func, delete as sa_delete
 from pydantic import BaseModel
 from typing import Optional, List
-import sys, os, re
+from collections import defaultdict
+import re
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from core.auth import verify_api_key
+from core.auth import verify_token
 from db.database import get_db
 from db.models import Company, Contact, SessionData, Record, User
 
@@ -35,6 +36,7 @@ class ContactIn(BaseModel):
     industry: Optional[str] = None
     product: Optional[str] = None
     position: Optional[str] = None
+    files: Optional[str] = None
     raw_data: Optional[dict] = None       # original unmapped JSON for reference
 
 
@@ -62,6 +64,7 @@ class ContactUpdate(BaseModel):
     industry: Optional[str] = None
     product: Optional[str] = None
     position: Optional[str] = None
+    files: Optional[str] = None
 
 
 # ── Helpers ───────────────────────────────────────────────────────────
@@ -77,13 +80,10 @@ def classify_phone(num: str) -> str:
     if INDIAN_MOBILE_RE.match(cleaned):
         return "IN"
     if INTL_PHONE_RE.match(cleaned):
-        # Extract country code from +XX or +XXX prefix
         m = re.match(r"^\+(\d{1,3})", cleaned)
         return f"+{m.group(1)}" if m else "INTL"
-    # Check if it looks like a bare Indian mobile (no prefix)
     if re.match(r"^[6-9]\d{9}$", cleaned):
         return "IN"
-    # Landline / invalid
     return "INVALID"
 
 
@@ -91,14 +91,15 @@ def validate_email(email: str) -> bool:
     return bool(EMAIL_RE.match(email.strip())) if email else False
 
 
-def _find_or_create_company(db: Session, name: str, data: ContactIn) -> Company:
+async def _find_or_create_company(db: AsyncSession, name: str, data: ContactIn) -> Company:
     """Find existing company by name or create a new one."""
     if not name:
         return None
     normalized = name.strip().lower()
-    existing = db.query(Company).filter(
-        Company.name.ilike(normalized)
-    ).first()
+    result = await db.execute(
+        select(Company).filter(Company.name.ilike(normalized))
+    )
+    existing = result.scalars().first()
     if existing:
         return existing
     company = Company(
@@ -111,7 +112,7 @@ def _find_or_create_company(db: Session, name: str, data: ContactIn) -> Company:
         product=data.product,
     )
     db.add(company)
-    db.flush()
+    await db.flush()
     return company
 
 
@@ -134,18 +135,34 @@ def _contact_to_dict(contact: Contact, company: Company = None) -> dict:
         "website": company.website if company else None,
         "industry": company.industry if company else None,
         "product": company.product if company else None,
+        "files": contact.files if hasattr(contact, 'files') else None,
         "created_at": contact.created_at.isoformat() if contact.created_at else None,
         "updated_at": contact.updated_at.isoformat() if contact.updated_at else None,
     }
 
 
+# ── Async chunked query helper ───────────────────────────────────────
+
+async def _chunked_query(db: AsyncSession, model, attr, values, chunk_size=3000):
+    """Query in chunks to avoid SQL bind-parameter limits."""
+    results = []
+    for i in range(0, len(values), chunk_size):
+        chunk = values[i:i + chunk_size]
+        result = await db.execute(
+            select(Contact, Company).outerjoin(Company, Contact.company_id == Company.id)
+            .filter(attr.in_(chunk))
+        )
+        results.extend(result.all())
+    return results
+
+
 # ── Routes ────────────────────────────────────────────────────────────
 
-@router.post("/contacts/batch", dependencies=[Depends(verify_api_key)])
-async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
+@router.post("/contacts/batch", dependencies=[Depends(verify_token)])
+async def batch_import(body: BatchImportRequest, db: AsyncSession = Depends(get_db)):
     """
     Receives the cleaned, mapped contacts from the frontend after the user
-    confirms the field mapping.  Validates, filters, and persists to the DB.
+    confirms the field mapping. Validates, filters, and persists to the DB.
     """
     imported = 0
     skipped = 0
@@ -153,41 +170,30 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
 
     user_id = None
     if hasattr(body, "user_email") and body.user_email:
-        u = db.query(User).filter(User.email == body.user_email).first()
+        result = await db.execute(select(User).filter(User.email == body.user_email))
+        u = result.scalars().first()
         if u: user_id = u.id
-
 
     # Save session metadata
     session = SessionData(
-    user_id=user_id,
-    file_name=body.file_name,
-    sheet_name=body.sheet_name,
-    mapping=body.mapping,
-    total_records=len(body.contacts),
+        user_id=user_id,
+        file_name=body.file_name,
+        sheet_name=body.sheet_name,
+        mapping=body.mapping,
+        total_records=len(body.contacts),
     )
-
     db.add(session)
-    db.flush()
+    await db.flush()
 
-    # Fetch existing contacts that share the same email or phone to check for full duplicates later
+    # Fetch existing contacts that share the same email or phone
     batch_emails = list(set([item.email_primary for item in body.contacts if item.email_primary]))
     batch_phones = list(set([item.phone_primary for item in body.contacts if item.phone_primary]))
-    
-    existing_contacts_data = []
-    
-    def chunked_query(db_sess, q, attr, values, chunk_size=3000):
-        result = []
-        for i in range(0, len(values), chunk_size):
-            chunk = values[i:i+chunk_size]
-            result.extend(q.filter(attr.in_(chunk)).all())
-        return result
 
+    existing_contacts_data = []
     if batch_emails:
-        q = db.query(Contact, Company).outerjoin(Company, Contact.company_id == Company.id)
-        existing_contacts_data.extend(chunked_query(db, q, Contact.email_primary, batch_emails))
+        existing_contacts_data.extend(await _chunked_query(db, Contact, Contact.email_primary, batch_emails))
     if batch_phones:
-        q = db.query(Contact, Company).outerjoin(Company, Contact.company_id == Company.id)
-        existing_contacts_data.extend(chunked_query(db, q, Contact.phone_primary, batch_phones))
+        existing_contacts_data.extend(await _chunked_query(db, Contact, Contact.phone_primary, batch_phones))
 
     # Deduplicate existing list
     seen_ids = set()
@@ -199,7 +205,6 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
     existing_contacts_data = unique_existing
 
     # Build hash maps for O(1) duplicate checks
-    from collections import defaultdict
     existing_by_email = defaultdict(list)
     existing_by_phone = defaultdict(list)
     for c, comp in existing_contacts_data:
@@ -208,24 +213,22 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
         if c.phone_primary:
             existing_by_phone[c.phone_primary].append((c, comp))
 
-    # Cache for companies during this batch to avoid repeated DB flushes
+    # Cache for companies during this batch
     company_cache = {}
 
     for item in body.contacts:
-        # ── Archive raw record FIRST (before any skip/continue) ───
-        # This ensures all uploaded rows are persisted for audit,
-        # even if they are later skipped as duplicates or invalid.
+        # Archive raw record FIRST
         if item.raw_data:
             db.add(Record(session_id=session.id, data=item.raw_data))
 
-        # ── Validate email ────────────────────────────────────────
+        # Validate email
         email_ok = validate_email(item.email_primary) if item.email_primary else False
         if not email_ok:
             item.email_primary = None
         if item.email_secondary and not validate_email(item.email_secondary):
             item.email_secondary = None
 
-        # ── Validate & classify phone ─────────────────────────────
+        # Validate & classify phone
         phone_class = "INVALID"
         if item.phone_primary:
             phone_class = classify_phone(item.phone_primary)
@@ -239,60 +242,57 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
             if sec_class == "INVALID":
                 item.phone_secondary = None
 
-        # ── Rule: must have at least email OR valid mobile ────────
+        # Must have at least email OR valid mobile
         has_email = item.email_primary is not None
         has_phone = item.phone_primary is not None
         if not has_email and not has_phone:
             skipped += 1
             continue
 
-        # ── Exact Duplicate check ───────────────────────────────────────
+        # Exact Duplicate check
         is_exact_dup = False
         candidates = []
         if item.email_primary and item.email_primary.lower() in existing_by_email:
             candidates.extend(existing_by_email[item.email_primary.lower()])
         if item.phone_primary and item.phone_primary in existing_by_phone:
             candidates.extend(existing_by_phone[item.phone_primary])
-            
+
         for existing_contact, existing_company in candidates:
-            # Check if this contact matches ALL provided fields
             match = True
             if item.email_primary and existing_contact.email_primary != item.email_primary: match = False
             if match and item.phone_primary and existing_contact.phone_primary != item.phone_primary: match = False
             if match and item.contact_name and existing_contact.name != item.contact_name: match = False
             if match and item.whatsapp and existing_contact.whatsapp != item.whatsapp: match = False
             if match and item.position and existing_contact.position != item.position: match = False
-            
             if match and item.company_name:
                 if not existing_company or existing_company.name != item.company_name: match = False
             if match and item.city:
                 if not existing_company or existing_company.city != item.city: match = False
             if match and item.industry:
                 if not existing_company or existing_company.industry != item.industry: match = False
-                
             if match:
                 is_exact_dup = True
                 break
-                
+
         if is_exact_dup:
             skipped += 1
             continue
 
-        # ── Flag foreign numbers ──────────────────────────────────
+        # Flag foreign numbers
         if item.phone_country and item.phone_country not in ("IN", "INVALID"):
             flagged_foreign += 1
 
-        # ── Find or create company ────────────────────────────────
+        # Find or create company
         company = None
         if item.company_name:
             comp_key = item.company_name.strip().lower()
             if comp_key in company_cache:
                 company = company_cache[comp_key]
             else:
-                company = _find_or_create_company(db, item.company_name, item)
+                company = await _find_or_create_company(db, item.company_name, item)
                 company_cache[comp_key] = company
 
-        # ── Create contact ────────────────────────────────────────
+        # Create contact
         contact = Contact(
             company_id=company.id if company else None,
             name=item.contact_name,
@@ -303,19 +303,19 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
             phone_country=item.phone_country,
             whatsapp=item.whatsapp,
             position=item.position,
+            files=item.files,
         )
         db.add(contact)
-
         imported += 1
         existing_contacts_data.append((contact, company))
 
     session.imported = imported
-    session.skipped  = skipped
+    session.skipped = skipped
 
     try:
-        db.commit()
+        await db.commit()
     except Exception as e:
-        db.rollback()
+        await db.rollback()
         raise HTTPException(500, f"Database error during save: {str(e)}")
 
     return JSONResponse(content={
@@ -327,20 +327,17 @@ async def batch_import(body: BatchImportRequest, db: Session = Depends(get_db)):
     })
 
 
-@router.get("/contacts", dependencies=[Depends(verify_api_key)])
+@router.get("/contacts", dependencies=[Depends(verify_token)])
 async def list_contacts(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=500),
     search: Optional[str] = Query(None),
     city: Optional[str] = Query(None),
     industry: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
-    """
-    Paginated contact listing with optional search and filters.
-    Joins Company table for full record view.
-    """
-    q = db.query(Contact, Company).outerjoin(Company, Contact.company_id == Company.id)
+    """Paginated contact listing with optional search and filters."""
+    q = select(Contact, Company).outerjoin(Company, Contact.company_id == Company.id)
 
     if search:
         like = f"%{search}%"
@@ -355,8 +352,15 @@ async def list_contacts(
     if industry:
         q = q.filter(Company.industry.ilike(f"%{industry}%"))
 
-    total = q.count()
-    rows = q.order_by(Contact.id.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    # Count
+    count_q = select(func.count()).select_from(q.subquery())
+    count_result = await db.execute(count_q)
+    total = count_result.scalar()
+
+    # Paginated rows
+    q = q.order_by(Contact.id.desc()).offset((page - 1) * page_size).limit(page_size)
+    result = await db.execute(q)
+    rows = result.all()
 
     return JSONResponse(content={
         "ok": True,
@@ -367,19 +371,22 @@ async def list_contacts(
     })
 
 
-@router.get("/contacts/{contact_id}", dependencies=[Depends(verify_api_key)])
-async def get_contact(contact_id: int, db: Session = Depends(get_db)):
-    row = db.query(Contact, Company).outerjoin(
-        Company, Contact.company_id == Company.id
-    ).filter(Contact.id == contact_id).first()
+@router.get("/contacts/{contact_id}", dependencies=[Depends(verify_token)])
+async def get_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(Contact, Company).outerjoin(Company, Contact.company_id == Company.id)
+        .filter(Contact.id == contact_id)
+    )
+    row = result.first()
     if not row:
         raise HTTPException(404, "Contact not found")
     return JSONResponse(content={"ok": True, "contact": _contact_to_dict(row[0], row[1])})
 
 
-@router.put("/contacts/{contact_id}", dependencies=[Depends(verify_api_key)])
-async def update_contact(contact_id: int, body: ContactUpdate, db: Session = Depends(get_db)):
-    contact = db.query(Contact).filter(Contact.id == contact_id).first()
+@router.put("/contacts/{contact_id}", dependencies=[Depends(verify_token)])
+async def update_contact(contact_id: int, body: ContactUpdate, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Contact).filter(Contact.id == contact_id))
+    contact = result.scalars().first()
     if not contact:
         raise HTTPException(404, "Contact not found")
 
@@ -411,10 +418,13 @@ async def update_contact(contact_id: int, body: ContactUpdate, db: Session = Dep
         contact.whatsapp = body.whatsapp
     if body.position is not None:
         contact.position = body.position
+    if body.files is not None:
+        contact.files = body.files
 
     # Update company fields
     if contact.company_id:
-        company = db.query(Company).filter(Company.id == contact.company_id).first()
+        comp_result = await db.execute(select(Company).filter(Company.id == contact.company_id))
+        company = comp_result.scalars().first()
         if company:
             if body.company_name is not None:
                 company.name = body.company_name
@@ -443,64 +453,75 @@ async def update_contact(contact_id: int, body: ContactUpdate, db: Session = Dep
                 product=body.product,
             )
             db.add(new_company)
-            db.flush()
+            await db.flush()
             contact.company_id = new_company.id
 
-    db.commit()
-    db.refresh(contact)
+    await db.commit()
+    await db.refresh(contact)
     return JSONResponse(content={"ok": True, "message": "Contact updated"})
 
 
-@router.delete("/contacts/{contact_id}", dependencies=[Depends(verify_api_key)])
-async def delete_contact(contact_id: int, db: Session = Depends(get_db)):
-    contact = db.query(Contact).filter(Contact.id == contact_id).first()
+@router.delete("/contacts/{contact_id}", dependencies=[Depends(verify_token)])
+async def delete_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Contact).filter(Contact.id == contact_id))
+    contact = result.scalars().first()
     if not contact:
         raise HTTPException(404, "Contact not found")
-    db.delete(contact)
-    db.commit()
+    await db.delete(contact)
+    await db.commit()
     return JSONResponse(content={"ok": True, "message": "Contact deleted"})
 
 
-@router.delete("/contacts", dependencies=[Depends(verify_api_key)])
-async def delete_multiple(ids: List[int] = Query(...), db: Session = Depends(get_db)):
-    """Delete multiple contacts at once. Handles empty lists and chunks
-    large batches to avoid exceeding SQL bind-parameter limits."""
+@router.delete("/contacts", dependencies=[Depends(verify_token)])
+async def delete_multiple(ids: List[int] = Query(...), db: AsyncSession = Depends(get_db)):
+    """Delete multiple contacts at once."""
     if not ids:
         return JSONResponse(content={"ok": True, "deleted": 0})
 
     CHUNK_SIZE = 5000
     total_deleted = 0
     for i in range(0, len(ids), CHUNK_SIZE):
-        chunk = ids[i : i + CHUNK_SIZE]
-        total_deleted += db.query(Contact).filter(
-            Contact.id.in_(chunk)
-        ).delete(synchronize_session=False)
-    db.commit()
+        chunk = ids[i:i + CHUNK_SIZE]
+        result = await db.execute(
+            sa_delete(Contact).filter(Contact.id.in_(chunk))
+        )
+        total_deleted += result.rowcount
+    await db.commit()
     return JSONResponse(content={"ok": True, "deleted": total_deleted})
 
 
-@router.get("/contacts/stats/summary", dependencies=[Depends(verify_api_key)])
-async def contact_stats(db: Session = Depends(get_db)):
+@router.get("/contacts/stats/summary", dependencies=[Depends(verify_token)])
+async def contact_stats(db: AsyncSession = Depends(get_db)):
     """Quick summary stats for the dashboard."""
-    total = db.query(Contact).count()
-    with_email = db.query(Contact).filter(Contact.email_primary.isnot(None)).count()
-    with_phone = db.query(Contact).filter(Contact.phone_primary.isnot(None)).count()
-    companies = db.query(Company).count()
+    total_r = await db.execute(select(func.count(Contact.id)))
+    total = total_r.scalar()
+
+    email_r = await db.execute(select(func.count(Contact.id)).filter(Contact.email_primary.isnot(None)))
+    with_email = email_r.scalar()
+
+    phone_r = await db.execute(select(func.count(Contact.id)).filter(Contact.phone_primary.isnot(None)))
+    with_phone = phone_r.scalar()
+
+    comp_r = await db.execute(select(func.count(Company.id)))
+    companies = comp_r.scalar()
 
     # City breakdown (top 10)
-    from sqlalchemy import func
-    city_rows = db.query(Company.city, func.count(Contact.id)).outerjoin(
+    city_q = select(Company.city, func.count(Contact.id)).outerjoin(
         Contact, Contact.company_id == Company.id
     ).filter(Company.city.isnot(None)).group_by(Company.city).order_by(
         func.count(Contact.id).desc()
-    ).limit(10).all()
+    ).limit(10)
+    city_result = await db.execute(city_q)
+    city_rows = city_result.all()
 
     # Industry breakdown (top 10)
-    ind_rows = db.query(Company.industry, func.count(Contact.id)).outerjoin(
+    ind_q = select(Company.industry, func.count(Contact.id)).outerjoin(
         Contact, Contact.company_id == Company.id
     ).filter(Company.industry.isnot(None)).group_by(Company.industry).order_by(
         func.count(Contact.id).desc()
-    ).limit(10).all()
+    ).limit(10)
+    ind_result = await db.execute(ind_q)
+    ind_rows = ind_result.all()
 
     return JSONResponse(content={
         "ok": True,

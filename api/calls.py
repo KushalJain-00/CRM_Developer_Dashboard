@@ -3,15 +3,13 @@ Call Logs API — Tracks all call discussions linked to contacts.
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
-import sys, os
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from core.auth import verify_api_key
+from core.auth import verify_token
 from db.database import get_db
 from db.models import CallLog, Contact, Company
 
@@ -61,11 +59,12 @@ def _log_to_dict(log: CallLog) -> dict:
 
 # ── Routes ────────────────────────────────────────────────────────────
 
-@router.post("/calls", dependencies=[Depends(verify_api_key)])
-async def create_call_log(body: CallLogIn, db: Session = Depends(get_db)):
+@router.post("/calls", dependencies=[Depends(verify_token)])
+async def create_call_log(body: CallLogIn, db: AsyncSession = Depends(get_db)):
     """Record a new call discussion for a contact."""
     # Verify contact exists
-    contact = db.query(Contact).filter(Contact.id == body.contact_id).first()
+    result = await db.execute(select(Contact).filter(Contact.id == body.contact_id))
+    contact = result.scalars().first()
     if not contact:
         raise HTTPException(404, "Contact not found")
 
@@ -85,21 +84,23 @@ async def create_call_log(body: CallLogIn, db: Session = Depends(get_db)):
         created_by=body.created_by,
     )
     db.add(log)
-    db.commit()
-    db.refresh(log)
+    await db.commit()
+    await db.refresh(log)
 
     return JSONResponse(content={"ok": True, "call_log": _log_to_dict(log)})
 
 
-@router.get("/calls/contact/{contact_id}", dependencies=[Depends(verify_api_key)])
+@router.get("/calls/contact/{contact_id}", dependencies=[Depends(verify_token)])
 async def get_call_logs_for_contact(
     contact_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """Get all call logs for a specific contact, newest first."""
-    logs = db.query(CallLog).filter(
-        CallLog.contact_id == contact_id
-    ).order_by(CallLog.call_date.desc()).all()
+    result = await db.execute(
+        select(CallLog).filter(CallLog.contact_id == contact_id)
+        .order_by(CallLog.call_date.desc())
+    )
+    logs = result.scalars().all()
 
     return JSONResponse(content={
         "ok": True,
@@ -108,9 +109,10 @@ async def get_call_logs_for_contact(
     })
 
 
-@router.put("/calls/{log_id}", dependencies=[Depends(verify_api_key)])
-async def update_call_log(log_id: int, body: CallLogUpdate, db: Session = Depends(get_db)):
-    log = db.query(CallLog).filter(CallLog.id == log_id).first()
+@router.put("/calls/{log_id}", dependencies=[Depends(verify_token)])
+async def update_call_log(log_id: int, body: CallLogUpdate, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(CallLog).filter(CallLog.id == log_id))
+    log = result.scalars().first()
     if not log:
         raise HTTPException(404, "Call log not found")
 
@@ -127,15 +129,16 @@ async def update_call_log(log_id: int, body: CallLogUpdate, db: Session = Depend
     if body.next_action_date is not None:
         log.next_action_date = datetime.fromisoformat(body.next_action_date)
 
-    db.commit()
+    await db.commit()
     return JSONResponse(content={"ok": True, "message": "Call log updated"})
 
 
-@router.delete("/calls/{log_id}", dependencies=[Depends(verify_api_key)])
-async def delete_call_log(log_id: int, db: Session = Depends(get_db)):
-    log = db.query(CallLog).filter(CallLog.id == log_id).first()
+@router.delete("/calls/{log_id}", dependencies=[Depends(verify_token)])
+async def delete_call_log(log_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(CallLog).filter(CallLog.id == log_id))
+    log = result.scalars().first()
     if not log:
         raise HTTPException(404, "Call log not found")
-    db.delete(log)
-    db.commit()
+    await db.delete(log)
+    await db.commit()
     return JSONResponse(content={"ok": True, "message": "Call log deleted"})
