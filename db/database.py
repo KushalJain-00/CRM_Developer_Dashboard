@@ -23,7 +23,10 @@ else:
         pool_size=5,
         max_overflow=10,
         pool_pre_ping=True,       # auto-reconnect on stale connections
-        pool_recycle=300,          # recycle connections every 5 min
+        pool_recycle=300,         # recycle connections every 5 min
+        connect_args={
+            "prepared_statement_cache_size": 0,  # Required for Supabase pgbouncer (transaction mode)
+        }
     )
 
 AsyncSessionLocal = async_sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
