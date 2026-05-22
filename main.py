@@ -20,10 +20,26 @@ from api.calls import router as calls_router
 from db.database import init_db
 
 
+import logging
+import asyncio
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize database tables on startup"""
-    await init_db()
+    logger.info("Starting database initialization...")
+    try:
+        # Wrap in a 10 second timeout so we don't hang forever
+        await asyncio.wait_for(init_db(), timeout=10.0)
+        logger.info("Database initialized successfully.")
+    except asyncio.TimeoutError:
+        logger.error("CRITICAL: Database connection timed out! If you are using Supabase on Render, make sure you use the Connection Pooler URL (IPv4) instead of the direct database URL (IPv6).")
+        raise
+    except Exception as e:
+        logger.error(f"CRITICAL: Database initialization failed: {str(e)}")
+        raise
     yield
 
 

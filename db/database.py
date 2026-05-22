@@ -10,6 +10,10 @@ if DATABASE_URL.startswith("postgres://"):
 elif DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
+# Strip query params since SQLAlchemy/asyncpg doesn't like Supabase's '?pgbouncer=true'
+if "?" in DATABASE_URL and not DATABASE_URL.startswith("sqlite"):
+    DATABASE_URL = DATABASE_URL.split("?")[0]
+
 # Configure engine based on database type
 if DATABASE_URL.startswith("sqlite"):
     engine = create_async_engine(
