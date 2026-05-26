@@ -2176,28 +2176,29 @@ function parseEml(fileName) {
   if (API_BASE && EML.parsed?.body) {
     EML.sigLoading = true;
     const aiConfig = getAiSettings();
-    const sigH = await apiHeaders();
-    fetch(`${API_BASE}/api/parse-signature`, {
-      method: 'POST',
-      headers: sigH,
-      body: JSON.stringify({ 
-        body_text: EML.parsed.body, 
-        subject: EML.parsed.subject,
-        provider: aiConfig.provider || 'groq',
-        model: aiConfig.model || 'llama-3.3-70b-versatile',
-        api_key: aiConfig.apiKey || ''
-      }),
-    })
-    .then(r => r.json())
-    .then(data => {
-      EML.sigLoading = false;
-      if (data.ok && data.fields && Object.values(data.fields).some(v => v)) {
-        EML.sigData = data.fields;
-        renderSigPanel();
-        showNotification('🪪 Signature intelligence extracted by AI', 'success');
-      }
-    })
-    .catch(() => { EML.sigLoading = false; });
+    apiHeaders().then(sigH => {
+      fetch(`${API_BASE}/api/parse-signature`, {
+        method: 'POST',
+        headers: sigH,
+        body: JSON.stringify({ 
+          body_text: EML.parsed.body, 
+          subject: EML.parsed.subject,
+          provider: aiConfig.provider || 'groq',
+          model: aiConfig.model || 'llama-3.3-70b-versatile',
+          api_key: aiConfig.apiKey || ''
+        }),
+      })
+      .then(r => r.json())
+      .then(data => {
+        EML.sigLoading = false;
+        if (data.ok && data.fields && Object.values(data.fields).some(v => v)) {
+          EML.sigData = data.fields;
+          renderSigPanel();
+          showNotification('🪪 Signature intelligence extracted by AI', 'success');
+        }
+      })
+      .catch(() => { EML.sigLoading = false; });
+    }).catch(() => { EML.sigLoading = false; });
   }
 }
 
