@@ -311,6 +311,8 @@ async def batch_import(body: BatchImportRequest, db: AsyncSession = Depends(get_
 
     session.imported = imported
     session.skipped = skipped
+    
+    session_id = session.id
 
     try:
         await db.commit()
@@ -323,7 +325,7 @@ async def batch_import(body: BatchImportRequest, db: AsyncSession = Depends(get_
         "imported": imported,
         "skipped": skipped,
         "flagged_foreign": flagged_foreign,
-        "session_id": session.id,
+        "session_id": session_id,
     })
 
 

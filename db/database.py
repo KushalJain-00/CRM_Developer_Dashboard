@@ -39,9 +39,7 @@ else:
             "ssl": ssl_context           # Required for Supabase, avoids self-signed cert errors
         }
     )
-
-AsyncSessionLocal = async_sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
-
+AsyncSessionLocal = async_sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, bind=engine, class_=AsyncSession)
 Base = declarative_base()
 
 
