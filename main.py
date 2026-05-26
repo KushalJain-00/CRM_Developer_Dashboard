@@ -70,6 +70,11 @@ app.add_middleware(
 
 from fastapi.staticfiles import StaticFiles
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Render to verify the app is running."""
+    return {"status": "ok"}
+
 app.include_router(parse_router, prefix="/api")
 app.include_router(pdf_router, prefix="/api")
 app.include_router(contacts_router, prefix="/api")
