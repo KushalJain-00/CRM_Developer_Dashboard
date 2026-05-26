@@ -14,7 +14,7 @@ router = APIRouter()
 MAX_SIZE = 30 * 1024 * 1024  # 30 MB
 
 
-@router.post("/parse", dependencies=[Depends(verify_token)])
+@router.post("/parse")
 async def parse_file(file: UploadFile = File(...)):
     content = await file.read()
     if len(content) > MAX_SIZE:

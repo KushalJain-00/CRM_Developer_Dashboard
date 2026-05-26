@@ -94,7 +94,7 @@ async def call_llm(provider, model, api_key, payload):
         data = response.json()
         return data["choices"][0]["message"]["content"].strip()
 
-@router.post("/parse-signature", dependencies=[Depends(verify_token)])
+@router.post("/parse-signature")
 @limiter.limit("200/minute")
 async def parse_signature(request: Request, body: SignatureRequest):
     email_text = clean_email_text(body.body_text)

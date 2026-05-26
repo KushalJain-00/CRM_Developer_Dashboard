@@ -158,7 +158,7 @@ async def _chunked_query(db: AsyncSession, model, attr, values, chunk_size=3000)
 
 # ── Routes ────────────────────────────────────────────────────────────
 
-@router.post("/contacts/batch", dependencies=[Depends(verify_token)])
+@router.post("/contacts/batch")
 async def batch_import(body: BatchImportRequest, db: AsyncSession = Depends(get_db)):
     """
     Receives the cleaned, mapped contacts from the frontend after the user
@@ -327,7 +327,7 @@ async def batch_import(body: BatchImportRequest, db: AsyncSession = Depends(get_
     })
 
 
-@router.get("/contacts", dependencies=[Depends(verify_token)])
+@router.get("/contacts")
 async def list_contacts(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=500),
@@ -371,7 +371,7 @@ async def list_contacts(
     })
 
 
-@router.get("/contacts/{contact_id}", dependencies=[Depends(verify_token)])
+@router.get("/contacts/{contact_id}")
 async def get_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(Contact, Company).outerjoin(Company, Contact.company_id == Company.id)
@@ -383,7 +383,7 @@ async def get_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
     return JSONResponse(content={"ok": True, "contact": _contact_to_dict(row[0], row[1])})
 
 
-@router.put("/contacts/{contact_id}", dependencies=[Depends(verify_token)])
+@router.put("/contacts/{contact_id}")
 async def update_contact(contact_id: int, body: ContactUpdate, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Contact).filter(Contact.id == contact_id))
     contact = result.scalars().first()
@@ -461,7 +461,7 @@ async def update_contact(contact_id: int, body: ContactUpdate, db: AsyncSession 
     return JSONResponse(content={"ok": True, "message": "Contact updated"})
 
 
-@router.delete("/contacts/{contact_id}", dependencies=[Depends(verify_token)])
+@router.delete("/contacts/{contact_id}")
 async def delete_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Contact).filter(Contact.id == contact_id))
     contact = result.scalars().first()
@@ -472,7 +472,7 @@ async def delete_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
     return JSONResponse(content={"ok": True, "message": "Contact deleted"})
 
 
-@router.delete("/contacts", dependencies=[Depends(verify_token)])
+@router.delete("/contacts")
 async def delete_multiple(ids: List[int] = Query(...), db: AsyncSession = Depends(get_db)):
     """Delete multiple contacts at once."""
     if not ids:
@@ -490,7 +490,7 @@ async def delete_multiple(ids: List[int] = Query(...), db: AsyncSession = Depend
     return JSONResponse(content={"ok": True, "deleted": total_deleted})
 
 
-@router.get("/contacts/stats/summary", dependencies=[Depends(verify_token)])
+@router.get("/contacts/stats/summary")
 async def contact_stats(db: AsyncSession = Depends(get_db)):
     """Quick summary stats for the dashboard."""
     total_r = await db.execute(select(func.count(Contact.id)))

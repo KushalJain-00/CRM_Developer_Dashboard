@@ -22,7 +22,7 @@ class PDFRequest(BaseModel):
     columns: list[str]
 
 
-@router.post("/export/pdf", dependencies=[Depends(verify_token)])
+@router.post("/export/pdf")
 async def export_pdf(body: PDFRequest):
     try:
         pdf_bytes = generate_pdf(body.model_dump())

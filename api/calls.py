@@ -59,7 +59,7 @@ def _log_to_dict(log: CallLog) -> dict:
 
 # ── Routes ────────────────────────────────────────────────────────────
 
-@router.post("/calls", dependencies=[Depends(verify_token)])
+@router.post("/calls")
 async def create_call_log(body: CallLogIn, db: AsyncSession = Depends(get_db)):
     """Record a new call discussion for a contact."""
     # Verify contact exists
@@ -90,7 +90,7 @@ async def create_call_log(body: CallLogIn, db: AsyncSession = Depends(get_db)):
     return JSONResponse(content={"ok": True, "call_log": _log_to_dict(log)})
 
 
-@router.get("/calls/contact/{contact_id}", dependencies=[Depends(verify_token)])
+@router.get("/calls/contact/{contact_id}")
 async def get_call_logs_for_contact(
     contact_id: int,
     db: AsyncSession = Depends(get_db),
@@ -109,7 +109,7 @@ async def get_call_logs_for_contact(
     })
 
 
-@router.put("/calls/{log_id}", dependencies=[Depends(verify_token)])
+@router.put("/calls/{log_id}")
 async def update_call_log(log_id: int, body: CallLogUpdate, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(CallLog).filter(CallLog.id == log_id))
     log = result.scalars().first()
@@ -133,7 +133,7 @@ async def update_call_log(log_id: int, body: CallLogUpdate, db: AsyncSession = D
     return JSONResponse(content={"ok": True, "message": "Call log updated"})
 
 
-@router.delete("/calls/{log_id}", dependencies=[Depends(verify_token)])
+@router.delete("/calls/{log_id}")
 async def delete_call_log(log_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(CallLog).filter(CallLog.id == log_id))
     log = result.scalars().first()
