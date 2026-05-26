@@ -66,6 +66,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Global exception handler — ensures CORS headers are always sent, even on 500 errors
+from fastapi import Request
+from fastapi.responses import JSONResponse
+import traceback
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled error on {request.method} {request.url.path}: {exc}")
+    logger.error(traceback.format_exc())
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc)},
+        headers={"Access-Control-Allow-Origin": "*"}
+    )
+
 from fastapi.staticfiles import StaticFiles
 
 @app.get("/health")
