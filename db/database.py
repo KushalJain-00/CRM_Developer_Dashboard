@@ -28,7 +28,6 @@ else:
         max_overflow=10,
         pool_pre_ping=True,       # auto-reconnect on stale connections
         pool_recycle=300,         # recycle connections every 5 min
-        prepared_statement_cache_size=0, # Disables SQLAlchemy's prepared statement cache
         connect_args={
             "statement_cache_size": 0,   # Disables asyncpg's native prepared statements (required for pgbouncer)
             "ssl": True                  # Required for Supabase since we stripped query params
