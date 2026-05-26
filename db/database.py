@@ -14,7 +14,13 @@ elif DATABASE_URL.startswith("postgresql://"):
 if "?" in DATABASE_URL and not DATABASE_URL.startswith("sqlite"):
     DATABASE_URL = DATABASE_URL.split("?")[0]
 
-# Configure engine based on database type
+import ssl
+
+# Create SSL context to allow self-signed certificates (equivalent to sslmode=require)
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
+
 if DATABASE_URL.startswith("sqlite"):
     engine = create_async_engine(
         DATABASE_URL,
@@ -30,7 +36,7 @@ else:
         pool_recycle=300,         # recycle connections every 5 min
         connect_args={
             "statement_cache_size": 0,   # Disables asyncpg's native prepared statements (required for pgbouncer)
-            "ssl": True                  # Required for Supabase since we stripped query params
+            "ssl": ssl_context           # Required for Supabase, avoids self-signed cert errors
         }
     )
 
