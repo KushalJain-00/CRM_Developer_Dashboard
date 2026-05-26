@@ -58,12 +58,10 @@ from core.rate_limit import limiter
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -85,7 +83,3 @@ app.include_router(sig_router, prefix="/api")
 
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
 
-
-@app.get("/health")
-async def health():
-    return {"status": "ok"}
