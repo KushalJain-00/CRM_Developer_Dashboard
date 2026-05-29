@@ -1,5 +1,5 @@
-// window.CRM_API_BASE = 'https://crm-developer-dashboard.onrender.com';
-window.CRM_API_BASE = 'http://localhost:8000';  // LOCAL TESTING
+window.CRM_API_BASE = 'https://crm-developer-dashboard.onrender.com';
+// window.CRM_API_BASE = 'http://localhost:8000';  // LOCAL TESTING
 
 // ── Supabase credentials ──────────────────────────────────────────────
 // NOTE: Supabase Anon Keys are designed to be public. Security is handled
