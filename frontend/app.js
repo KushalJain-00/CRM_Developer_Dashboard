@@ -1673,6 +1673,20 @@ async function deleteSession(sessionId) {
     const delH = await apiHeaders();
     await fetch(`${API_BASE}/api/history/${sessionId}`, { method: 'DELETE', headers: delH });
     loadHistory();
+    if (S.sessionId === sessionId) {
+      S.rawData = [];
+      S.clean = [];
+      S.sessionId = null;
+      const topActions = document.getElementById('topActions');
+      if (topActions) topActions.style.display = 'none';
+      const sbFileCard = document.getElementById('sbFileCard');
+      if (sbFileCard) sbFileCard.classList.add('hidden');
+      const topTitle = document.getElementById('topTitle');
+      if (topTitle) topTitle.textContent = 'Upload Data';
+      const topSub = document.getElementById('topSub');
+      if (topSub) topSub.textContent = 'Drag & drop Excel or CSV files';
+      showView('upload');
+    }
   } catch (err) {
     showNotification(`Delete failed: ${err.message}`, 'error');
   }
