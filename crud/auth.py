@@ -8,13 +8,13 @@ async def upsert_user(db: AsyncSession, email: str, name: str = None, provider_u
     user = result.scalars().first()
     
     if user:
-        user.last_login = datetime.now(timezone.utc)
+        user.last_login = datetime.utcnow()
         if name:
             user.name = name
         if provider_uid:
             user.provider_uid = provider_uid
     else:
-        user = User(email=email, name=name, provider_uid=provider_uid, last_login=datetime.now(timezone.utc))
+        user = User(email=email, name=name, provider_uid=provider_uid, last_login=datetime.utcnow())
         db.add(user)
         
     await db.commit()

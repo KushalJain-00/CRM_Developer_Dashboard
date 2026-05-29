@@ -68,8 +68,8 @@ async def create_call_log(body: CallLogIn, db: AsyncSession = Depends(get_db)):
     if not contact:
         raise HTTPException(404, "Contact not found")
 
-    call_date = datetime.fromisoformat(body.call_date) if body.call_date else datetime.utcnow()
-    next_date = datetime.fromisoformat(body.next_action_date) if body.next_action_date else None
+    call_date = datetime.fromisoformat(body.call_date.replace('Z', '+00:00')).replace(tzinfo=None) if body.call_date else datetime.utcnow()
+    next_date = datetime.fromisoformat(body.next_action_date.replace('Z', '+00:00')).replace(tzinfo=None) if body.next_action_date else None
 
     log = CallLog(
         contact_id=body.contact_id,

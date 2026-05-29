@@ -25,6 +25,10 @@ This plan outlines the root causes of the bugs in the CRM EML extraction, mappin
    - When saving a session, the backend checks for the user's record. Since the user doesn't exist, the session is saved with `user_id = None`.
    - Later, when history retrieves sessions matching the user, it results in inconsistent state mapping.
 
+5. **CRM Edits, Deletes, and Call Logs Not Saving (Mocked UI)**:
+   - The frontend includes buttons to Edit contacts, Delete contacts, and Add Call Logs (CRM Phase 2). However, these functions (`saveEdit`, `deleteRow`, `addCallLogFromPanel`) currently only mutate local JavaScript state (`S.filtered` array) or append DOM elements without making any `fetch()` requests to the backend API (`PUT /api/contacts/{id}`, `POST /api/calls`, etc.).
+   - Furthermore, the frontend operates on parsed data which doesn't include the backend `contact.id`. Because of this, it cannot construct the appropriate URLs for the backend API.
+
 ---
 
 ## Proposed Changes
@@ -45,6 +49,10 @@ This plan outlines the root causes of the bugs in the CRM EML extraction, mappin
 - Update the Pydantic schemas `ContactIn` and `ContactUpdate` to include `files: Optional[str] = None`.
 - Update `batch_import()` and `update_contact()` to save/update the `files` column.
 - Update `_contact_to_dict` to include `files`.
+- Update `batch_import()` to track and return the database `contact.id` for each item inside a `contact_ids` array, so the frontend can associate rows with their database records.
+
+#### [MODIFY] [api/history.py](file:///d:/PROJECTS/CRM_Developer/api/history.py)
+- Update `get_session_endpoint()` to query existing CRM contacts by email/phone (similar to `export_session_with_calls`) and append the `_contact_id` property to the returned records, so that loaded history sessions can be edited in the frontend.
 
 #### [MODIFY] [api/parse_signature.py](file:///d:/PROJECTS/CRM_Developer/api/parse_signature.py)
 - Update the system prompt to instruct the AI to extract contact information from the full email text, not just signatures.
@@ -81,6 +89,10 @@ This plan outlines the root causes of the bugs in the CRM EML extraction, mappin
   - `position`: `row['Designation'] || null`
   - `whatsapp`: `row['WhatsApp'] || null`
   - `files`: `row['Files'] || null`
+- Update `saveToCRM()` to process the returned `contact_ids` array and assign `_contact_id` to each row in `S.clean` so the frontend can interact with the backend APIs.
+- Wire up `saveEdit()` to make a `PUT /api/contacts/{id}` request when a row has an associated `_contact_id`.
+- Wire up `deleteRow()` to make a `DELETE /api/contacts/{id}` request when deleting a row with an associated `_contact_id`.
+- Wire up `addCallLogFromPanel()` to make a `POST /api/calls` request using the `_contact_id`.
 - Update `renderSigPanel()` to support both single signature objects and arrays of signature objects. If multiple signatures are found, render them as separate blocks.
 - Update `emlSendToCRM()` and `pushBulkToCRM()` to:
   - Populate the `Files` column with the comma-separated names of attachments.

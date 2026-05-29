@@ -216,6 +216,8 @@ async def batch_import(body: BatchImportRequest, db: AsyncSession = Depends(get_
     # Cache for companies during this batch
     company_cache = {}
 
+    contact_ids = []
+
     for item in body.contacts:
         # Archive raw record FIRST
         if item.raw_data:
@@ -247,6 +249,7 @@ async def batch_import(body: BatchImportRequest, db: AsyncSession = Depends(get_
         has_phone = item.phone_primary is not None
         if not has_email and not has_phone:
             skipped += 1
+            contact_ids.append(None)
             continue
 
         # Exact Duplicate check
@@ -272,6 +275,7 @@ async def batch_import(body: BatchImportRequest, db: AsyncSession = Depends(get_
                 if not existing_company or existing_company.industry != item.industry: match = False
             if match:
                 is_exact_dup = True
+                contact_ids.append(existing_contact)
                 break
 
         if is_exact_dup:
@@ -308,6 +312,7 @@ async def batch_import(body: BatchImportRequest, db: AsyncSession = Depends(get_
         db.add(contact)
         imported += 1
         existing_contacts_data.append((contact, company))
+        contact_ids.append(contact)
 
     session.imported = imported
     session.skipped = skipped
@@ -320,12 +325,15 @@ async def batch_import(body: BatchImportRequest, db: AsyncSession = Depends(get_
         await db.rollback()
         raise HTTPException(500, f"Database error during save: {str(e)}")
 
+    final_contact_ids = [c.id if c else None for c in contact_ids]
+
     return JSONResponse(content={
         "ok": True,
         "imported": imported,
         "skipped": skipped,
         "flagged_foreign": flagged_foreign,
         "session_id": session_id,
+        "contact_ids": final_contact_ids
     })
 
 

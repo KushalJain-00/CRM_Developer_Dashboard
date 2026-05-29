@@ -195,12 +195,10 @@ async function syncAuthSession() {
     const API_BASE_URL = (window.CRM_API_BASE || '').replace(/\/$/, '');
     const API_KEY = window.CRM_API_KEY || '';
     if (API_BASE_URL && user.email) {
+      const h = await apiHeaders();
       fetch(`${API_BASE_URL}/api/auth/upsert`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': API_KEY
-        },
+        headers: h,
         body: JSON.stringify({
           email: user.email,
           name: fullName || user.email,
@@ -712,6 +710,7 @@ function processData() {
   // Step 1: Clean & normalize values
   const cleaned = S.rawData.map(row => {
     const out = { _phoneCountry: 'IN' };
+    if (row._contact_id) out._contact_id = row._contact_id;
     keep.forEach(h => {
       const type = S.mapping[h].type;
       let v = row[h];
@@ -825,6 +824,7 @@ function normalizeToStandardFields() {
   // Map each cleaned row to standard fields
   S.clean = S.clean.map(row => {
     const out = { _phoneCountry: row._phoneCountry || 'IN' };
+    if (row._contact_id) out._contact_id = row._contact_id;
 
     fieldDefs.forEach(fd => {
       if (fd.idx !== undefined) {
@@ -1479,6 +1479,9 @@ function resetApp() {
    ══════════════════════════════════════════════════════════════════════ */
 
 async function saveToCRM() {
+  if (document.body.classList.contains('eml-mode')) {
+    return emlSaveToSupabase();
+  }
   if (!API_BASE) { alert('Backend not configured. Set CRM_API_BASE in config.js'); return; }
   if (!S.clean.length) { alert('No data to save.'); return; }
   const btn = document.getElementById('btnSaveCRM');
@@ -1526,6 +1529,15 @@ async function saveToCRM() {
     }
     const data = await res.json();
     S.sessionId = data.session_id;
+
+    // Inject _contact_id into S.clean for subsequent edit/delete/call-log operations
+    if (data.contact_ids && Array.isArray(data.contact_ids)) {
+      data.contact_ids.forEach((id, i) => {
+        if (i < S.clean.length && id) S.clean[i]._contact_id = id;
+      });
+      filterTable(); // refresh S.filtered so it picks up the new IDs
+    }
+
     const msg = `✅ Saved ${data.imported} contacts to CRM.`
       + (data.skipped ? ` ${data.skipped} skipped (duplicates/invalid).` : '')
       + (data.flagged_foreign ? ` ${data.flagged_foreign} foreign numbers flagged.` : '');
@@ -1588,8 +1600,60 @@ async function reloadSession(sessionId, fileName, btnEl) {
     const res = await fetch(`${API_BASE}/api/history/${sessionId}?page_size=1000`, { headers: sessH });
     const data = await res.json();
     if (!data.ok || !data.records.length) { showNotification('No records found.', 'error'); return; }
+    if (fileName.startsWith('Bulk EML') || data.sheet_name === 'EML Bulk Import') {
+      BULK.rows = data.records.map(r => ({
+        'File Name':       r['File'] || r['File Name'] || '',
+        'Subject':         r['Subject'] || '',
+        'Date':            r['Date'] || '',
+        'From Name':       '',
+        'From Email':      r['From'] || r['From Email'] || '',
+        'Contact Name':    r['Person Name 1'] || r['Contact Name'] || '',
+        'Email':           r['Email 1'] || r['Email'] || '',
+        'Company':         r['Company Name'] || r['Company'] || '',
+        'Designation':     r['Designation'] || '',
+        'Phone Primary':   r['Mobile 1'] || r['Phone Primary'] || '',
+        'Phone Secondary': r['Mobile 2'] || r['Phone Secondary'] || '',
+        'Website':         r['Website'] || '',
+        'City':            r['City'] || r['Location'] || '',
+        'Domain':          r['Domain'] || '',
+        'Source':          r['Source'] || '',
+        'Attachments':     r['Files'] || r['Attachments'] || '',
+        'Is Reply':        r['Is Reply'] || 'No',
+        'Is Forward':      r['Is Forward'] || 'No'
+      }));
+      BULK.processed = [...new Set(BULK.rows.map(r=>r['File Name']))].length || 1;
+      BULK.errors = 0;
+      showBulkDashboard();
+      return;
+    }
+
+    if (data.sheet_name === 'EML Contacts' || fileName.endsWith('.eml') || fileName === 'Email Import') {
+      EML.parsed = { fileName: fileName, subject: '', date: '', from: [], to: [], cc: [], body: '', attachments: [], phones: [], urls: [] };
+      EML.contacts = data.records.map(r => ({
+        name: r['Person Name 1'] || '',
+        email: r['Email 1'] || '',
+        domain: r['Domain'] || '',
+        source: r['Source'] || ''
+      }));
+      EML.filtered = [...EML.contacts];
+      EML.sigData = data.records.map(r => ({
+        name: r['Person Name 1'],
+        email: r['Email 1'],
+        company: r['Company Name'],
+        designation: r['Designation'],
+        phone_primary: r['Mobile 1'],
+        phone_secondary: r['Mobile 2'],
+        website: r['Website'],
+        city: r['City'],
+        address: r['Address'],
+        pincode: r['Pincode']
+      }));
+      showEmlView();
+      return;
+    }
+
     S.rawData = data.records;
-    S.headers = Object.keys(data.records[0]);
+    S.headers = Object.keys(data.records[0]).filter(k => !k.startsWith('_'));
     S.fileName = fileName;
     S.sheetName = data.sheet_name;
     S.mapping = data.mapping || {};
@@ -1693,7 +1757,7 @@ function editRow(idx) {
   modal.classList.add('open');
 }
 
-function saveEdit() {
+async function saveEdit() {
   if (_editIdx === null) return;
   const row = S.filtered[_editIdx];
   const inputs = document.querySelectorAll('#editFields input');
@@ -1727,11 +1791,55 @@ function saveEdit() {
 
   if (hasError) return; // Abort save — do NOT close the modal
 
-  // All validations passed — apply values
+  // All validations passed — apply values temporarily to send to backend
+  const updatedRow = { ...row };
+  for (const inp of inputs) {
+    updatedRow[inp.dataset.col] = inp.value.trim();
+  }
+
+  // UPDATE BACKEND
+  if (updatedRow._contact_id && API_BASE) {
+    const btn = document.querySelector('#editModal .btn-primary');
+    const oldText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-inline"></span> Saving...';
+    btn.disabled = true;
+    try {
+      const h = await apiHeaders();
+      const payload = {
+        contact_name: updatedRow['Person Name 1'] || null,
+        company_name: updatedRow['Company Name'] || null,
+        email_primary: updatedRow['Email 1'] || null,
+        email_secondary: updatedRow['Email 2'] || null,
+        phone_primary: updatedRow['Mobile 1'] || null,
+        phone_secondary: updatedRow['Mobile 2'] || null,
+        whatsapp: updatedRow['WhatsApp'] || null,
+        position: updatedRow['Designation'] || null,
+        address: updatedRow['Address'] || null,
+        city: updatedRow['Location'] || null,
+        pincode: updatedRow['Pincode'] || null,
+        website: updatedRow['Website'] || null,
+        product: updatedRow['Products / Misc'] || null,
+        files: updatedRow['Files'] || null,
+      };
+      const res = await fetch(`${API_BASE}/api/contacts/${updatedRow._contact_id}`, {
+        method: 'PUT', headers: h, body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error(await res.text());
+    } catch(err) {
+      console.error(err);
+      showNotification('Failed to update DB', 'error');
+      btn.innerHTML = oldText;
+      btn.disabled = false;
+      return;
+    }
+    btn.innerHTML = oldText;
+    btn.disabled = false;
+  }
+
+  // Update local state if backend update was successful or if not in DB yet
   for (const inp of inputs) {
     row[inp.dataset.col] = inp.value.trim();
   }
-
   S.filtered[_editIdx] = row;
   closeEditModal();
   renderTable();
@@ -1744,12 +1852,27 @@ function closeEditModal() {
 }
 
 /* ── Delete Row ───────────────────────────────────────────────────── */
-function deleteRow(idx) {
+async function deleteRow(idx) {
   const row = S.filtered[idx];
   if (!row) return;
   const companyCols = colsByType('company');
   const name = companyCols.length ? row[companyCols[0]] || 'this record' : 'this record';
   if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+  
+  if (row._contact_id && API_BASE) {
+    try {
+      const h = await apiHeaders();
+      const res = await fetch(`${API_BASE}/api/contacts/${row._contact_id}`, {
+        method: 'DELETE', headers: h
+      });
+      if (!res.ok) throw new Error(await res.text());
+    } catch (err) {
+      console.error(err);
+      showNotification('Failed to delete from DB', 'error');
+      return;
+    }
+  }
+
   // Remove from S.clean (find actual index)
   const cleanIdx = S.clean.indexOf(row);
   if (cleanIdx >= 0) S.clean.splice(cleanIdx, 1);
@@ -1762,7 +1885,7 @@ function deleteRow(idx) {
 
 /* ── Contact Detail Panel + Call Logs ─────────────────────────────── */
 let _panelIdx = null;
-function showContactPanel(idx) {
+async function showContactPanel(idx) {
   _panelIdx = idx;
   const row = S.filtered[idx];
   if (!row) return;
@@ -1794,10 +1917,43 @@ function showContactPanel(idx) {
     detailsDiv.innerHTML += `<div class="pd-row"><span class="pd-label">🌍 Country</span><span class="pd-val"><span class="badge b-amber">${row._phoneCountry} — Foreign Number</span></span></div>`;
   }
 
-  // Call logs section
-  document.getElementById('callLogsList').innerHTML = '<div class="empty-state" style="padding:16px;font-size:12px">💡 Call logs will appear here after saving to CRM and recording calls.</div>';
+  // Call logs section — fetch from backend if contact is in DB
+  const callLogsList = document.getElementById('callLogsList');
+  callLogsList.innerHTML = '<div class="empty-state" style="padding:16px;font-size:12px">Loading call logs…</div>';
 
   panel.classList.add('open');
+
+  if (row._contact_id && API_BASE) {
+    try {
+      const h = await apiHeaders();
+      const res = await fetch(`${API_BASE}/api/calls/contact/${row._contact_id}`, { headers: h });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.logs && data.logs.length > 0) {
+          callLogsList.innerHTML = data.logs.map(log => {
+            const d = log.call_date ? new Date(log.call_date) : null;
+            const dateStr = d ? `${d.toLocaleDateString()} ${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}` : '';
+            const typeCls = log.call_type === 'Incoming' ? 'b-emerald' : log.call_type === 'Follow-up' ? 'b-amber' : 'b-blue';
+            return `<div class="call-log-entry">
+              <div class="cle-header">
+                <span class="cle-type badge ${typeCls}">${escHtml(log.call_type || '')}</span>
+                <span class="cle-outcome">${escHtml(log.outcome || '')}</span>
+                <span class="cle-date">${dateStr}</span>
+              </div>
+              <div class="cle-notes">${escHtml(log.notes || '')}</div>
+            </div>`;
+          }).join('');
+        } else {
+          callLogsList.innerHTML = '<div class="empty-state" style="padding:16px;font-size:12px">💡 No call logs yet. Record your first call below.</div>';
+        }
+      }
+    } catch(err) {
+      console.warn('Failed to load call logs:', err);
+      callLogsList.innerHTML = '<div class="empty-state" style="padding:16px;font-size:12px">💡 Call logs will appear here after saving to CRM and recording calls.</div>';
+    }
+  } else {
+    callLogsList.innerHTML = '<div class="empty-state" style="padding:16px;font-size:12px">💡 Save to CRM first, then record calls here.</div>';
+  }
 }
 
 function closeContactPanel() {
@@ -1805,11 +1961,40 @@ function closeContactPanel() {
   _panelIdx = null;
 }
 
-function addCallLogFromPanel() {
+async function addCallLogFromPanel() {
+  if (_panelIdx === null) return;
+  const row = S.filtered[_panelIdx];
   const notes = document.getElementById('callNotes').value.trim();
   const outcome = document.getElementById('callOutcome').value;
   const callType = document.getElementById('callType').value;
   if (!notes) { showNotification('Please enter call notes.', 'error'); return; }
+
+  const btn = document.querySelector('.call-log-form .btn-primary');
+  if (btn) btn.disabled = true;
+
+  if (row._contact_id && API_BASE) {
+    try {
+      const h = await apiHeaders();
+      const payload = {
+        contact_id: row._contact_id,
+        call_type: callType,
+        outcome: outcome,
+        notes: notes,
+        call_date: new Date().toISOString()
+      };
+      const res = await fetch(`${API_BASE}/api/calls`, {
+        method: 'POST', headers: h, body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error(await res.text());
+    } catch(err) {
+      console.error(err);
+      showNotification('Failed to save call log to DB', 'error');
+      if (btn) btn.disabled = false;
+      return;
+    }
+  }
+
+  if (btn) btn.disabled = false;
 
   const now = new Date();
   const entry = document.createElement('div');
@@ -2486,10 +2671,20 @@ function showEmlView() {
   document.getElementById('topSub').textContent=`${EML.parsed?.fileName||'Email'} · ${EML.contacts.length} contacts extracted`;
   document.body.classList.add('eml-mode');
   const ta=document.getElementById('topActions'); if(ta) ta.style.display='flex';
+  const btn = document.getElementById('btnSaveCRM');
+  if (btn) btn.innerHTML = '💾 Save to EML DB';
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.textContent.includes('Save to CRM')) n.querySelector('.ni-label').textContent = 'Save to EML DB';
+  });
 }
 
 function exitEmlDashboard() {
   document.body.classList.remove('eml-mode');
+  const btn = document.getElementById('btnSaveCRM');
+  if (btn) btn.innerHTML = '💾 Save to CRM';
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.textContent.includes('Save to EML DB')) n.querySelector('.ni-label').textContent = 'Save to CRM';
+  });
   const v=document.getElementById('view-eml');
   v.style.transition='opacity .35s, transform .35s'; v.style.opacity='0'; v.style.transform='translateY(12px)';
   setTimeout(()=>{v.style.opacity='';v.style.transform='';v.style.transition='';v.classList.remove('active');EML.raw='';EML.parsed=null;EML.contacts=[];EML.filtered=[];showView('upload');},380);
@@ -2558,6 +2753,8 @@ async function emlSaveToSupabase() {
   if(!emlClient){showNotification('EML Supabase not configured. Add EML_SUPABASE_URL and EML_SUPABASE_ANON_KEY to config.js','error');return;}
   if(!EML.parsed){showNotification('No email loaded','error');return;}
   const p=EML.parsed;
+  const btn = document.getElementById('btnSaveCRM');
+  if (btn) { btn.innerHTML = '<span class="spinner-inline"></span> Saving…'; btn.disabled = true; }
   try {
     showNotification('Saving to EML database…','info');
     const {data:emailRow,error:emailErr} = await emlClient.from('eml_emails').insert({
@@ -2604,6 +2801,9 @@ async function emlSaveToSupabase() {
     showNotification(`✅ Saved email + ${EML.contacts.length} contacts to EML database`,'success');
   } catch(err) {
     showNotification('Save failed: '+err.message,'error');
+  } finally {
+    const btn = document.getElementById('btnSaveCRM');
+    if (btn) { btn.innerHTML = '💾 Save to EML DB'; btn.disabled = false; }
   }
 }
 

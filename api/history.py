@@ -27,8 +27,45 @@ async def get_session_endpoint(session_id: int, page: int = 1, page_size: int = 
     s = await get_session(db, session_id)
     if not s: raise HTTPException(404, "Not found")
     total, records = await get_session_records(db, session_id, page, page_size)
+    
+    # Pre-fetch contacts to attach IDs for frontend editing
+    emails = []
+    phones = []
+    for r in records:
+        row = r.data or {}
+        e = row.get('Email 1') or row.get('email') or row.get('Email') or row.get('email_primary')
+        p = row.get('Mobile 1') or row.get('phone') or row.get('Phone') or row.get('phone_primary')
+        if e: emails.append(e)
+        if p: phones.append(p)
+        
+    contacts = []
+    if emails:
+        contacts.extend(await find_contacts_by_emails(db, emails))
+    if phones:
+        contacts.extend(await find_contacts_by_phones(db, phones))
+        
+    c_by_email = {c.email_primary.lower(): c for c in contacts if c.email_primary}
+    c_by_phone = {c.phone_primary: c for c in contacts if c.phone_primary}
+    
+    out_records = []
+    for r in records:
+        row = dict(r.data or {})
+        e = row.get('Email 1') or row.get('email') or row.get('Email') or row.get('email_primary')
+        p = row.get('Mobile 1') or row.get('phone') or row.get('Phone') or row.get('phone_primary')
+        
+        contact = None
+        if e and e.lower() in c_by_email:
+            contact = c_by_email[e.lower()]
+        elif p and p in c_by_phone:
+            contact = c_by_phone[p]
+            
+        if contact:
+            row['_contact_id'] = contact.id
+            
+        out_records.append(row)
+
     return JSONResponse({"ok": True, "file_name": s.file_name, "sheet_name": s.sheet_name,
-        "mapping": s.mapping, "total": total, "records": [r.data for r in records]})
+        "mapping": s.mapping, "total": total, "records": out_records})
 
 @router.delete("/history/{session_id}")
 async def delete_session_endpoint(session_id: int, db: AsyncSession = Depends(get_db)):
