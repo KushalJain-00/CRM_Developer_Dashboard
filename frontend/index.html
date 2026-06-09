@@ -115,6 +115,7 @@
         <button class="btn btn-secondary btn-sm" onclick="downloadVCF()">📱 VCF</button>
         <button class="btn btn-secondary btn-sm" onclick="downloadZip()">📦 ZIP</button>
       </div>
+      <div class="ai-settings-btn" onclick="openAiSettingsModal()" title="AI Settings" style="cursor:pointer;font-size:20px;display:flex;align-items:center;opacity:0.8;transition:opacity 0.2s;margin-right:12px;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8">⚙️</div>
       <div class="theme-picker" id="themePicker" title="Switch Theme">
         <div class="theme-dot active" data-theme="nexus-light" onclick="setTheme('nexus-light')" title="Nexus Light"></div>
         <div class="theme-dot" data-theme="nexus-dark" onclick="setTheme('nexus-dark')" title="Nexus Dark"></div>
@@ -354,6 +355,29 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
       <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI Settings Modal -->
+<div class="modal-overlay" id="aiSettingsModal" style="display:none; z-index: 2000;">
+  <div class="modal-box" style="max-width:600px; width:95%;">
+    <div class="modal-header">
+      <div class="modal-title">⚙️ AI Provider Settings</div>
+      <button class="modal-close" onclick="closeAiSettingsModal()">✕</button>
+    </div>
+    <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+      <p style="font-size:13px; color:var(--text-2); margin-bottom:16px;">Configure your primary AI provider and multiple fallbacks. The system will automatically switch to the next fallback if an API call fails.</p>
+      
+      <div id="aiChainContainer" style="display:flex; flex-direction:column; gap:16px;">
+        <!-- Chain items will be injected here via JS -->
+      </div>
+
+      <button class="btn btn-secondary btn-sm" style="margin-top:16px; width:100%; border: 1px dashed var(--border);" onclick="addAiFallback()">+ Add Fallback Provider</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeAiSettingsModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAiSettings()">Save Settings</button>
     </div>
   </div>
 </div>

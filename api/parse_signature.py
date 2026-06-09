@@ -59,40 +59,102 @@ Rules for accuracy:
 
 Do not include any intro, outro, or markdown code blocks. Just the raw JSON array."""
 
+from typing import List, Optional
+
+class ModelConfig(BaseModel):
+    provider: str
+    model: str
+    api_key: str
+
 class SignatureRequest(BaseModel):
     body_text: str
     subject: str = ""
-    provider: str = "openrouter"
-    model: str = "meta-llama/llama-3.3-70b-instruct"
-    api_key: str = ""
+    chain: List[ModelConfig] = []
 
 PROVIDERS = {
     "openrouter": "https://openrouter.ai/api/v1/chat/completions",
     "groq": "https://api.groq.com/openai/v1/chat/completions",
-    "openai": "https://api.openai.com/v1/chat/completions"
+    "openai": "https://api.openai.com/v1/chat/completions",
+    "deepseek": "https://api.deepseek.com/beta/chat/completions",
+    "anthropic": "https://api.anthropic.com/v1/messages",
+    "gemini": "https://generativelanguage.googleapis.com/v1beta/models/"
 }
 
 def clean_email_text(text: str) -> str:
     """Basic cleaning to save tokens (removes long continuous non-space strings like base64)."""
     text = re.sub(r'([A-Za-z0-9+/=]{100,})', '', text)
-    return text[:20000] # Limit to 20k chars
+    return text[:100000] # Limit to 100k chars
 
-async def call_llm(provider, model, api_key, payload):
-    url = PROVIDERS.get(provider, PROVIDERS["openrouter"])
+async def call_llm(provider, model, api_key, system_prompt, user_prompt):
+    url = PROVIDERS.get(provider)
+    if not url:
+        raise Exception(f"Unknown provider: {provider}")
+
     headers = {
-        "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
     }
-    if provider == "openrouter":
-        headers["HTTP-Referer"] = "https://crm.engine"
-        headers["X-Title"] = "CRM Engine"
 
-    async with httpx.AsyncClient(timeout=30.0) as client:
+    if provider == "anthropic":
+        headers["x-api-key"] = api_key
+        headers["anthropic-version"] = "2023-06-01"
+        payload = {
+            "model": model,
+            "max_tokens": 4096,
+            "temperature": 0.1,
+            "system": system_prompt,
+            "messages": [
+                {"role": "user", "content": user_prompt}
+            ]
+        }
+    elif provider == "gemini":
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        payload = {
+            "system_instruction": {
+                "parts": [{"text": system_prompt}]
+            },
+            "contents": [{
+                "parts": [{"text": user_prompt}]
+            }],
+            "generationConfig": {
+                "temperature": 0.1,
+                "maxOutputTokens": 4096
+            }
+        }
+    else:
+        # OpenAI compatible endpoints (OpenRouter, Groq, OpenAI, DeepSeek)
+        headers["Authorization"] = f"Bearer {api_key}"
+        if provider == "openrouter":
+            headers["HTTP-Referer"] = "https://crm.engine"
+            headers["X-Title"] = "CRM Engine"
+
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            "temperature": 0.1,
+            "max_tokens": 4096,
+        }
+        if provider in ["openai", "groq", "deepseek"]:
+            payload["response_format"] = {"type": "json_object"}
+
+    async with httpx.AsyncClient(timeout=45.0) as client:
         response = await client.post(url, headers=headers, json=payload)
+        
         if response.status_code != 200:
-            raise Exception(f"AI API Error ({response.status_code}): {response.text}")
+            raise Exception(f"{provider} API Error ({response.status_code}): {response.text}")
+            
         data = response.json()
-        return data["choices"][0]["message"]["content"].strip()
+        if provider == "anthropic":
+            return data["content"][0]["text"].strip()
+        elif provider == "gemini":
+            try:
+                return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            except (KeyError, IndexError):
+                raise Exception(f"Gemini API returned unexpected structure: {data}")
+        else:
+            return data["choices"][0]["message"]["content"].strip()
 
 @router.post("/parse-signature")
 @limiter.limit("200/minute")
@@ -103,58 +165,37 @@ async def parse_signature(request: Request, body: SignatureRequest):
         return JSONResponse({"ok": True, "fields": [], "cached": False})
 
     # Cache check
-    cache_string = f"{body.model}_{email_text}"
+    cache_string = f"{body.chain[0].model if body.chain else 'nomodel'}_{email_text}"
     cache_key = hashlib.md5(cache_string.encode()).hexdigest()
     cached_val = _cache.get(cache_key)
     if cached_val is not None:
         return JSONResponse({"ok": True, "fields": cached_val, "cached": True})
 
-    payload = {
-        "model": body.model,
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": f"Extract contact info from this email (Subject: {body.subject}):\n\n{email_text}"}
-        ],
-        "temperature": 0.1,
-        "max_tokens": 1024,
-    }
+    chain = body.chain
+    if not chain:
+        return JSONResponse({"ok": False, "error": "No AI configuration provided in the chain."})
 
-    # Fallback chain: Initial provider -> Groq -> OpenRouter -> OpenAI
-    chain = [
-        {"provider": body.provider, "model": body.model, "api_key": body.api_key.strip() or os.getenv(f"{body.provider.upper()}_API_KEY", "")},
-        {"provider": "groq", "model": "llama-3.3-70b-versatile", "api_key": os.getenv("GROQ_API_KEY", "")},
-        {"provider": "openrouter", "model": "meta-llama/llama-3.3-70b-instruct", "api_key": os.getenv("OPENROUTER_API_KEY", "")},
-        {"provider": "openai", "model": "gpt-4o-mini", "api_key": os.getenv("OPENAI_API_KEY", "")}
-    ]
+    user_prompt = f"Extract contact info from this email (Subject: {body.subject}):\n\n{email_text}"
 
     raw = None
     last_err = None
     for attempt in chain:
-        prov = attempt["provider"]
-        mod = attempt["model"]
-        key = attempt["api_key"]
+        prov = attempt.provider
+        mod = attempt.model
+        key = attempt.api_key
         
         if not key:
             continue
             
-        payload["model"] = mod
-        
-        # Enforce JSON mode for supported providers
-        if prov in ["openai", "groq"]:
-            payload["response_format"] = {"type": "json_object"}
-        elif "response_format" in payload:
-            del payload["response_format"]
-        
-        # 5 Retries with exponential backoff for each provider in chain
         success = False
-        for i in range(5):
+        for i in range(3): # 3 Retries per provider
             try:
-                raw = await call_llm(prov, mod, key, payload)
+                raw = await call_llm(prov, mod, key, SYSTEM_PROMPT, user_prompt)
                 success = True
                 break
             except Exception as e:
                 last_err = str(e)
-                await asyncio.sleep(2 ** i) # 1, 2, 4, 8, 16
+                await asyncio.sleep(2 ** i) # 1, 2, 4
         
         if success:
             break

@@ -271,31 +271,49 @@ const AI_MODELS = {
     { value: 'google/gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
     { value: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
   ],
-  groq: [
-    { value: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
-    { value: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B' },
-    { value: 'gemma2-9b-it', label: 'Gemma 2 9B' },
-  ],
   openai: [
     { value: 'gpt-4o', label: 'GPT-4o' },
     { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+  ],
+  anthropic: [
+    { value: 'claude-3-5-sonnet-latest', label: 'Claude 3.5 Sonnet' },
+    { value: 'claude-3-5-haiku-latest', label: 'Claude 3.5 Haiku' },
+    { value: 'claude-3-opus-latest', label: 'Claude 3 Opus' },
+  ],
+  deepseek: [
+    { value: 'deepseek-chat', label: 'DeepSeek Chat (V3)' },
+    { value: 'deepseek-reasoner', label: 'DeepSeek Reasoner (R1)' },
+  ],
+  gemini: [
+    { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+    { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+    { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
+    { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' },
   ]
 };
 
-function initAiSettings() {
-  const settings = getAiSettings();
-  const providerEl = document.getElementById('aiProviderSelect');
-  if (providerEl) {
-    providerEl.value = settings.provider || 'openrouter';
-    updateModelOptions(settings.model);
-    document.getElementById('aiApiKeyInput').value = settings.apiKey || '';
-  }
-}
+let currentAiChain = [];
 
 function getAiSettings() {
   try {
-    return JSON.parse(localStorage.getItem('CRM_AI_SETTINGS') || '{}');
-  } catch (e) { return {}; }
+    const settings = JSON.parse(localStorage.getItem('CRM_AI_SETTINGS') || '{"chain":[]}');
+    if (settings.chain && settings.chain.length > 0) return settings;
+    if (settings.provider && settings.apiKey) {
+      return { chain: [{ provider: settings.provider, model: settings.model, apiKey: settings.apiKey }] };
+    }
+    return { chain: [{ provider: 'openrouter', model: 'meta-llama/llama-3.3-70b-instruct', apiKey: '' }] };
+  } catch (e) { 
+    return { chain: [{ provider: 'openrouter', model: 'meta-llama/llama-3.3-70b-instruct', apiKey: '' }] }; 
+  }
+}
+
+function initAiSettings() {
+  const settings = getAiSettings();
+  currentAiChain = settings.chain || [];
+  if (currentAiChain.length === 0) {
+    currentAiChain.push({ provider: 'openrouter', model: 'meta-llama/llama-3.3-70b-instruct', apiKey: '' });
+  }
+  renderAiChain();
 }
 
 function openAiSettingsModal() {
@@ -307,9 +325,69 @@ function closeAiSettingsModal() {
   document.getElementById('aiSettingsModal').style.display = 'none';
 }
 
-async function updateModelOptions(selectedModel = null) {
-  const provider = document.getElementById('aiProviderSelect').value;
-  const modelSelect = document.getElementById('aiModelSelect');
+function renderAiChain() {
+  const container = document.getElementById('aiChainContainer');
+  if (!container) return;
+  container.innerHTML = currentAiChain.map((item, index) => `
+    <div class="ai-chain-item" style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-2); position: relative;">
+      <div style="font-weight:600; margin-bottom:8px; font-size:13px; color:var(--text-2)">
+        ${index === 0 ? '🥇 Primary Provider' : `🥈 Fallback Provider ${index}`}
+        ${index > 0 ? `<button onclick="removeAiFallback(${index})" style="position:absolute; right:8px; top:8px; background:transparent; border:none; color:var(--text-3); cursor:pointer;">✕</button>` : ''}
+      </div>
+      <div style="display:flex; gap:8px; margin-bottom:8px;">
+        <select id="aiProv_${index}" class="tbl-select" style="flex:1" onchange="onProviderChange(${index})">
+          <option value="openrouter" ${item.provider==='openrouter'?'selected':''}>OpenRouter</option>
+          <option value="openai" ${item.provider==='openai'?'selected':''}>OpenAI</option>
+          <option value="anthropic" ${item.provider==='anthropic'?'selected':''}>Anthropic</option>
+          <option value="deepseek" ${item.provider==='deepseek'?'selected':''}>DeepSeek</option>
+          <option value="gemini" ${item.provider==='gemini'?'selected':''}>Gemini</option>
+        </select>
+        <select id="aiModel_${index}" class="tbl-select" style="flex:1">
+          <!-- populated dynamically -->
+        </select>
+      </div>
+      <input type="password" id="aiKey_${index}" placeholder="API Key for this provider" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text)" value="${item.apiKey || ''}">
+    </div>
+  `).join('');
+
+  currentAiChain.forEach((item, i) => {
+    updateModelOptionsForIndex(i, item.provider, item.model);
+  });
+}
+
+function addAiFallback() {
+  syncCurrentChainFromUI();
+  currentAiChain.push({ provider: 'openai', model: 'gpt-4o-mini', apiKey: '' });
+  renderAiChain();
+}
+
+function removeAiFallback(index) {
+  syncCurrentChainFromUI();
+  currentAiChain.splice(index, 1);
+  renderAiChain();
+}
+
+function syncCurrentChainFromUI() {
+  currentAiChain.forEach((item, index) => {
+    const p = document.getElementById(`aiProv_${index}`);
+    const m = document.getElementById(`aiModel_${index}`);
+    const k = document.getElementById(`aiKey_${index}`);
+    if (p) item.provider = p.value;
+    if (m) item.model = m.value;
+    if (k) item.apiKey = k.value.trim();
+  });
+}
+
+function onProviderChange(index) {
+  const p = document.getElementById(`aiProv_${index}`);
+  if (p) {
+    updateModelOptionsForIndex(index, p.value, null);
+  }
+}
+
+async function updateModelOptionsForIndex(index, provider, selectedModel) {
+  const modelSelect = document.getElementById(`aiModel_${index}`);
+  if (!modelSelect) return;
   
   if (provider === 'openrouter') {
     modelSelect.innerHTML = '<option>Loading OpenRouter models...</option>';
@@ -323,7 +401,7 @@ async function updateModelOptions(selectedModel = null) {
       modelSelect.innerHTML = AI_MODELS.openrouter.map(m => `<option value="${m.value}">${m.label}</option>`).join('');
     }
   } else {
-    modelSelect.innerHTML = AI_MODELS[provider].map(m => `<option value="${m.value}">${m.label}</option>`).join('');
+    modelSelect.innerHTML = (AI_MODELS[provider] || []).map(m => `<option value="${m.value}">${m.label}</option>`).join('');
   }
   
   if (selectedModel) {
@@ -332,16 +410,16 @@ async function updateModelOptions(selectedModel = null) {
 }
 
 function saveAiSettings() {
-  const provider = document.getElementById('aiProviderSelect').value;
-  const model = document.getElementById('aiModelSelect').value;
-  const apiKey = document.getElementById('aiApiKeyInput').value.trim();
+  syncCurrentChainFromUI();
   
-  if (!apiKey) {
-    alert('Please enter your API Key.');
-    return;
+  for (let i=0; i<currentAiChain.length; i++) {
+    if (!currentAiChain[i].apiKey) {
+      alert(`Please enter an API key for ${currentAiChain[i].provider} (Provider ${i+1}).`);
+      return;
+    }
   }
   
-  localStorage.setItem('CRM_AI_SETTINGS', JSON.stringify({ provider, model, apiKey }));
+  localStorage.setItem('CRM_AI_SETTINGS', JSON.stringify({ chain: currentAiChain }));
   closeAiSettingsModal();
   showNotification('AI Settings saved successfully', 'success');
 }
@@ -2351,7 +2429,7 @@ function parseEml(fileName) {
     from: parseAddresses(headers['from']||''), to: parseAddresses(headers['to']||''),
     cc: parseAddresses(headers['cc']||''), bcc: parseAddresses(headers['bcc']||''),
     replyTo: parseAddresses(headers['reply-to']||''),
-    body: (bodyText||'').slice(0,5000), bodyHtml: (htmlBody||'').slice(0,10000),
+    body: (bodyText||'').slice(0,100000), bodyHtml: (htmlBody||'').slice(0,100000),
     attachments, phones, urls,
     isReply, isForwarded,
     priority: headers['x-priority'] || headers['importance'] || 'normal',
@@ -2382,9 +2460,7 @@ function parseEml(fileName) {
         body: JSON.stringify({ 
           body_text: EML.parsed.body, 
           subject: EML.parsed.subject,
-          provider: aiConfig.provider || 'groq',
-          model: aiConfig.model || 'llama-3.3-70b-versatile',
-          api_key: aiConfig.apiKey || ''
+          chain: aiConfig.chain || []
         }),
       })
       .then(r => r.json())
@@ -2956,9 +3032,7 @@ async function handleBulkEml(fileList) {
         body: JSON.stringify({ 
           body_text: item.parsed.bodyText, 
           subject: item.parsed.subject,
-          provider: aiConfig.provider || 'groq',
-          model: aiConfig.model || 'llama-3.3-70b-versatile',
-          api_key: aiConfig.apiKey || ''
+          chain: aiConfig.chain || []
         })
       });
       const resJson = await aiResp.json();

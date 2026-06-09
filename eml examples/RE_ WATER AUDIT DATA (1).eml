@@ -1,0 +1,305 @@
+Delivered-To: mitul@excelenviro.com
+Authentication-Results: mx.zohomail.in;
+	dkim=pass;
+	spf=pass (zohomail.in: domain of torrentelectricals.com designates 52.101.225.134 as permitted sender)  smtp.mailfrom=manojkumarsindha@torrentelectricals.com;
+	arc=fail (Bad Signature);
+	dmarc=pass(p=reject dis=none)  header.from=torrentelectricals.com
+Received: from PNYPR01CU001.outbound.protection.outlook.com (mail-centralindiaazon11020134.outbound.protection.outlook.com [52.101.225.134]) by mx.zoho.in
+	with SMTPS id 1779160126294860.0239585565112; Tue, 19 May 2026 08:38:46 +0530 (IST)
+Received: from PN0PR01CA0044.INDPRD01.PROD.OUTLOOK.COM (2603:1096:c01:49::19)
+ by PNYPR01MB12788.INDPRD01.PROD.OUTLOOK.COM (2603:1096:c01:30c::9) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.25.24; Tue, 19 May
+ 2026 03:08:44 +0000
+Received: from PN2PEPF0000018D.INDPRD01.PROD.OUTLOOK.COM
+ (2603:1096:c01:49:cafe::ad) by PN0PR01CA0044.outlook.office365.com
+ (2603:1096:c01:49::19) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.21.25.24 via Frontend Transport; Tue, 19
+ May 2026 03:08:44 +0000
+Received: from DLP-EMAIL01.torrentpower.com (20.192.6.25) by
+ PN2PEPF0000018D.mail.protection.outlook.com (10.167.242.20) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.21.48.11 via Frontend Transport; Tue, 19 May 2026 03:08:44 +0000
+Received: from MA0PR01CU012.outbound.protection.outlook.com (unknown [40.93.131.24])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by Forcepoint Email with ESMTPS id D74522C9CB72E9143F4C;
+	Tue, 19 May 2026 08:38:43 +0530 (IST)
+Received: from PN0PR01MB10111.INDPRD01.PROD.OUTLOOK.COM (2603:1096:c01:1f0::7)
+ by PN2PR01MB10092.INDPRD01.PROD.OUTLOOK.COM (2603:1096:c01:1f3::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.25.24; Tue, 19 May
+ 2026 03:08:41 +0000
+Received: from PN0PR01MB10111.INDPRD01.PROD.OUTLOOK.COM
+ ([fe80::ac3a:4ec3:b894:d237]) by PN0PR01MB10111.INDPRD01.PROD.OUTLOOK.COM
+ ([fe80::ac3a:4ec3:b894:d237%4]) with mapi id 15.21.0025.023; Tue, 19 May 2026
+ 03:08:41 +0000
+Return-Path: <manojkumarsindha@torrentelectricals.com>
+Return-Path: manojkumarsindha@torrentelectricals.com
+ARC-Seal: i=2; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=fail;
+ b=WrUIBN7p2MRvywaOrZTfIoSVbtv3iXZzVmiXNAJZl/fTFeTYNxEB0+MEpSQO8cQdEXIVdWXguzsD71bQNPoszWJwgKzNG7nQ66pPWUx+ARmV3y/P4HrpMPtpMGvAgOcYxS7Z9xUMqMZ1Dp9TI8Y+MhYiolGIuZ6dDRO0eO7XjG5PvCTtfRBGH0l5Uw6nGgIxYBNtag9nE6Sk3DcjC5f7RBVdoi3zZLwzzJcrB/zQ2lgUixjbpx4AfRj7IzXnwMsI+HQTATih9u1GfnaOsW79U6gHS+yHfrPYBjE4cImMx2+0EpDOK7BXelMH3jtGBjVgwwuDDvCQ//Abaz97WRkLOA==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=QdDclgJrexLu3RxJFTBrA1AoGQv5Vgghh6dAvdOympo=;
+ b=HD6+nlNAXSG9cYPCCWukrkYV8FTWyZNzGUh8MaBWL0nMYkZMJP6X3+CE/j+kHCjbFQ2xSLwYgPSt9soR+9Wb3/0ZJwXw4CvU0uuOYxWlsA7Aqnnpg8/utAUiLI3nn6q0SGcB5GT9+82g0Z9GoyYjl7YO6w2Zkc3ufVo5ZfmI8rRJ5dkKeLUFOyxfiVrOEeD6/04krz7JzTSofbcvLqwebGrnwJgYffU+SDPfIwEJI9PbJqSO+bmvcD2/sZUvvDTU4r7t6FIh61N9sYkWiibHTE97bqGaE5voMHAc98SY5UWeeZ2b+vZhgHW7T42aKwGKvd8uOBGZaL8hOXHzmrG2Xw==
+ARC-Authentication-Results: i=2; mx.microsoft.com 1; spf=pass (sender ip is
+ 20.192.6.25) smtp.rcpttodomain=excelenviro.com
+ smtp.mailfrom=torrentelectricals.com; dmarc=pass (p=reject sp=reject pct=100)
+ action=none header.from=torrentelectricals.com; dkim=pass (signature was
+ verified) header.d=torrentelectricals.com; arc=fail (48)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=torrentelectricals.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=QdDclgJrexLu3RxJFTBrA1AoGQv5Vgghh6dAvdOympo=;
+ b=m3lSmdYCD0gjBrAHnyb6MGVkKoNw7pyWw9wWpna4w/0REslTh6i5Bs4cUDoGKHb/0FJHzANRMc+php+nDjLMLlBo/HbONSU8XmDkLL1JGOXmbdbGsWZB855I3rqgJpny/uasjIgZ6E+kx5SnCzCzb1IL0VIOkhzt6RGEWjLpQL0hanXFdw6Bgqu215pdffPe8LP8JVvKTHC8gSxeujFXT6dogzxwm7LUGmv0i3oOoSqsI2RSwKwFTiKMoAxax0yI5C0M9L03Svi3fjRIfBMbF94A+HxIWlDV9vCNHr9ckqlW05tggcb8waL/IU160Wfgb4MNak7opJvsHkEEyqX5dw==
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 20.192.6.25)
+ smtp.mailfrom=torrentelectricals.com; dkim=pass (signature was verified)
+ header.d=torrentelectricals.com;dmarc=pass action=none
+ header.from=torrentelectricals.com;
+Received-SPF: pass (zohomail.in: domain of torrentelectricals.com designates 52.101.225.134 as permitted sender) client-ip=52.101.225.134; envelope-from=manojkumarsindha@torrentelectricals.com; helo=PNYPR01CU001.outbound.protection.outlook.com;
+Received-SPF: Pass (protection.outlook.com: domain of torrentelectricals.com
+ designates 20.192.6.25 as permitted sender) receiver=protection.outlook.com;
+ client-ip=20.192.6.25; helo=DLP-EMAIL01.torrentpower.com; pr=C
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=gl9LP2rz7us22dKY7b/FwIupZzKjchSKUoppkDd5s4nmdhuKbX8XYIWpy2Z0aaV0YDdF6BaOZxfWPSZ15hG3UR1Id3Q05f4egc8EvOySK7XNM28W3NUwVqphGsOWBqj5ViVwbJP1m9L/t1/ktSZe+l30maGErpldsNusbnySDwspI1OX+EQ9rEOM6gPNpWSwLJC21ZIivRvf1LE3uVExDD6MszP6V422X+1aXIJ30CXJ6JH4gROCksCmmy9ual06vPLdpRgg5dKAqSuZ+pVH8EryY+LOfM3fQhtnX9ouRlttuXEDSplEUxMp89x84WVnQz2uBTo7z77df0vLk1cc2g==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=QdDclgJrexLu3RxJFTBrA1AoGQv5Vgghh6dAvdOympo=;
+ b=k5awrkZC3UvbLijji7aLBexwG3/Rfxi1rkLtXu/4YzM1Zf+pt5sha3TCLrp7loSQrl4MrPqHtt8r294KBC+HBnkX2ExTd9lI75xQpZBO0HIREDMLvGigmHyUDznaG6Gv6Eh7aQDWcZAMsVSNAvSu+rhlxXN/DUcYy4Aofpj9FhawZI9h3f5o8PBF0PIMrVD/xA1xJuuAxnZOS3uHoymp555ks0m87U5yZIwgd186vQbRdkEeex4A+Qgv1hRjqgvIModP3tcwkFavI7DKarsVOgc5e2kzTcsLuU+EX5j7BW9xf4dDF6Aqi8boGVlMXw9HgtFPgXZ4kVnyi/ed6JSrsw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=torrentelectricals.com; dmarc=pass action=none
+ header.from=torrentelectricals.com; dkim=pass
+ header.d=torrentelectricals.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=torrentelectricals.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=QdDclgJrexLu3RxJFTBrA1AoGQv5Vgghh6dAvdOympo=;
+ b=m3lSmdYCD0gjBrAHnyb6MGVkKoNw7pyWw9wWpna4w/0REslTh6i5Bs4cUDoGKHb/0FJHzANRMc+php+nDjLMLlBo/HbONSU8XmDkLL1JGOXmbdbGsWZB855I3rqgJpny/uasjIgZ6E+kx5SnCzCzb1IL0VIOkhzt6RGEWjLpQL0hanXFdw6Bgqu215pdffPe8LP8JVvKTHC8gSxeujFXT6dogzxwm7LUGmv0i3oOoSqsI2RSwKwFTiKMoAxax0yI5C0M9L03Svi3fjRIfBMbF94A+HxIWlDV9vCNHr9ckqlW05tggcb8waL/IU160Wfgb4MNak7opJvsHkEEyqX5dw==
+From: <manojkumarsindha@torrentelectricals.com>
+To: <mitul@excelenviro.com>
+CC: <aakanksha@prakruti.co.in>,
+	<vishvadipsinhravalaji@torrentelectricals.com>,
+	<rajendratak@torrentelectricals.com>, <NILESHMEHTA@torrentelectricals.com>,
+	<anandkumar@torrentelectricals.com>
+Subject: RE: WATER AUDIT DATA
+Thread-Topic: WATER AUDIT DATA
+Thread-Index: AdzGaj3Tcqyc6XVdRzWrp0EuJNtXhwAAGIKgA1TEmiAE37h6MA==
+Date: Tue, 19 May 2026 03:08:41 +0000
+Message-ID: <PN0PR01MB10111F69357E7628CA8901562B2002@PN0PR01MB10111.INDPRD01.PROD.OUTLOOK.COM>
+References: <PN0PR01MB10111F8166E696A39A1CED13FB25AA@PN0PR01MB10111.INDPRD01.PROD.OUTLOOK.COM>
+ <PN0PR01MB10111091626A09B44E4D35FE5B25AA@PN0PR01MB10111.INDPRD01.PROD.OUTLOOK.COM>
+ <PN0PR01MB10111593B455E91AAAD82E7AEB22B2@PN0PR01MB10111.INDPRD01.PROD.OUTLOOK.COM>
+In-Reply-To: <PN0PR01MB10111593B455E91AAAD82E7AEB22B2@PN0PR01MB10111.INDPRD01.PROD.OUTLOOK.COM>
+Accept-Language: en-GB, en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Authentication-Results-Original: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=torrentelectricals.com;
+x-ms-traffictypediagnostic: PN0PR01MB10111:EE_|PN2PR01MB10092:EE_|PN2PEPF0000018D:EE_|PNYPR01MB12788:EE_
+X-MS-Office365-Filtering-Correlation-Id: fd4ee855-feda-4e1a-a13b-08deb553efbc
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam-Untrusted: BCL:0;ARA:13230040|366016|1800799024|376014|8096899003|18002099003|22082099003|56012099003|38070700021|4143699003;
+X-Microsoft-Antispam-Message-Info-Original: aIlDQnaK4dKItjJr+5toAnLhSjNbjuiFwyGsvJrhU4hjSfhktZrptCf1htBhLjTAZN+ziXMqPNXEAdcaQ7tNtWGQ0Ldywpj5SlMJpVXZARr0btAvouEFCP6WAHVSsvTP3nvmgca2HyuVsHM7KhA+axgt3sVHxSRq+EJ9sdkJ0b+fEHNGg3MAGPeFc2Sh8/l64dOdq4x4pKeqCr1xsvzcv97GKK3lT4SmdTmZQT8ROHcyOQFXknCGJwVOWFdNFHQbcwviYOgTYQj1+2Z43h6A9Y3aQDWuU+DaN5zXoePL7Zle/h0NpS+Chccm9XoIotZPBiq51aBnEz+eBXQBQMR5TUoL9gMDFOuK6iS4+11vodbfjBSOALTlqxtcPi23cXsWaiua/pFDkDGm/x7EzrNEnF6C6gZl8nKDYOzXztiTIbWNBv//yay2EI4RMWiCLDSRd3jUyXX5+4Fi5imB3nRNBMGWnNczkDBbkOy7mbrGlCXVAitSGwvQCoZRR+cz6Gv/0NUPlntZH51Juz0R70TUMdi4wnJeZ9zMYwO0RtYmR7wktxLB2VbSVB6cpNPY/ntFZ3eVRCtbk/u6A5AKFdQId9frK8D+zG47Pmkpxq2VJ9OXR72hxz4RGuEHxzI5dv/E377h/keBuCj6+L9Yw8uvUxxCRNhYRA33+eOwkXbsFJ27Cr6F5nTQN4sxcTeOw46EP/1PtOOO5k1xhrU0S/B5eiXauy1Qu5FVp8M8B+j7iQV2VR9P8L0mBGLffUULdzhK
+X-Forefront-Antispam-Report-Untrusted: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PN0PR01MB10111.INDPRD01.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(8096899003)(18002099003)(22082099003)(56012099003)(38070700021)(4143699003);DIR:OUT;SFP:1102;
+Content-Type: multipart/alternative;
+	boundary="_000_PN0PR01MB10111F69357E7628CA8901562B2002PN0PR01MB10111IN_"
+MIME-Version: 1.0
+X-Exchange-RoutingPolicyChecked: IHlUR3AhT+E56pVuzg5a/6PusUKa6FoiGqbUH43/WJ6piIRcrXSig4bfeYl7k/wcVxiejWTfn3BHMuLRAfAOPgCZCR1ZTwbqCxk3dpavkngYGK4SLp5tntAOVI0HYlLZGAI/NLxaAuG5M3aG7ej87B5DUijVRSljegqmXgrxiciCd+lzo+919+Iel8S3T+o/vZg4wjQnfwHWVGJsEQYd/0A8QmCcJV3YDSBlm0E8+wB97jE4X/TR+p8PeimRkfGmUcV10MqV4pV1Rj9PS6Fi4Dkxj593j2DztXBMBGfrX0LYEWbBMaXehmF8fxhqjgyDUlcTbEbUpT93u+6u6kDJsA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PN2PR01MB10092
+X-EOPAttributedMessage: 0
+X-MS-Exchange-Transport-CrossTenantHeadersStripped: PN2PEPF0000018D.INDPRD01.PROD.OUTLOOK.COM
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id-Prvs: cc24ac2b-79a8-4af0-ce51-08deb553ee3f
+X-Microsoft-Antispam: BCL:0;ARA:13230040|14060799003|1800799024|36860700016|35042699022|82310400026|376014|8096899003|22082099003|18002099003|56012099003|4143699003;
+X-Microsoft-Antispam-Message-Info: HVskOfc4Ffuxcijm0qajFfoVK9DG63i8L+r3I0e5wJi0Uh5CJOkzX048g6+dtVHagNQWk8/ak+w7Dkz3MWWniT1j/KezjpMSd9VABUEwkJM8yyg1499VoAriNydsiiz71CUyxwrZtaI4jycEA6Y3W0enxKq3AsCg8rPz52JxavspIFk4k3tKlnB2dvzY90W1hcAOHMMIRfm4OlAioeu8t/JF6WWnRMnP9t1aLN/nMYMxEKbdWvnU2Q2vGQjyUa2W26WyzVg20fvKvPtNPEjjNQg7bBEqf5cZUTfY6H/XrQrg3Dnrnm4oQ+uqaZ7p7MgXfoIeJh8JEeBfFKuIOz/Xe5fMercz3zX259jKXKIk2+Ni9EVfz1WTwT5gMr2Ja+tZnW3a8tLuJTIQ9juYwlP0qGMLZ2+95G3YOZbbj/nljY2yX9yqkCwbzZhKOok5I/zZR0yO+wPVDlMRNh3tFgcb5YlLZtunlPsNdizgo5jH5gafWzE3TzIlR2dJ5gxE2DwEwB6rXelz6TravW435FjIwolZYrKkNB0gQ57zmAPnWgArRbUm69jdzKzCpQTWuwd68h8nznMX/3wf/AVf/CQhHav8sk4AKjYOcUnUov+q+9ffOy1W+lWg9hnZ8uxDpv4H6pTt5cXOwG9RNgsF0oRryo/4j9Bc1yg+Xgd8abj6alFlTiirPVbDMoaKmqOjH3Re4/cTXpL+eBBG1KF4pYZY+oxJOBeU6JpI7NGYVEO1JqY=
+X-Forefront-Antispam-Report: CIP:20.192.6.25;CTRY:IN;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:DLP-EMAIL01.torrentpower.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230040)(14060799003)(1800799024)(36860700016)(35042699022)(82310400026)(376014)(8096899003)(22082099003)(18002099003)(56012099003)(4143699003);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: qm/O8Tc73QZLJFDIre+b8xUGWiSB8brhukZ6D1z77fauOYN9nAukSSFlhJBJSwTXY88qxmko37AXnBc9zR29eMZWWX+Df+sA9TsiKVUwE5Fp6+QBYYS2I3z/FLsDBSdvFvVs9WtoZ9zpWla4KiN4EePORHPW5ANvz1EjabJB8eBq1Qoy2qh6Jz4MHkaGV9b4l/bXGK7fI2RVGQVUL2OeGgwnmztZFSdknfozY2L49HI91X5xvU0oy50qjqoiFOGdbeyyHMcnGpu6EZLvYSbURpzY3SvUGuoKuALkQgIqOj5e1XQKaFLj1RZ0Gfp4NKXBQ2EL1GXcS9ZyRMDUeyi7RZBPegtVfFigRQDcF8LbcqPdwghbmJNfESwjqTSjGwEBVf6XxPckwv2TqK3OFZ9Zgg0lWPRqajqVjPO8l99JZmc4+3J1dVVLreDDvNMcbqZz
+X-OriginatorOrg: torrentelectricals.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 May 2026 03:08:44.1783
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: fd4ee855-feda-4e1a-a13b-08deb553efbc
+X-MS-Exchange-CrossTenant-Id: 82476f6b-9376-4b7f-8c7d-1ef9c7fb28aa
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=82476f6b-9376-4b7f-8c7d-1ef9c7fb28aa;Ip=[20.192.6.25];Helo=[DLP-EMAIL01.torrentpower.com]
+X-MS-Exchange-CrossTenant-AuthSource: PN2PEPF0000018D.INDPRD01.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PNYPR01MB12788
+X-ZohoMail-DKIM: pass (identity @torrentelectricals.com)
+
+--_000_PN0PR01MB10111F69357E7628CA8901562B2002PN0PR01MB10111IN_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+Dear Sir,
+
+Till date we have not received any update on Water Audit Report after your =
+visit and data submission.
+
+Thanks & Regards,
+
+Sindha Manojkumar Udesinh
+Manager EHS
+(M) 9909926140
+From: Manojkumar Sindha / EHS / Nadiad
+Sent: Tuesday, April 7, 2026 14:14
+To: 'Mitul Jain' <mitul@excelenviro.com<mailto:mitul@excelenviro.com>>
+Cc: 'Aakanksha' <aakanksha@prakruti.co.in<mailto:aakanksha@prakruti.co.in>>=
+; Vishvadipsinh Ravalaji / EHS / Nadiad <vishvadipsinhravalaji@torrentelect=
+ricals.com<mailto:vishvadipsinhravalaji@torrentelectricals.com>>; Rajendra =
+Tak / EHS / Nadiad <rajendratak@torrentelectricals.com<mailto:rajendratak@t=
+orrentelectricals.com>>; Nilesh Mehta / Utility / Nadiad <NILESHMEHTA@torre=
+ntelectricals.com<mailto:NILESHMEHTA@torrentelectricals.com>>; P Anand Kuma=
+r <anandkumar@torrentelectricals.com<mailto:anandkumar@torrentelectricals.c=
+om>>
+Subject: RE: WATER AUDIT DATA
+
+Dear Sir,
+
+As per our telephonic discussion kindly find attached data herewith.
+
+Request you kindly compile the data and plan the visit at earliest to concl=
+ude the same with final report.
+
+Thanks & Regards,
+
+Sindha Manojkumar Udesinh
+Manager EHS
+(M) 9909926140
+
+Disclaimer : This email along with any attachments may contain confidential=
+, proprietary or legally privileged information and is for the intended rec=
+ipient only. Any other use of email, such as, unauthorized access, disclosu=
+re, copying, distribution or reliance on any contents of it by anyone else =
+is prohibited and unlawful. If you are not the intended recipient, please n=
+otify the sender immediately and delete the email.
+
+--_000_PN0PR01MB10111F69357E7628CA8901562B2002PN0PR01MB10111IN_
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
+osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
+//www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
+>
+<meta name=3D"Generator" content=3D"Microsoft Word 15 (filtered medium)">
+<style><!--
+/* Font Definitions */
+@font-face
+	{font-family:Shruti;
+	panose-1:2 11 5 2 4 2 4 2 2 3;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:Aptos;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0cm;
+	font-size:12.0pt;
+	font-family:"Aptos",sans-serif;
+	mso-ligatures:standardcontextual;
+	mso-fareast-language:EN-US;}
+a:link, span.MsoHyperlink
+	{mso-style-priority:99;
+	color:#467886;
+	text-decoration:underline;}
+span.EmailStyle20
+	{mso-style-type:personal-reply;
+	font-family:"Aptos",sans-serif;
+	color:windowtext;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	font-size:10.0pt;
+	mso-ligatures:none;}
+@page WordSection1
+	{size:612.0pt 792.0pt;
+	margin:72.0pt 72.0pt 72.0pt 72.0pt;}
+div.WordSection1
+	{page:WordSection1;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext=3D"edit">
+<o:idmap v:ext=3D"edit" data=3D"1" />
+</o:shapelayout></xml><![endif]-->
+</head>
+<body lang=3D"EN-IN" link=3D"#467886" vlink=3D"#96607D" style=3D"word-wrap:=
+break-word">
+<div class=3D"WordSection1">
+<p class=3D"MsoNormal">Dear Sir,<o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">Till date we have not received any update on Water A=
+udit Report after your visit and data submission.<o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">Thanks &amp; Regards,<o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">Sindha Manojkumar Udesinh<o:p></o:p></p>
+<p class=3D"MsoNormal">Manager EHS<br>
+(M) 9909926140<o:p></o:p></p>
+<div>
+<div style=3D"border:none;border-top:solid #E1E1E1 1.0pt;padding:3.0pt 0cm =
+0cm 0cm">
+<p class=3D"MsoNormal"><b><span lang=3D"EN-US" style=3D"font-size:11.0pt;fo=
+nt-family:&quot;Calibri&quot;,sans-serif;mso-ligatures:none;mso-fareast-lan=
+guage:EN-IN">From:</span></b><span lang=3D"EN-US" style=3D"font-size:11.0pt=
+;font-family:&quot;Calibri&quot;,sans-serif;mso-ligatures:none;mso-fareast-=
+language:EN-IN">
+ Manojkumar Sindha / EHS / Nadiad <br>
+<b>Sent:</b> Tuesday, April 7, 2026 14:14<br>
+<b>To:</b> 'Mitul Jain' &lt;<a href=3D"mailto:mitul@excelenviro.com">mitul@=
+excelenviro.com</a>&gt;<br>
+<b>Cc:</b> 'Aakanksha' &lt;<a href=3D"mailto:aakanksha@prakruti.co.in">aaka=
+nksha@prakruti.co.in</a>&gt;; Vishvadipsinh Ravalaji / EHS / Nadiad &lt;<a =
+href=3D"mailto:vishvadipsinhravalaji@torrentelectricals.com">vishvadipsinhr=
+avalaji@torrentelectricals.com</a>&gt;; Rajendra
+ Tak / EHS / Nadiad &lt;<a href=3D"mailto:rajendratak@torrentelectricals.co=
+m">rajendratak@torrentelectricals.com</a>&gt;; Nilesh Mehta / Utility / Nad=
+iad &lt;<a href=3D"mailto:NILESHMEHTA@torrentelectricals.com">NILESHMEHTA@t=
+orrentelectricals.com</a>&gt;; P Anand Kumar &lt;<a href=3D"mailto:anandkum=
+ar@torrentelectricals.com">anandkumar@torrentelectricals.com</a>&gt;<br>
+<b>Subject:</b> RE: WATER AUDIT DATA<o:p></o:p></span></p>
+</div>
+</div>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US">Dear Sir,<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US"><o:p>&nbsp;</o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US">As per our telephonic discussio=
+n kindly find attached data herewith.<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US"><o:p>&nbsp;</o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US">Request you kindly compile the =
+data and plan the visit at earliest to conclude the same with final report.=
+<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US"><o:p>&nbsp;</o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US">Thanks &amp; Regards,<o:p></o:p=
+></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US"><o:p>&nbsp;</o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US">Sindha Manojkumar Udesinh<o:p><=
+/o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US">Manager EHS<o:p></o:p></span></=
+p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US">(M) 9909926140<o:p></o:p></span=
+></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+</div>
+Disclaimer : This email along with any attachments may contain confidential=
+, proprietary or legally privileged information and is for the intended rec=
+ipient only. Any other use of email, such as, unauthorized access, disclosu=
+re, copying, distribution or reliance
+ on any contents of it by anyone else is prohibited and unlawful. If you ar=
+e not the intended recipient, please notify the sender immediately and dele=
+te the email.
+</body>
+</html>
+
+--_000_PN0PR01MB10111F69357E7628CA8901562B2002PN0PR01MB10111IN_--
