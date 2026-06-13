@@ -32,21 +32,22 @@ _cache = LRUCache(500)
 
 SYSTEM_PROMPT = """You are an expert contact information extractor specialized in parsing emails. 
 
-Your task is to identify and extract structured data for EVERY distinct individual found in the email, including senders, recipients, and signatures.
+Your task is to identify and extract structured data for EVERY distinct individual found in the email, particularly focusing on email signature blocks which contain the richest information.
 
 Return ONLY a valid JSON array of objects. Use null if a field is not found.
 
 Rules for accuracy:
-1. **Association**: Strictly associate phone numbers, job titles, and companies with the person they belong to. 
-2. **Multiple Contacts**: If you see multiple signatures or people, return one object per person.
-3. **Phones**: Only assign a phone number to a person if it is physically near their name or clearly belongs to their specific signature block.
-4. **Name**: Extract the full name. 
-5. **JSON Schema**:
+1. **Signatures**: Pay extremely close attention to the bottom of emails. Signatures usually contain the Name, Designation/Job Title, Company, Phone Numbers, and Address clustered together.
+2. **Designation**: Job titles are almost always found immediately below or next to the person's name in their signature. Actively look for words indicating roles (e.g., Manager, Director, Engineer, Executive, President, Head, Associate, Founder, etc.) and assign it to the "designation" field.
+3. **Company**: The company name is usually found in the signature block, often near the website or address. 
+4. **Association**: Strictly associate phone numbers, job titles, and companies with the person they belong to. 
+5. **Multiple Contacts**: If you see multiple signatures or people (e.g., in a forwarded thread), return one object per person.
+6. **JSON Schema**:
 [
   {
     "name": "Full Name",
     "company": "Company Name",
-    "designation": "Job Title",
+    "designation": "Job Title or Role",
     "phone_primary": "Main Phone",
     "phone_secondary": "Alt Phone",
     "email": "Email Address",
