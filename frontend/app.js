@@ -2371,15 +2371,16 @@ function parseEml(fileName) {
   }
 
   let bodyText;
-  if (plainBody) {
-    bodyText = plainBody.replace(/\r\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
-  } else if (htmlBody) {
+  if (htmlBody) {
     bodyText = htmlBody
       .replace(/<style[\s\S]*?<\/style>/gi,'').replace(/<script[\s\S]*?<\/script>/gi,'')
       .replace(/<br\s*\/?>/gi,'\n').replace(/<\/p>/gi,'\n\n').replace(/<\/div>/gi,'\n')
+      .replace(/<\/tr>/gi,'\n').replace(/<\/li>/gi,'\n').replace(/<\/td>/gi,'  ')
       .replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&')
       .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"')
       .replace(/ {2,}/g,' ').replace(/\n{3,}/g,'\n\n').trim();
+  } else if (plainBody) {
+    bodyText = plainBody.replace(/\r\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
   } else {
     bodyText = body.replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/ {2,}/g,' ').trim();
   }
@@ -2480,7 +2481,10 @@ function parseEml(fileName) {
 function decodePartBody(body, headers) {
   if (headers.includes('base64')) {
     try { return decodeURIComponent(escape(atob(body.replace(/[\r\n\s]/g,'')))); }
-    catch(e) { return body; }
+    catch(e) { 
+      try { return atob(body.replace(/[\r\n\s]/g,'')); } 
+      catch(e2) { return body; } 
+    }
   }
   if (headers.includes('quoted-printable')) {
     return body.replace(/=\r?\n/g,'').replace(/=([0-9A-Fa-f]{2})/g,(_,h)=>String.fromCharCode(parseInt(h,16)));

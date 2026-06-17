@@ -34,7 +34,7 @@ SYSTEM_PROMPT = """You are an expert contact information extractor specialized i
 
 Your task is to identify and extract structured data for EVERY distinct individual found in the email, particularly focusing on email signature blocks which contain the richest information.
 
-Return ONLY a valid JSON array of objects. Use null if a field is not found.
+Return ONLY a valid JSON array of objects. Do not include markdown code blocks like ```json ... ```. Output raw JSON ONLY. Use null if a field is not found.
 
 Rules for accuracy:
 1. **Signatures**: Pay extremely close attention to the bottom of emails. Signatures usually contain the Name, Designation/Job Title, Company, Phone Numbers, and Address clustered together.
@@ -42,7 +42,8 @@ Rules for accuracy:
 3. **Company**: The company name is usually found in the signature block, often near the website or address. 
 4. **Association**: Strictly associate phone numbers, job titles, and companies with the person they belong to. 
 5. **Multiple Contacts**: If you see multiple signatures or people (e.g., in a forwarded thread), return one object per person.
-6. **JSON Schema**:
+6. **Robustness**: Even if you only find one contact, still return it inside a JSON array.
+7. **JSON Schema**:
 [
   {
     "name": "Full Name",
@@ -57,8 +58,7 @@ Rules for accuracy:
     "pincode": "PIN/Zip"
   }
 ]
-
-Do not include any intro, outro, or markdown code blocks. Just the raw JSON array."""
+"""
 
 from typing import List, Optional
 
@@ -209,10 +209,11 @@ async def parse_signature(request: Request, body: SignatureRequest):
     try:
         fields = json.loads(raw)
     except json.JSONDecodeError:
-        json_match = re.search(r'\[.*\]', raw, re.DOTALL)
+        json_match = re.search(r'(\[.*\]|\{.*\})', raw, re.DOTALL)
         if json_match:
             try:
-                fields = json.loads(json_match.group(0))
+                parsed = json.loads(json_match.group(0))
+                fields = parsed if isinstance(parsed, list) else [parsed]
             except Exception:
                 pass
                 
