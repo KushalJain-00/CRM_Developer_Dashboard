@@ -2460,7 +2460,7 @@ function parseEml(fileName) {
         body: JSON.stringify({ 
           body_text: EML.parsed.body, 
           subject: EML.parsed.subject,
-          chain: aiConfig.chain || []
+          chain: (aiConfig.chain || []).map(c => ({ provider: c.provider, model: c.model, api_key: c.apiKey || '' }))
         }),
       })
       .then(r => r.json())
@@ -3035,7 +3035,7 @@ async function handleBulkEml(fileList) {
         body: JSON.stringify({ 
           body_text: item.parsed.bodyText, 
           subject: item.parsed.subject,
-          chain: aiConfig.chain || []
+          chain: (aiConfig.chain || []).map(c => ({ provider: c.provider, model: c.model, api_key: c.apiKey || '' }))
         })
       });
       const resJson = await aiResp.json();
