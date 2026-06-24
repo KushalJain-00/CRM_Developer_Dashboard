@@ -172,9 +172,8 @@ async function syncAuthSession() {
   if (!crmClient) return;
   try {
     const { data, error } = await crmClient.auth.getUser();
-    if (error) throw error;
-    const user = data.user;
-    if (!user) {
+    const user = data?.user;
+    if (error || !user) {
       S.userEmail = null;
       localStorage.removeItem('crm-session');
       window.location.replace('signin.html');
