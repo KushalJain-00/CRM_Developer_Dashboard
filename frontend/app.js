@@ -3038,12 +3038,16 @@ async function handleBulkEml(fileList) {
           chain: (aiConfig.chain || []).map(c => ({ provider: c.provider, model: c.model, api_key: c.apiKey || '' }))
         })
       });
+      if (!aiResp.ok) {
+        throw new Error(`Server returned status: ${aiResp.status}`);
+      }
       const resJson = await aiResp.json();
       if (resJson.ok && Array.isArray(resJson.fields)) {
         item.aiData = resJson.fields;
       } else if (resJson.ok && resJson.fields && typeof resJson.fields === 'object') {
         item.aiData = [resJson.fields];
       } else {
+        if (resJson.error) throw new Error(resJson.error);
         item.aiData = [];
       }
     } catch (err) {
@@ -3051,6 +3055,9 @@ async function handleBulkEml(fileList) {
       item.aiData = [];
       BULK.errors++;
       BULK.errorList.push(`${item.file.name}: ${err.message || 'Extraction failed'}`);
+      
+      updateBulkProgress(aiReceived, total, `API Error. Cooling down for 60 seconds before retrying...`);
+      await new Promise(r => setTimeout(r, 60000));
     }
 
     aiReceived++;
