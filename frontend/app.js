@@ -3008,7 +3008,7 @@ async function handleBulkEml(fileList) {
   let aiSent = 0;
   let aiReceived = 0;
   const total = parsedFiles.length;
-  const CONCURRENCY = 5;
+  const CONCURRENCY = 2; // Lowered to avoid API rate limits (e.g., Gemini 15 RPM)
 
   const updateAiProgress = () => {
     updateBulkProgress(aiReceived, total, `AI Extraction<br>Sent to AI: <span style="color:#6C5CE7;font-weight:600">${aiSent}</span> / ${total} &nbsp;|&nbsp; Received: <span style="color:#2ECC71;font-weight:600">${aiReceived}</span> / ${total}`);
@@ -3056,7 +3056,7 @@ async function handleBulkEml(fileList) {
     aiReceived++;
     updateAiProgress();
     
-    await new Promise(r => setTimeout(r, 500)); // 500ms delay
+    await new Promise(r => setTimeout(r, 1500)); // 1.5s delay to prevent 429 Too Many Requests
     await processNext();
   }
 
