@@ -43,19 +43,19 @@ Rules for accuracy:
 4. **Association**: Strictly associate phone numbers, job titles, and companies with the person they belong to. 
 5. **Multiple Contacts**: If you see multiple signatures or people (e.g., in a forwarded thread), return one object per person.
 6. **Robustness**: Even if you only find one contact, still return it inside a JSON array.
-7. **JSON Schema**:
+7. **JSON Schema (USE EXACTLY THESE KEYS)**:
 [
   {
-    "name": "Full Name",
-    "company": "Company Name",
-    "designation": "Job Title or Role",
-    "phone_primary": "Main Phone",
-    "phone_secondary": "Alt Phone",
-    "email": "Email Address",
-    "website": "URL",
-    "address": "Full Address",
-    "city": "City",
-    "pincode": "PIN/Zip"
+    "name": "<extracted full name>",
+    "company": "<extracted company name>",
+    "designation": "<extracted job title>",
+    "phone_primary": "<extracted main phone>",
+    "phone_secondary": "<extracted alt phone>",
+    "email": "<extracted email address - CRITICAL FOR MATCHING>",
+    "website": "<extracted url>",
+    "address": "<extracted full address>",
+    "city": "<extracted city>",
+    "pincode": "<extracted zip/postal code>"
   }
 ]
 """

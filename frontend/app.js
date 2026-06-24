@@ -3026,38 +3026,46 @@ async function handleBulkEml(fileList) {
     aiSent++;
     updateAiProgress();
 
-    try {
-      const aiConfig = getAiSettings();
-      const bulkSigH = await apiHeaders();
-      const aiResp = await fetch(`${API_BASE}/api/parse-signature`, {
-        method: 'POST',
-        headers: bulkSigH,
-        body: JSON.stringify({ 
-          body_text: item.parsed.bodyText, 
-          subject: item.parsed.subject,
-          chain: (aiConfig.chain || []).map(c => ({ provider: c.provider, model: c.model, api_key: c.apiKey || '' }))
-        })
-      });
-      if (!aiResp.ok) {
-        throw new Error(`Server returned status: ${aiResp.status}`);
+    let success = false;
+    let attempts = 0;
+    while (!success && attempts < 3) {
+      attempts++;
+      try {
+        const aiConfig = getAiSettings();
+        const bulkSigH = await apiHeaders();
+        const aiResp = await fetch(`${API_BASE}/api/parse-signature`, {
+          method: 'POST',
+          headers: bulkSigH,
+          body: JSON.stringify({ 
+            body_text: item.parsed.bodyText, 
+            subject: item.parsed.subject,
+            chain: (aiConfig.chain || []).map(c => ({ provider: c.provider, model: c.model, api_key: c.apiKey || '' }))
+          })
+        });
+        if (!aiResp.ok) {
+          throw new Error(`Server returned status: ${aiResp.status}`);
+        }
+        const resJson = await aiResp.json();
+        if (resJson.ok && Array.isArray(resJson.fields)) {
+          item.aiData = resJson.fields;
+        } else if (resJson.ok && resJson.fields && typeof resJson.fields === 'object') {
+          item.aiData = [resJson.fields];
+        } else {
+          if (resJson.error) throw new Error(resJson.error);
+          item.aiData = [];
+        }
+        success = true;
+      } catch (err) {
+        console.error(`AI parse failed for ${item.file.name} (Attempt ${attempts})`, err);
+        if (attempts < 3) {
+          updateBulkProgress(aiReceived, total, `API Error. Cooling down for 60 seconds before retrying ${item.file.name}...`);
+          await new Promise(r => setTimeout(r, 60000));
+        } else {
+          item.aiData = [];
+          BULK.errors++;
+          BULK.errorList.push(`${item.file.name}: ${err.message || 'Extraction failed'}`);
+        }
       }
-      const resJson = await aiResp.json();
-      if (resJson.ok && Array.isArray(resJson.fields)) {
-        item.aiData = resJson.fields;
-      } else if (resJson.ok && resJson.fields && typeof resJson.fields === 'object') {
-        item.aiData = [resJson.fields];
-      } else {
-        if (resJson.error) throw new Error(resJson.error);
-        item.aiData = [];
-      }
-    } catch (err) {
-      console.error('AI parse failed for', item.file.name, err);
-      item.aiData = [];
-      BULK.errors++;
-      BULK.errorList.push(`${item.file.name}: ${err.message || 'Extraction failed'}`);
-      
-      updateBulkProgress(aiReceived, total, `API Error. Cooling down for 60 seconds before retrying...`);
-      await new Promise(r => setTimeout(r, 60000));
     }
 
     aiReceived++;
@@ -3078,8 +3086,9 @@ async function handleBulkEml(fileList) {
         const { file, parsed, aiData } = item;
         
         parsed.contacts.forEach(c => {
-          const matchingAi = (aiData || []).find(a => a.email && a.email.toLowerCase() === c.email.toLowerCase()) || 
-                             ((aiData || []).length === 1 ? aiData[0] : {});
+          const matchingAi = (aiData || []).find(a => a.email && c.email && a.email.toLowerCase() === c.email.toLowerCase()) || 
+                             (aiData || []).find(a => a.name && c.name && a.name.toLowerCase().includes(c.name.split(' ')[0].toLowerCase())) ||
+                             ((aiData || []).length > 0 ? aiData[0] : {});
 
           // Only fallback to parsed.phones[0] if it's the sender or there's only one contact
           const phoneFallback = (parsed.contacts.length === 1 || c.source === 'FROM') ? (parsed.phones[0] || '') : '';
