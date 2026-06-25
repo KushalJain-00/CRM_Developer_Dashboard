@@ -270,6 +270,13 @@ const AI_MODELS = {
     { value: 'google/gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
     { value: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
   ],
+  groq: [
+    { value: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B Versatile' },
+    { value: 'llama-3.1-8b-instant', label: 'Llama 3.1 8B Instant' },
+    { value: 'gemma2-9b-it', label: 'Gemma 2 9B' },
+    { value: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B' },
+    { value: 'llama-3.3-70b-specdec', label: 'Llama 3.3 70B SpecDec' },
+  ],
   openai: [
     { value: 'gpt-4o', label: 'GPT-4o' },
     { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
@@ -324,17 +331,30 @@ function closeAiSettingsModal() {
   document.getElementById('aiSettingsModal').style.display = 'none';
 }
 
+let _dragSrcIdx = null;
+
 function renderAiChain() {
   const container = document.getElementById('aiChainContainer');
   if (!container) return;
+  const roleLabel = (i) => i === 0 ? '🥇 Primary' : i === 1 ? '🥈 Fallback 1' : `🥉 Fallback ${i}`;
   container.innerHTML = currentAiChain.map((item, index) => `
-    <div class="ai-chain-item" style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-2); position: relative;">
-      <div style="font-weight:600; margin-bottom:8px; font-size:13px; color:var(--text-2)">
-        ${index === 0 ? '🥇 Primary Provider' : `🥈 Fallback Provider ${index}`}
-        ${index > 0 ? `<button onclick="removeAiFallback(${index})" style="position:absolute; right:8px; top:8px; background:transparent; border:none; color:var(--text-3); cursor:pointer;">✕</button>` : ''}
+    <div class="ai-chain-item" draggable="true" data-chain-idx="${index}" 
+         ondragstart="onChainDragStart(event,${index})" ondragover="onChainDragOver(event)" ondrop="onChainDrop(event,${index})" ondragend="onChainDragEnd(event)"
+         style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-2); position: relative; cursor: grab; transition: opacity 0.2s, transform 0.2s, border-color 0.2s;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="cursor:grab; font-size:16px; opacity:0.5; user-select:none;" title="Drag to reorder">⠿</span>
+          <span style="font-weight:600; font-size:13px; color:var(--text-2)">${roleLabel(index)}</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:4px;">
+          ${index > 0 ? `<button onclick="moveChainItem(${index},${index-1})" title="Move up" style="background:transparent; border:none; cursor:pointer; font-size:14px; padding:2px 4px; color:var(--text-3);">▲</button>` : ''}
+          ${index < currentAiChain.length - 1 ? `<button onclick="moveChainItem(${index},${index+1})" title="Move down" style="background:transparent; border:none; cursor:pointer; font-size:14px; padding:2px 4px; color:var(--text-3);">▼</button>` : ''}
+          ${currentAiChain.length > 1 ? `<button onclick="removeAiFallback(${index})" title="Remove" style="background:transparent; border:none; color:#F43F5E; cursor:pointer; font-size:14px; padding:2px 4px;">✕</button>` : ''}
+        </div>
       </div>
       <div style="display:flex; gap:8px; margin-bottom:8px;">
         <select id="aiProv_${index}" class="tbl-select" style="flex:1" onchange="onProviderChange(${index})">
+          <option value="groq" ${item.provider==='groq'?'selected':''}>Groq (Fast & Free)</option>
           <option value="openrouter" ${item.provider==='openrouter'?'selected':''}>OpenRouter</option>
           <option value="openai" ${item.provider==='openai'?'selected':''}>OpenAI</option>
           <option value="anthropic" ${item.provider==='anthropic'?'selected':''}>Anthropic</option>
@@ -354,9 +374,46 @@ function renderAiChain() {
   });
 }
 
+function moveChainItem(fromIdx, toIdx) {
+  syncCurrentChainFromUI();
+  const [item] = currentAiChain.splice(fromIdx, 1);
+  currentAiChain.splice(toIdx, 0, item);
+  renderAiChain();
+}
+
+function onChainDragStart(e, idx) {
+  _dragSrcIdx = idx;
+  e.currentTarget.style.opacity = '0.4';
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function onChainDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const item = e.currentTarget;
+  item.style.borderColor = '#6C5CE7';
+}
+
+function onChainDrop(e, toIdx) {
+  e.preventDefault();
+  e.currentTarget.style.borderColor = '';
+  if (_dragSrcIdx === null || _dragSrcIdx === toIdx) return;
+  syncCurrentChainFromUI();
+  const [item] = currentAiChain.splice(_dragSrcIdx, 1);
+  currentAiChain.splice(toIdx, 0, item);
+  _dragSrcIdx = null;
+  renderAiChain();
+}
+
+function onChainDragEnd(e) {
+  _dragSrcIdx = null;
+  e.currentTarget.style.opacity = '1';
+  document.querySelectorAll('.ai-chain-item').forEach(el => el.style.borderColor = '');
+}
+
 function addAiFallback() {
   syncCurrentChainFromUI();
-  currentAiChain.push({ provider: 'openai', model: 'gpt-4o-mini', apiKey: '' });
+  currentAiChain.push({ provider: 'groq', model: 'llama-3.3-70b-versatile', apiKey: '' });
   renderAiChain();
 }
 
@@ -3043,7 +3100,18 @@ async function handleBulkEml(fileList) {
           })
         });
         if (!aiResp.ok) {
-          throw new Error(`Server returned status: ${aiResp.status}`);
+          let errMsg = `Server returned status: ${aiResp.status}`;
+          try {
+            const errText = await aiResp.text();
+            try {
+              const errJson = JSON.parse(errText);
+              if (errJson.detail) errMsg += ` - ${errJson.detail}`;
+              else if (errJson.error) errMsg += ` - ${errJson.error}`;
+            } catch(e) {
+              errMsg += ` - ${errText.substring(0, 100)}`;
+            }
+          } catch(e) {}
+          throw new Error(errMsg);
         }
         const resJson = await aiResp.json();
         if (resJson.ok && Array.isArray(resJson.fields)) {
