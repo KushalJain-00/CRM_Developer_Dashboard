@@ -60,7 +60,7 @@ def _log_to_dict(log: CallLog) -> dict:
 # ── Routes ────────────────────────────────────────────────────────────
 
 @router.post("/calls")
-async def create_call_log(body: CallLogIn, db: AsyncSession = Depends(get_db)):
+async def create_call_log(body: CallLogIn, db: AsyncSession = Depends(get_db), current_user = Depends(verify_token)):
     """Record a new call discussion for a contact."""
     # Verify contact exists
     result = await db.execute(select(Contact).filter(Contact.id == body.contact_id))
@@ -110,7 +110,7 @@ async def get_call_logs_for_contact(
 
 
 @router.put("/calls/{log_id}")
-async def update_call_log(log_id: int, body: CallLogUpdate, db: AsyncSession = Depends(get_db)):
+async def update_call_log(log_id: int, body: CallLogUpdate, db: AsyncSession = Depends(get_db), current_user = Depends(verify_token)):
     result = await db.execute(select(CallLog).filter(CallLog.id == log_id))
     log = result.scalars().first()
     if not log:
@@ -134,7 +134,7 @@ async def update_call_log(log_id: int, body: CallLogUpdate, db: AsyncSession = D
 
 
 @router.delete("/calls/{log_id}")
-async def delete_call_log(log_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_call_log(log_id: int, db: AsyncSession = Depends(get_db), current_user = Depends(verify_token)):
     result = await db.execute(select(CallLog).filter(CallLog.id == log_id))
     log = result.scalars().first()
     if not log:

@@ -68,7 +68,7 @@ async def get_session_endpoint(session_id: int, page: int = 1, page_size: int = 
         "mapping": s.mapping, "total": total, "records": out_records})
 
 @router.delete("/history/{session_id}")
-async def delete_session_endpoint(session_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_session_endpoint(session_id: int, db: AsyncSession = Depends(get_db), current_user = Depends(verify_token)):
     deleted = await crud_delete_session(db, session_id)
     if not deleted: raise HTTPException(404, "Not found")
     return JSONResponse({"ok": True})

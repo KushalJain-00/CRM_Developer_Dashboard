@@ -159,7 +159,7 @@ async def _chunked_query(db: AsyncSession, model, attr, values, chunk_size=3000)
 # ── Routes ────────────────────────────────────────────────────────────
 
 @router.post("/contacts/batch")
-async def batch_import(body: BatchImportRequest, db: AsyncSession = Depends(get_db)):
+async def batch_import(body: BatchImportRequest, db: AsyncSession = Depends(get_db), current_user = Depends(verify_token)):
     """
     Receives the cleaned, mapped contacts from the frontend after the user
     confirms the field mapping. Validates, filters, and persists to the DB.
@@ -323,7 +323,7 @@ async def batch_import(body: BatchImportRequest, db: AsyncSession = Depends(get_
         await db.commit()
     except Exception as e:
         await db.rollback()
-        raise HTTPException(500, f"Database error during save: {str(e)}")
+        raise HTTPException(500, "Database error during save")
 
     final_contact_ids = [c.id if c else None for c in contact_ids]
 
@@ -394,7 +394,7 @@ async def get_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.put("/contacts/{contact_id}")
-async def update_contact(contact_id: int, body: ContactUpdate, db: AsyncSession = Depends(get_db)):
+async def update_contact(contact_id: int, body: ContactUpdate, db: AsyncSession = Depends(get_db), current_user = Depends(verify_token)):
     result = await db.execute(select(Contact).filter(Contact.id == contact_id))
     contact = result.scalars().first()
     if not contact:
@@ -472,7 +472,7 @@ async def update_contact(contact_id: int, body: ContactUpdate, db: AsyncSession 
 
 
 @router.delete("/contacts/{contact_id}")
-async def delete_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_contact(contact_id: int, db: AsyncSession = Depends(get_db), current_user = Depends(verify_token)):
     result = await db.execute(select(Contact).filter(Contact.id == contact_id))
     contact = result.scalars().first()
     if not contact:
@@ -483,7 +483,7 @@ async def delete_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.delete("/contacts")
-async def delete_multiple(ids: List[int] = Query(...), db: AsyncSession = Depends(get_db)):
+async def delete_multiple(ids: List[int] = Query(...), db: AsyncSession = Depends(get_db), current_user = Depends(verify_token)):
     """Delete multiple contacts at once."""
     if not ids:
         return JSONResponse(content={"ok": True, "deleted": 0})

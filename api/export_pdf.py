@@ -23,11 +23,11 @@ class PDFRequest(BaseModel):
 
 
 @router.post("/export/pdf")
-async def export_pdf(body: PDFRequest):
+async def export_pdf(body: PDFRequest, current_user = Depends(verify_token)):
     try:
         pdf_bytes = generate_pdf(body.model_dump())
     except Exception as e:
-        raise HTTPException(500, f"PDF generation failed: {str(e)}")
+        raise HTTPException(500, "PDF generation failed")
 
     # Sanitize filename to prevent header injection
     safe_name = re.sub(r'[^\w\s\-\.]', '', body.fileName or 'export').strip() or 'export'

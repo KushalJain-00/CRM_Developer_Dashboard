@@ -1,0 +1,1747 @@
+Delivered-To: mitul@excelenviro.com
+Received-SPF: pass (zohomail.in: domain of prakruti.co.in designates 92.53.243.29 as permitted sender) client-ip=92.53.243.29; envelope-from=priyanshi@prakruti.co.in; helo=mail.mailsonweb.com;
+Authentication-Results: mx.zohomail.in;
+	dkim=pass;
+	spf=pass (zohomail.in: domain of prakruti.co.in designates 92.53.243.29 as permitted sender)  smtp.mailfrom=priyanshi@prakruti.co.in
+ARC-Seal: i=1; a=rsa-sha256; t=1782989825; cv=none; 
+	d=zohomail.in; s=zohoarc; 
+	b=HV0flcUXnBGmHhWdjBffZCqj3OFyxJVa3RrlJ9wCpZZnqjOrrzWJntZt5Eml3vIO17mOPuGW0rApIgZnTr2PU7EL9JVtppWj34RSdc8/glT3ejyDhGPqUY4ozQv9fxcg5rWSIVla4AQ0RzbtjlAnrvmf7C3Nc/BQwbzBPFmzXgs=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.in; s=zohoarc; 
+	t=1782989825; h=Content-Type:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=hBzGGDJL5T//ltFEu7swGpushipONzxTv2WeRsV8jV4=; 
+	b=JP13dWhHWYhRsQOl+T2tlmcmMPO6oCpTJLp1Lqe62MP+w9reBgCFu94Vp5ls370ExJb9HOPtOYiMVQ00tT+OfalNDzqMy0ueA642cZkdRlo21qsR+ySCINWG4cTMMnUmZU1IZrrGHvetTMKwDfukiTUMuH2hOifU98wnl3zucJU=
+ARC-Authentication-Results: i=1; mx.zohomail.in;
+	dkim=pass;
+	spf=pass (zohomail.in: domain of prakruti.co.in designates 92.53.243.29 as permitted sender)  smtp.mailfrom=priyanshi@prakruti.co.in
+Return-Path: <priyanshi@prakruti.co.in>
+Received: from mail.mailsonweb.com (mail.mailsonweb.com [92.53.243.29]) by mx.zoho.in
+	with SMTPS id 1782989824948316.9008716213049; Thu, 2 Jul 2026 16:27:04 +0530 (IST)
+Received: from DESKTOPR2E0GHA (UnknownHost [103.241.226.32])
+	by mail.mailsonweb.com with SMTP	(version=Tls12	cipher=Aes256 bits=256);
+	Thu, 2 Jul 2026 11:56:24 +0100
+X-SmarterMail-Authenticated-As: priyanshi@prakruti.co.in
+DKIM-Signature: v=1; a=rsa-sha256; d=prakruti.co.in; s=de8DE9D4352DF9E90;
+	c=relaxed/relaxed; t=1782989823; h=from;
+	bh=hBzGGDJL5T//ltFEu7swGpushipONzxTv2WeRsV8jV4=;
+	b=uos3VSxOsM3dTgzJIPxy0atYGMgv1PJ0hhNoW40osvHOPL9ZuvlEqdpEc4C4Nf95Zn45pDZcmGs
+	4cd/zBr5Fz+BeymBOjzum29X/rMz0dJD3FYWEfcSl8f9Z81ds4Qrkny+O1BpJQHtuNV/o9fxOyWJw
+	TwmLJtn8xYHh+OdXaMDU7kyoZZD4TKzfMPkpG9YOc2hdKU51Z+dj1HYpfvDR2UdQKKqOnco4wt2OB
+	1mxNXUcuD/J8KUjIrDVR/ilcJJRlWnV16qDGW5R52W4rARpw6+flTcZAmvWMQlw38vX4INRyAgffl
+	/F9XgHxL2YLa0XQ6a308L7/N0vfTa+VW5lhw==
+From: priyanshi <priyanshi@prakruti.co.in>
+To: 'Mitul Jain' <mitul@excelenviro.com>
+Cc: 'aakanksha' <aakanksha@prakruti.co.in>, 'kg' <kg@prakruti.co.in>, 'labdhi'
+	<labdhi@prakruti.co.in>
+References: <000001dce143$761be3f0$6253abd0$@prakruti.co.in>
+	<19e1fe29713.6b40cf05894861.1937316055395892794@excelenviro.com>
+	<19e2c03be5a.388f747136254.7569797310882442103@excelenviro.com>
+	<000d01dd09f3$68795d30$396c1790$@prakruti.co.in>
+	<19f21de724b.890df94d37225.4614011191534680717@excelenviro.com>
+In-Reply-To: <19f21de724b.890df94d37225.4614011191534680717@excelenviro.com>
+Subject: Torrent Electricals Limited - Water Audit Report
+Date: Thu, 2 Jul 2026 16:30:22 +0530
+Message-ID: <000001dd0a12$07dee480$179cad80$@prakruti.co.in>
+MIME-Version: 1.0
+X-Mailer: Microsoft Outlook 15.0
+Thread-Index: AQDs0v0UHWnIN/TXIuXKMlU+PA0ubgHI+YmHAkXDW34BxsVBNgJkNROot/ivaAA=
+X-Antivirus: AVG (VPS 260701-0, 7/1/2026), Outbound message
+X-Antivirus-Status: Clean
+Content-Type: multipart/related;
+	boundary="----=_NextPart_000_0001_01DD0A40.21A09660"
+Content-Language: en-in
+X-Zoho-Virus-Status: 1
+X-Zoho-AV-Stamp: zmail-av-0.2.10.1.5.2/282.969.97
+X-ZohoMail-DKIM: pass (identity @prakruti.co.in)
+
+This is a multipart message in MIME format.
+
+------=_NextPart_000_0001_01DD0A40.21A09660
+Content-Type: multipart/alternative;
+	boundary="----=_NextPart_001_0002_01DD0A40.21A09660"
+
+
+------=_NextPart_001_0002_01DD0A40.21A09660
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Dear Sir,
+
+ 
+
+In  regards to the trailing mail, please note that the provided water audit=
+ report is of M/s Torrent Pharmaceuticals Ltd. instead of M/s Torrent Elect=
+ricals Ltd.
+
+ 
+
+Regards,
+
+ 
+
+Priyanshi Mehta (Technical Executive)
+
+Prakruti
+
+Mobile: +91 7096953939
+
+Contact No.: +91 265 2356171,
+
+9409100037, 9409100067, 9409100073
+
+Extension: 205
+
+ 
+
+From: Mitul Jain [mailto:mitul@excelenviro.com] 
+Sent: 02 July 2026 13:38
+To: priyanshi
+Cc: aakanksha; 'kg'; labdhi
+Subject: RE: Torrent Electricals Limited - Water Audit Report
+
+ 
+
+Mam,
+
+ 
+
+Kindly find the attached copy of revised report for your kind reference. 
+
+ 
+
+Review and confirm the same for digital signature. 
+
+ 
+
+Thanks & Regards 
+
+ 
+
+
+
+Mitul V Jain (Director)
+
+(Mob +91-9173543401)
+
+(reply to:  <mailto:manoj@excelenviro.com> mitul@excelenviro.com
+
+ 
+
+Excel Enviro Tech Private Limited 
+
+(EHS | ESG | CGWA| MoEF&Cc | GPCB | EPR | CP)
+
+Office Phone: 9825729124 / 9722009572
+
+TF-2, TF-1, TF-2, Sun House, Old High Court Lane,
+
+Off Ashram Road, Ahmadabad - 380009
+
+ 
+
+ 
+
+ 
+
+ 
+
+From: priyanshi <priyanshi@prakruti.co.in <mailto:priyanshi@prakruti.co.in>=
+ >
+To: "'Mitul Jain'"<mitul@excelenviro.com <mailto:mitul@excelenviro.com> >
+Cc: <aakanksha@prakruti.co.in <mailto:aakanksha@prakruti.co.in> >, "'kg'"<k=
+g@prakruti.co.in <mailto:kg@prakruti.co.in> >, <labdhi@prakruti.co.in <mail=
+to:labdhi@prakruti.co.in> >
+Date: Thu, 02 Jul 2026 12:47:58 +0530
+Subject: RE: Torrent Electricals Limited - Water Audit Report
+
+ 
+
+Dear Sir,
+
+ 
+
+Kindly find attached herewith ETP Inlet and Outlet Analysis Report for your=
+ ready refrence.
+
+ 
+
+ 
+
+Regards,
+
+ 
+
+Priyanshi Mehta (Technical Executive)
+
+Prakruti
+
+Mobile: +91 7096953939
+
+Contact No.: +91 265 2356171,
+
+9409100037, 9409100067, 9409100073
+
+Extension: 205
+
+ 
+
+From: priyanshi [mailto:priyanshi@prakruti.co.in <mailto:priyanshi@prakruti=
+=2Eco.in> ] 
+Sent: 19 May 2026 19:32
+To: 'Mitul Jain'
+Cc: 'aakanksha@prakruti.co.in <mailto:aakanksha@prakruti.co.in> '
+Subject: RE: Torrent Electricals Limited - Water Audit Report
+
+ 
+
+Dear Sir,
+
+ 
+
+Kindly find attached herewith water balance diagram.
+
+ 
+
+ 
+
+Regards,
+
+ 
+
+Priyanshi Mehta (Technical Executive)
+
+Prakruti
+
+Mobile: +91 7096953939
+
+Contact No.: +91 265 2356171,
+
+9409100037, 9409100067, 9409100073
+
+Extension: 205
+
+ 
+
+ 
+
+ 
+
+ 
+
+From: Mitul Jain [mailto:mitul@excelenviro.com] 
+Sent: 15 May 2026 19:52
+To: priyanshi@prakruti.co.in <mailto:priyanshi@prakruti.co.in> 
+Cc: aakanksha@prakruti.co.in <mailto:aakanksha@prakruti.co.in> 
+Subject: Re:Torrent Electricals Limited - Water Audit Report
+
+ 
+
+Kindly provide word copy of water balance diagram
+
+ 
+
+
+
+Mitul V Jain (Director)
+
+(Mob +91-9173543401)
+
+(reply to:  <mailto:manoj@excelenviro.com> mitul@excelenviro.com
+
+ 
+
+Excel Enviro Tech Private Limited 
+
+(EHS | ESG | CGWA| MoEF&Cc | GPCB | EPR | CP)
+
+Office Phone: 9825729124 / 9722009572
+
+TF-2, TF-1, TF-2, Sun House, Old High Court Lane,
+
+Off Ashram Road, Ahmadabad - 380009
+
+ 
+
+ 
+
+ 
+
+---- On Wed, 13 May 2026 11:20:04 +0530 Mitul Jain <mitul@excelenviro.com <=
+mailto:mitul@excelenviro.com> > wrote ----
+
+ 
+
+Dear Mam,
+
+ 
+
+As per the trailing mail we are awaiting the below mentioned data for the w=
+ater audit report 
+
+ 
+
+1. ETP - Inlet and ETP - Outlet Analysis Report 
+
+ 
+
+Thanks & Regards =E2=80=8B
+
+ 
+
+
+
+Mitul V Jain (Director)
+
+(Mob +91-9173543401)
+
+(reply to:  <mailto:manoj@excelenviro.com> mitul@excelenviro.com
+
+ 
+
+Excel Enviro Tech Private Limited 
+
+(EHS | ESG | CGWA| MoEF&Cc | GPCB | EPR | CP)
+
+Office Phone: 9825729124 / 9722009572
+
+TF-2, TF-1, TF-2, Sun House, Old High Court Lane,
+
+Off Ashram Road, Ahmadabad - 380009
+
+ 
+
+ 
+
+ 
+
+ 
+
+From: priyanshi <priyanshi@prakruti.co.in <mailto:priyanshi@prakruti.co.in>=
+ >
+To: <mitul@excelenviro.com <mailto:mitul@excelenviro.com> >
+Cc: "'Aakanksha'"<aakanksha@prakruti.co.in <mailto:aakanksha@prakruti.co.in=
+> >
+Date: Mon, 11 May 2026 18:07:58 +0530
+Subject: Torrent Electricals Limited - Water Audit Report
+
+ 
+
+Dear Sir,
+
+ 
+
+As per your trailing mail, kindly find herewith attached data as required.
+
+1.     Copy of CGWA NOC Application (NOCAP Copy) =E2=80=93 attached
+
+2.     Water Balance Diagram as per the NOC - attached
+
+3.     Gardening Area - 80318.67 m2
+
+ 
+
+Regards,
+
+ 
+
+Priyanshi Mehta (Technical Executive)
+
+Prakruti
+
+Mobile: +91 7096953939
+
+Contact No.: +91 265 2356171,
+
+9409100037, 9409100067, 9409100073
+
+Extension: 205
+
+ 
+
+ 
+
+From: Mitul Jain [ <mailto:mitul@excelenviro.com> mailto:mitul@excelenviro.=
+com] 
+Sent: 25 April 2026 15:12
+To: Aakanksha
+Subject: ** SPAM-LOW ** Torrent Electricals Limited - Water Audit Report
+
+ 
+
+Dear Mam, 
+
+ 
+
+This is to inform you that as per the site visit we had yesterday at Torren=
+t Pharmaceuticals Limited for water audit report, below mentioned data/docu=
+ments are required from your end to complete the water audit report 
+
+ 
+
+1. ETP - Inlet and ETP - Outlet Analysis Report
+
+2. Copy of CGWA NOC Application (NOCAP Copy) 
+
+3. Water Balance Diagram as per the NOC 
+
+4. Gardening Area 
+
+ 
+
+Do let us know if you need anything else we will be more than happy to help=
+ you out. 
+
+ 
+
+Awaiting your positive response. 
+
+ 
+
+Thanks & Regards 
+
+ 
+
+
+
+Mitul V Jain (Director)
+
+(Mob +91-9173543401)
+
+(reply to:  <mailto:manoj@excelenviro.com> mitul@excelenviro.com
+
+ 
+
+Excel Enviro Tech Private Limited 
+
+(EHS | ESG | CGWA| MoEF&Cc | GPCB | EPR | CP)
+
+Office Phone: 9825729124 / 9722009572
+
+TF-2, TF-1, TF-2, Sun House, Old High Court Lane,
+
+Off Ashram Road, Ahmadabad - 380009
+
+ 
+
+ 
+
+ 
+
+
+ <http://www.avg.com/email-signature?utm_medium=3Demail&utm_source=3Dlink&u=
+tm_campaign=3Dsig-email&utm_content=3Demailclient> 
+
+Virus-free. <http://www.avg.com/email-signature?utm_medium=3Demail&utm_sour=
+ce=3Dlink&utm_campaign=3Dsig-email&utm_content=3Demailclient> www.avg.com
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+-- 
+This email has been checked for viruses by AVG antivirus software.
+www.avg.com
+------=_NextPart_001_0002_01DD0A40.21A09660
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" =
+xmlns:o=3D"urn:schemas-microsoft-com:office:office" =
+xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" =
+xmlns=3D"http://www.w3.org/TR/REC-html40"><head><meta =
+http-equiv=3DContent-Type content=3D"text/html; charset=3Dutf-8"><meta =
+name=3DGenerator content=3D"Microsoft Word 15 (filtered medium)"><!--[if =
+!mso]><style>v\:* {behavior:url(#default#VML);}
+o\:* {behavior:url(#default#VML);}
+w\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style><![endif]--><style><!--
+/* Font Definitions */
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:Aptos;}
+@font-face
+	{font-family:Verdana;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";}
+a:link, span.MsoHyperlink
+	{mso-style-priority:99;
+	color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-priority:99;
+	color:purple;
+	text-decoration:underline;}
+span.x1110330044msohyperlink
+	{mso-style-name:x_1110330044msohyperlink;}
+span.x1110330044msohyperlinkfollowed
+	{mso-style-name:x_1110330044msohyperlinkfollowed;}
+span.x1110330044x1125405544msohyperlink1
+	{mso-style-name:x_1110330044x1125405544msohyperlink1;}
+span.x1110330044x1125405544msohyperlinkfollowed1
+	{mso-style-name:x_1110330044x1125405544msohyperlinkfollowed1;}
+span.x1110330044msohyperlink1
+	{mso-style-name:x_1110330044msohyperlink1;
+	color:blue;
+	text-decoration:underline;}
+span.x1110330044msohyperlinkfollowed1
+	{mso-style-name:x_1110330044msohyperlinkfollowed1;
+	color:purple;
+	text-decoration:underline;}
+span.x1110330044x1125405544msohyperlink11
+	{mso-style-name:x_1110330044x1125405544msohyperlink11;
+	color:blue;
+	text-decoration:underline;}
+span.x1110330044x1125405544msohyperlinkfollowed11
+	{mso-style-name:x_1110330044x1125405544msohyperlinkfollowed11;
+	color:purple;
+	text-decoration:underline;}
+span.font
+	{mso-style-name:font;}
+span.size
+	{mso-style-name:size;}
+span.colour
+	{mso-style-name:colour;}
+span.x1110330044size
+	{mso-style-name:x_1110330044size;}
+span.highlight
+	{mso-style-name:highlight;}
+p.x1110330044x1159080465x1125405544msolistparagraph, =
+li.x1110330044x1159080465x1125405544msolistparagraph, =
+div.x1110330044x1159080465x1125405544msolistparagraph
+	{mso-style-name:x_1110330044x1159080465x1125405544msolistparagraph;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";}
+span.x1110330044font
+	{mso-style-name:x_1110330044font;}
+span.EmailStyle32
+	{mso-style-type:personal-reply;
+	font-family:"Calibri","sans-serif";
+	color:#1F497D;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	font-size:10.0pt;}
+@page WordSection1
+	{size:612.0pt 792.0pt;
+	margin:72.0pt 72.0pt 72.0pt 72.0pt;}
+div.WordSection1
+	{page:WordSection1;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext=3D"edit">
+<o:idmap v:ext=3D"edit" data=3D"1" />
+</o:shapelayout></xml><![endif]--></head><body lang=3DEN-IN link=3Dblue =
+vlink=3Dpurple><div class=3DWordSection1><p class=3DMsoNormal =
+style=3D'margin-right:6.0pt'><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>De=
+ar Sir,<o:p></o:p></span></p><p class=3DMsoNormal =
+style=3D'margin-right:6.0pt'><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'><o=
+:p>&nbsp;</o:p></span></p><p class=3DMsoNormal =
+style=3D'margin-right:6.0pt'><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>In=
+=C2=A0 regards to the trailing mail, please note that the provided water =
+audit report is of M/s Torrent Pharmaceuticals Ltd. instead of M/s =
+Torrent Electricals Ltd.<o:p></o:p></span></p><p class=3DMsoNormal><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif";color:#1F497=
+D'><o:p>&nbsp;</o:p></span></p><p class=3DMsoNormal =
+style=3D'margin-right:6.0pt'><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Re=
+gards,</span><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif";color:#00007=
+D'><o:p></o:p></span></p><p class=3DMsoNormal =
+style=3D'margin-right:6.0pt'><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>&n=
+bsp;</span><span style=3D'color:#00007D'><o:p></o:p></span></p><p =
+class=3DMsoNormal style=3D'margin-right:6.0pt'><b><span =
+style=3D'font-family:"Arial","sans-serif";color:navy'>Priyanshi Mehta =
+(Technical Executive)</span></b><span =
+style=3D'font-family:"Calibri","sans-serif";color:#00007D'><o:p></o:p></s=
+pan></p><p class=3DMsoNormal style=3D'margin-right:6.0pt'><b><span =
+style=3D'font-size:13.5pt;font-family:"Arial","sans-serif";color:navy'>Pr=
+akruti</span></b><span =
+style=3D'font-family:Aptos;color:#00007D'><o:p></o:p></span></p><p =
+class=3DMsoNormal><b><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Mo=
+bile:</span></b><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>&n=
+bsp;+91 7096953939</span><span =
+style=3D'font-family:"Calibri","sans-serif";color:#00007D'><o:p></o:p></s=
+pan></p><p class=3DMsoNormal><b><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Co=
+ntact No.:</span></b><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>&n=
+bsp;+91 265 2356171,</span><span =
+style=3D'font-family:"Calibri","sans-serif";color:#00007D'><o:p></o:p></s=
+pan></p><p class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>94=
+09100037, 9409100067, 9409100073</span><span =
+style=3D'font-family:"Calibri","sans-serif";color:#00007D'><o:p></o:p></s=
+pan></p><p class=3DMsoNormal><b><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Ex=
+tension</span></b><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>: =
+205</span><span =
+style=3D'font-family:"Arial","sans-serif";color:#00007D;mso-fareast-langu=
+age:EN-US'><o:p></o:p></span></p><p class=3DMsoNormal><span =
+style=3D'font-family:"Arial","sans-serif";color:#00007D;mso-fareast-langu=
+age:EN-US'><o:p>&nbsp;</o:p></span></p><div><div =
+style=3D'border:none;border-top:solid #E1E1E1 1.0pt;padding:3.0pt 0cm =
+0cm 0cm'><p class=3DMsoNormal><b><span lang=3DEN-US =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif"'>From:</span=
+></b><span lang=3DEN-US =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif"'> Mitul =
+Jain [mailto:mitul@excelenviro.com] <br><b>Sent:</b> 02 July 2026 =
+13:38<br><b>To:</b> priyanshi<br><b>Cc:</b> aakanksha; 'kg'; =
+labdhi<br><b>Subject:</b> RE: Torrent Electricals Limited - Water Audit =
+Report<o:p></o:p></span></p></div></div><p =
+class=3DMsoNormal><o:p>&nbsp;</o:p></p><div><div><p =
+class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>Mam,<o:p></=
+o:p></span></p></div><div><p class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'><o:p>&nbsp;=
+</o:p></span></p></div><div><p class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>Kindly =
+find the attached copy of revised report for your kind =
+reference.&nbsp;<o:p></o:p></span></p></div><div><p =
+class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'><o:p>&nbsp;=
+</o:p></span></p></div><div><p class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>Review and =
+confirm the same for digital =
+signature.&nbsp;<o:p></o:p></span></p></div><div><p =
+class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'><o:p>&nbsp;=
+</o:p></span></p></div><div><p class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>Thanks =
+&amp; Regards&nbsp;<o:p></o:p></span></p></div><div><p =
+class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'><o:p>&nbsp;=
+</o:p></span></p></div><div id=3D"Zm-_Id_-Sgn"><div><p =
+class=3DMsoNormal><b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'><img width=3D204 height=3D99 id=3D"_x0000_i1025" =
+src=3D"cid:image004.jpg@01DD0A40.1437AA40" alt=3D"EET Logo =
+.jpg"></span></b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'><o:p></o:p></span></p></div><div><p class=3DMsoNormal><b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>Mitul&nbsp;V Jain (Director)</span></b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'><o:p></o:p></span></p></div><div><p class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>(Mob +91-9173543401)<o:p></o:p></span></p></div><div><p =
+class=3DMsoNormal><b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>(reply to:&nbsp;<a href=3D"mailto:manoj@excelenviro.com" =
+target=3D"_blank"><span =
+style=3D'color:#1155CC'>mitul@excelenviro.com</span></a></span></b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'><o:p></o:p></span></p></div><div><p class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'><o:p>&nbsp;</o:p></span></p></div><div><p class=3DMsoNormal><b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>Excel Enviro Tech Private Limited&nbsp;</span></b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'><o:p></o:p></span></p></div><div><p class=3DMsoNormal><b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>(EHS | ESG | CGWA| MoEF&amp;Cc | GPCB | EPR | CP)</span></b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'><o:p></o:p></span></p></div><div><p class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>Office Phone: 9825729124 / =
+9722009572<o:p></o:p></span></p></div><div><p class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>TF-2, TF-1, TF-2, Sun House, Old High Court =
+Lane,<o:p></o:p></span></p></div><div><p class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>Off Ashram Road, Ahmadabad - =
+380009<o:p></o:p></span></p></div><div><p class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'><o:p>&nbsp;</o:p></span></p></div></div><div><p =
+class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'><o:p>&nbsp;=
+</o:p></span></p></div><div style=3D'border:none;border-top:solid =
+#CCCCCC 1.0pt;padding:0cm 0cm 0cm =
+0cm;margin-top:7.5pt;margin-bottom:7.5pt'><p class=3DMsoNormal =
+style=3D'mso-line-height-alt:0pt'><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'><o:p>&nbsp;=
+</o:p></span></p></div><div><div><p class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'><o:p>&nbsp;=
+</o:p></span></p></div><div id=3D"Zm-_Id_-Sgn1"><p =
+class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>From: =
+priyanshi &lt;<a =
+href=3D"mailto:priyanshi@prakruti.co.in">priyanshi@prakruti.co.in</a>&gt;=
+<br>To: &quot;'Mitul Jain'&quot;&lt;<a =
+href=3D"mailto:mitul@excelenviro.com">mitul@excelenviro.com</a>&gt;<br>Cc=
+: &lt;<a =
+href=3D"mailto:aakanksha@prakruti.co.in">aakanksha@prakruti.co.in</a>&gt;=
+, &quot;'kg'&quot;&lt;<a =
+href=3D"mailto:kg@prakruti.co.in">kg@prakruti.co.in</a>&gt;, &lt;<a =
+href=3D"mailto:labdhi@prakruti.co.in">labdhi@prakruti.co.in</a>&gt;<br>Da=
+te: Thu, 02 Jul 2026 12:47:58 +0530<br>Subject: RE: Torrent Electricals =
+Limited - Water Audit Report<o:p></o:p></span></p></div><div><p =
+class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'><o:p>&nbsp;=
+</o:p></span></p></div><blockquote id=3D"blockquote_zmail"><div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>De=
+ar Sir,</span></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>&n=
+bsp;</span></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Ki=
+ndly find attached herewith ETP Inlet and Outlet Analysis Report for =
+your ready refrence.</span></span><o:p></o:p></p><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif";color:#1F497=
+D'>&nbsp;</span></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif";color:#1F497=
+D'>&nbsp;</span></span><o:p></o:p></p><p class=3DMsoNormal =
+style=3D'margin-right:6.0pt'><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Re=
+gards,</span></span><o:p></o:p></p><p class=3DMsoNormal =
+style=3D'margin-right:6.0pt'><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>&n=
+bsp;</span></span><o:p></o:p></p><p class=3DMsoNormal =
+style=3D'margin-right:6.0pt'><span class=3Dfont><b><span =
+style=3D'font-family:"Arial","sans-serif";color:navy'>Priyanshi Mehta =
+(Technical Executive)</span></b></span><o:p></o:p></p><p =
+class=3DMsoNormal style=3D'margin-right:6.0pt'><span =
+class=3Dsize><b><span =
+style=3D'font-size:13.5pt;font-family:"Arial","sans-serif";color:navy'>Pr=
+akruti</span></b></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Mo=
+bile:</span></b></span><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>&n=
+bsp;+91 7096953939</span></span><o:p></o:p></p><p =
+class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Co=
+ntact No.:</span></b></span><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>&n=
+bsp;+91 265 2356171,</span></span><o:p></o:p></p><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>94=
+09100037, 9409100067, 9409100073</span></span><o:p></o:p></p><p =
+class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Ex=
+tension</span></b></span><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>: =
+205</span></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif";color:#1F497=
+D'>&nbsp;</span></span><o:p></o:p></p><div><div =
+style=3D'border:none;border-top:solid #E1E1E1 1.0pt;padding:3.0pt 0cm =
+0cm 0cm'><p class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif"'>From:</span=
+></b></span><span class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif"'> priyanshi =
+[mailto:<a href=3D"mailto:priyanshi@prakruti.co.in" =
+target=3D"_blank">priyanshi@prakruti.co.in</a>] </span></span><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif"'><br><span =
+class=3Dsize><b>Sent:</b> 19 May 2026 19:32</span><br><span =
+class=3Dsize><b>To:</b> 'Mitul Jain'</span><br><span =
+class=3Dsize><b>Cc:</b> '<a href=3D"mailto:aakanksha@prakruti.co.in" =
+target=3D"_blank">aakanksha@prakruti.co.in</a>'</span><br><span =
+class=3Dsize><b>Subject:</b> RE: Torrent Electricals Limited - Water =
+Audit Report</span></span><o:p></o:p></p></div></div><p =
+class=3DMsoNormal><span class=3Dsize>&nbsp;</span><o:p></o:p></p><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>De=
+ar Sir,</span></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>&n=
+bsp;</span></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Ki=
+ndly find attached herewith water balance =
+diagram.</span></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>&n=
+bsp;</span></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif";color:#1F497=
+D'>&nbsp;</span></span><o:p></o:p></p><p class=3DMsoNormal =
+style=3D'margin-right:6.0pt'><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Re=
+gards,</span></span><o:p></o:p></p><p class=3DMsoNormal =
+style=3D'margin-right:6.0pt'><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>&n=
+bsp;</span></span><o:p></o:p></p><p class=3DMsoNormal =
+style=3D'margin-right:6.0pt'><span class=3Dfont><b><span =
+style=3D'font-family:"Arial","sans-serif";color:navy'>Priyanshi Mehta =
+(Technical Executive)</span></b></span><o:p></o:p></p><p =
+class=3DMsoNormal style=3D'margin-right:6.0pt'><span =
+class=3Dsize><b><span =
+style=3D'font-size:13.5pt;font-family:"Arial","sans-serif";color:navy'>Pr=
+akruti</span></b></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Mo=
+bile:</span></b></span><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>&n=
+bsp;+91 7096953939</span></span><o:p></o:p></p><p =
+class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Co=
+ntact No.:</span></b></span><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>&n=
+bsp;+91 265 2356171,</span></span><o:p></o:p></p><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>94=
+09100037, 9409100067, 9409100073</span></span><o:p></o:p></p><p =
+class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Ex=
+tension</span></b></span><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>: =
+205</span></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Arial","sans-serif";color:#002060'=
+>&nbsp;</span></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif";color:#1F497=
+D'>&nbsp;</span></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif";color:#1F497=
+D'>&nbsp;</span></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif";color:#1F497=
+D'>&nbsp;</span></span><o:p></o:p></p><div><div =
+style=3D'border:none;border-top:solid #E1E1E1 1.0pt;padding:3.0pt 0cm =
+0cm 0cm'><p class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif"'>From:</span=
+></b></span><span class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif"'> Mitul =
+Jain [<a href=3D"mailto:mitul@excelenviro.com" =
+target=3D"_blank">mailto:mitul@excelenviro.com</a>] </span></span><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif"'><br><span =
+class=3Dsize><b>Sent:</b> 15 May 2026 19:52</span><br><span =
+class=3Dsize><b>To:</b> <a href=3D"mailto:priyanshi@prakruti.co.in" =
+target=3D"_blank">priyanshi@prakruti.co.in</a></span><br><span =
+class=3Dsize><b>Cc:</b> <a href=3D"mailto:aakanksha@prakruti.co.in" =
+target=3D"_blank">aakanksha@prakruti.co.in</a></span><br><span =
+class=3Dsize><b>Subject:</b> Re:Torrent Electricals Limited - Water =
+Audit Report</span></span><o:p></o:p></p></div></div><p =
+class=3DMsoNormal><span class=3Dsize>&nbsp;</span><o:p></o:p></p><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif"'>Kindly =
+provide word copy of water balance =
+diagram</span></span><o:p></o:p></p><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><div =
+id=3D"x_1110330044signatureElementId"><div><p class=3DMsoNormal><b><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'><img border=3D0 width=3D204 height=3D99 id=3D"_x0000_i1026" =
+src=3D"cid:image005.jpg@01DD0A40.1437AA40" alt=3D"EET Logo =
+.jpg"></span></b><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><b><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>Mitul&nbsp;V Jain =
+(Director)</span></b></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>(Mob +91-9173543401)</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>(reply to:&nbsp;<a href=3D"mailto:manoj@excelenviro.com" =
+target=3D"_blank"><span class=3Dcolour><span =
+style=3D'color:#1155CC'>mitul@excelenviro.com</span></span></a></span></b=
+></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>&nbsp;</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>Excel Enviro Tech Private =
+Limited&nbsp;</span></b></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>(EHS | ESG | CGWA| MoEF&amp;Cc | GPCB | EPR | =
+CP)</span></b></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>Office Phone: 9825729124 / =
+9722009572</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>TF-2, TF-1, TF-2, Sun House, Old High Court =
+Lane,</span></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>Off Ashram Road, Ahmadabad - =
+380009</span></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>&nbsp;</span></span><o:p></o:p></p></div></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif"'>---- On =
+Wed, 13 May 2026 11:20:04 +0530 <b>Mitul Jain &lt;<a =
+href=3D"mailto:mitul@excelenviro.com" =
+target=3D"_blank">mitul@excelenviro.com</a>&gt;</b> wrote =
+----</span></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><blockquote =
+style=3D'margin-top:5.0pt;margin-bottom:5.0pt'><div><div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>Dear =
+Mam,</span></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>As per the =
+trailing mail we are awaiting the below mentioned data for the water =
+audit report&nbsp;</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:black;=
+background:white'>1. ETP - Inlet and ETP - Outlet Analysis =
+Report&nbsp;</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:black;=
+background:white'>Thanks &amp; Regards </span></span><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:black;ba=
+ckground:white'>=E2=80=8B</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><div =
+id=3D"x_1159080465Zm-_Id_-Sgn"><div><p class=3DMsoNormal><b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'><img border=3D0 width=3D204 height=3D99 id=3D"_x0000_i1027" =
+src=3D"cid:image006.jpg@01DD0A40.1437AA40" alt=3D"EET Logo =
+.jpg"></span></b><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>Mitul&nbsp;V Jain =
+(Director)</span></b></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>(Mob +91-9173543401)</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>(reply to:&nbsp;<a href=3D"mailto:manoj@excelenviro.com" =
+target=3D"_blank"><span class=3Dcolour><span =
+style=3D'color:#1155CC'>mitul@excelenviro.com</span></span></a></span></b=
+></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>&nbsp;</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>Excel Enviro Tech Private =
+Limited&nbsp;</span></b></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>(EHS | ESG | CGWA| MoEF&amp;Cc | GPCB | EPR | =
+CP)</span></b></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>Office Phone: 9825729124 / =
+9722009572</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>TF-2, TF-1, TF-2, Sun House, Old High Court =
+Lane,</span></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>Off Ashram Road, Ahmadabad - =
+380009</span></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>&nbsp;</span></span><o:p></o:p></p></div></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><div style=3D'border:none;border-top:solid =
+#CCCCCC 1.0pt;padding:0cm 0cm 0cm =
+0cm;margin-top:7.5pt;margin-bottom:7.5pt;min-height: 0px'><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><div id=3D"x_1159080465Zm-_Id_-Sgn1"><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>From: =
+priyanshi &lt;<a href=3D"mailto:priyanshi@prakruti.co.in" =
+target=3D"_blank">priyanshi@prakruti.co.in</a>&gt;</span></span><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'><br><span =
+class=3Dsize>To: &lt;<a href=3D"mailto:mitul@excelenviro.com" =
+target=3D"_blank">mitul@excelenviro.com</a>&gt;</span><br><span =
+class=3Dsize>Cc: &quot;'Aakanksha'&quot;&lt;<a =
+href=3D"mailto:aakanksha@prakruti.co.in" =
+target=3D"_blank">aakanksha@prakruti.co.in</a>&gt;</span><br><span =
+class=3Dsize>Date: Mon, 11 May 2026 18:07:58 +0530</span><br><span =
+class=3Dsize>Subject: Torrent Electricals Limited - Water Audit =
+Report</span></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><blockquote =
+id=3D"x_1159080465blockquote_zmail"><div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>De=
+ar Sir,</span></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>&n=
+bsp;</span></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>As=
+ per your trailing mail, kindly find herewith attached data as =
+required.</span></span><o:p></o:p></p><p =
+class=3Dx1110330044x1159080465x1125405544msolistparagraph =
+style=3D'mso-margin-top-alt:5.0pt;margin-right:0cm;margin-bottom:0cm;marg=
+in-left:36.0pt;margin-bottom:.0001pt;text-indent:-18.0pt'><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>1.=
+</span></span><span class=3Dsize><span =
+style=3D'font-size:7.0pt;color:navy'>&nbsp;&nbsp;&nbsp;&nbsp; =
+</span></span><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Co=
+py of CGWA NOC Application (NOCAP Copy) =E2=80=93 =
+attached</span></span><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'><o:p></o:p>=
+</span></p><p class=3Dx1110330044x1159080465x1125405544msolistparagraph =
+style=3D'mso-margin-top-alt:5.0pt;margin-right:0cm;margin-bottom:0cm;marg=
+in-left:36.0pt;margin-bottom:.0001pt;text-indent:-18.0pt'><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>2.=
+</span></span><span class=3Dsize><span =
+style=3D'font-size:7.0pt;color:navy'>&nbsp;&nbsp;&nbsp;&nbsp; =
+</span></span><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Wa=
+ter Balance Diagram as per the NOC - attached</span></span><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'><o:p></o:p>=
+</span></p><p class=3Dx1110330044x1159080465x1125405544msolistparagraph =
+style=3D'mso-margin-top-alt:5.0pt;margin-right:0cm;margin-bottom:0cm;marg=
+in-left:36.0pt;margin-bottom:.0001pt;text-indent:-18.0pt'><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>3.=
+</span></span><span class=3Dsize><span =
+style=3D'font-size:7.0pt;color:navy'>&nbsp;&nbsp;&nbsp;&nbsp; =
+</span></span><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Ga=
+rdening Area - 80318.67 m<sup>2</sup></span></span><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'><o:p></o:p>=
+</span></p><p class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>&n=
+bsp;</span></span><o:p></o:p></p><p class=3DMsoNormal =
+style=3D'margin-right:6.0pt'><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Re=
+gards,</span></span><o:p></o:p></p><p class=3DMsoNormal =
+style=3D'margin-right:6.0pt'><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>&n=
+bsp;</span></span><o:p></o:p></p><p class=3DMsoNormal =
+style=3D'margin-right:6.0pt'><span class=3Dfont><b><span =
+style=3D'font-family:"Arial","sans-serif";color:navy'>Priyanshi Mehta =
+(Technical Executive)</span></b></span><o:p></o:p></p><p =
+class=3DMsoNormal style=3D'margin-right:6.0pt'><span =
+class=3Dsize><b><span =
+style=3D'font-size:13.5pt;font-family:"Arial","sans-serif";color:navy'>Pr=
+akruti</span></b></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Mo=
+bile:</span></b></span><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>&n=
+bsp;+91 7096953939</span></span><o:p></o:p></p><p =
+class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Co=
+ntact No.:</span></b></span><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>&n=
+bsp;+91 265 2356171,</span></span><o:p></o:p></p><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>94=
+09100037, 9409100067, 9409100073</span></span><o:p></o:p></p><p =
+class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>Ex=
+tension</span></b></span><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:navy'>: =
+205</span></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Arial","sans-serif";color:#002060'=
+>&nbsp;</span></span><o:p></o:p></p><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Arial","sans-serif";color:#002060'=
+>&nbsp;</span></span><o:p></o:p></p><div><div =
+style=3D'border:none;border-top:solid #E1E1E1 1.0pt;padding:3.0pt 0cm =
+0cm 0cm'><p class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif"'>From:</span=
+></b></span><span class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif"'> Mitul =
+Jain [</span></span><span class=3Dx1110330044size><a =
+href=3D"mailto:mitul@excelenviro.com" target=3D"_blank"><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif"'>mailto:mitu=
+l@excelenviro.com</span></span></a></span><span class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif"'>] =
+</span></span><span =
+style=3D'font-size:11.0pt;font-family:"Calibri","sans-serif"'><br><span =
+class=3Dx1110330044size><b>Sent:</b> 25 April 2026 15:12</span><br><span =
+class=3Dx1110330044size><b>To:</b> Aakanksha</span><br><span =
+class=3Dx1110330044size><b>Subject:</b> ** SPAM-LOW ** Torrent =
+Electricals Limited - Water Audit =
+Report</span></span><o:p></o:p></p></div></div><p =
+class=3DMsoNormal><span =
+class=3Dx1110330044size>&nbsp;</span><o:p></o:p></p><div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>Dear =
+Mam,&nbsp;</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>This is to =
+inform you that as per the site visit we had yesterday at Torrent =
+Pharmaceuticals Limited for water audit report, below mentioned =
+data/documents are required from your end to complete the water audit =
+report&nbsp;</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>1. ETP - =
+Inlet and ETP - Outlet Analysis =
+Report</span></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>2. Copy of =
+CGWA NOC Application (NOCAP =
+Copy)&nbsp;</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>3. Water =
+Balance Diagram as per the =
+NOC&nbsp;</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>4. =
+Gardening Area&nbsp;</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>Do let us =
+know if you need anything else we will be more than happy to help you =
+out.&nbsp;</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>Awaiting =
+your positive response.&nbsp;</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>Thanks =
+&amp; Regards&nbsp;</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div><div><div id=3D""><div><p =
+class=3DMsoNormal><b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'><img border=3D0 width=3D204 height=3D99 id=3D"_x0000_i1028" =
+src=3D"cid:image007.jpg@01DD0A40.1437AA40" alt=3D"EET Logo =
+.jpg"></span></b><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>Mitul&nbsp;V Jain =
+(Director)</span></b></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>(Mob +91-9173543401)</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>(reply to:&nbsp;</span></b></span><span class=3Dx1110330044size><a =
+href=3D"mailto:manoj@excelenviro.com" target=3D"_blank"><span =
+class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#1155C=
+C'>mitul@excelenviro.com</span></b></span></a></span><o:p></o:p></p></div=
+><div><p class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>&nbsp;</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>Excel Enviro Tech Private =
+Limited&nbsp;</span></b></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><b><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>(EHS | ESG | CGWA| MoEF&amp;Cc | GPCB | EPR | =
+CP)</span></b></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>Office Phone: 9825729124 / =
+9722009572</span></span><o:p></o:p></p></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>TF-2, TF-1, TF-2, Sun House, Old High Court =
+Lane,</span></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>Off Ashram Road, Ahmadabad - =
+380009</span></span><o:p></o:p></p></div><div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif";color:#88888=
+8'>&nbsp;</span></span><o:p></o:p></p></div></div></div></div><p =
+class=3DMsoNormal><span =
+class=3Dx1110330044size>&nbsp;</span><o:p></o:p></p></div><div =
+id=3D"x_1110330044_8569045047354109759__2663457097438323724_DAB4FAD8-2DD7=
+-40BB-A1B8-4E2AA1F9FDF2"><p class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p><table class=3DMsoNormalTable border=3D1 =
+cellpadding=3D0 style=3D'border:none;border-top:solid #D3D4DE =
+1.0pt'><tr><td width=3D55 =
+style=3D'width:41.25pt;border:none;padding:9.75pt .75pt .75pt .75pt'><p =
+class=3DMsoNormal><span class=3Dsize><a =
+href=3D"http://www.avg.com/email-signature?utm_medium=3Demail&amp;utm_sou=
+rce=3Dlink&amp;utm_campaign=3Dsig-email&amp;utm_content=3Demailclient" =
+target=3D"_blank"><span style=3D'text-decoration:none'><img border=3D0 =
+width=3D46 height=3D29 id=3D"_x0000_i1029" =
+src=3D"https://s-install.avcdn.net/ipm/preview/icons/icon-envelope-tick-g=
+reen-avg-v1.png"></span></a></span><o:p></o:p></p></td><td width=3D470 =
+style=3D'width:352.5pt;border:none;padding:9.0pt .75pt .75pt .75pt'><p =
+class=3DMsoNormal style=3D'line-height:13.5pt'><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Arial","sans-serif";color:#41424E'=
+>Virus-free.<a =
+href=3D"http://www.avg.com/email-signature?utm_medium=3Demail&amp;utm_sou=
+rce=3Dlink&amp;utm_campaign=3Dsig-email&amp;utm_content=3Demailclient" =
+target=3D"_blank"><span class=3Dcolour><span =
+style=3D'color:#4453EA'>www.avg.com</span></span></a></span></span><o:p><=
+/o:p></p></td></tr></table></div></div></blockquote></div><div><p =
+class=3DMsoNormal><span class=3Dsize><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div></div><p class=3DMsoNormal><span =
+class=3Dsize><span =
+style=3D'font-size:11.0pt;font-family:"Verdana","sans-serif"'>&nbsp;</spa=
+n></span><o:p></o:p></p></div></blockquote></div></div><p =
+class=3DMsoNormal><span =
+class=3Dsize>&nbsp;</span><o:p></o:p></p></div></div></blockquote></div><=
+div><p class=3DMsoNormal><span =
+style=3D'font-size:10.0pt;font-family:"Verdana","sans-serif"'><o:p>&nbsp;=
+</o:p></span></p></div></div><p =
+class=3DMsoNormal><o:p>&nbsp;</o:p></p></div></body></html>
+------=_NextPart_001_0002_01DD0A40.21A09660--
+
+------=_NextPart_000_0001_01DD0A40.21A09660
+Content-Type: image/jpeg; name=image004.jpg
+Content-Transfer-Encoding: base64
+Content-ID: <image004.jpg@01DD0A40.1437AA40>
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAoHBwkHBgoJCAkLCwoMDxkQDw4ODx4WFxIZJCAmJSMg
+IyIoLTkwKCo2KyIjMkQyNjs9QEBAJjBGS0U+Sjk/QD3/2wBDAQsLCw8NDx0QEB09KSMpPT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT3/wAARCABjAMwDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD1bU9Z
+stGhie+kKLIdq4Qtk49qzv8AhOND/wCfl/8Av03+FZfxH/5B9h/10b+VcBXq4XBU6tJTle54mNzG
+rQrOnFKx6n/wnGh/8/L/APfpv8Ku6Z4i0/V52isXkkZRuY+UwAHuSK8fr1PwPaJbeGoZFA3zlpHP
+rzgfoKWLwlKhT5le5WBx1bE1eV2tv/Wp0FRrMGnaLZICozuKnafoelYt9o+r3mspdJqvkW8TgpCi
+nBA6555zW/XnSjGKVnf9D1YylJu6tb8RKKjuZvs1rNMV3CNC+PXAzXGj4lRf9A1/+/w/wq6VCpVu
+4K5FbE0qLSqO1ztqK4n/AIWVF/0Dn/7+j/Cj/hZUX/QOf/v6P8K1+o1/5fyMf7Rw38/4P/I7aiuJ
+/wCFlRf9A5/+/o/wrQ0TxvbavqC2j27W7ODsZnBDH06VMsHWinJxKhj8POSjGWr9TpqKWiuY6xKK
+yfEHiKDw/bxvIhllkbCRq2CR3P0rn/8AhZUX/QOf/v6P8K6KeFq1I80Y6HNVxlClLlnKzO2orif+
+FlRf9A5/+/o/wo/4WVF/0Dn/AO/o/wAKv6jX/l/Iz/tHDfz/AIP/ACO2orif+FlRf9A5/wDv6P8A
+Cj/hZUX/AEDn/wC/o/wo+o1/5fyD+0cN/P8Ag/8AI7aiuJ/4WVF/0Dn/AO/o/wAKP+FlRf8AQOf/
+AL+j/Cj6jX/l/IP7Rw38/wCD/wAjqtQ1SDTTEJ0nPmttXy4mfJ7DgdahHiHTmkEfnHebn7LtKHPm
+Yzjp+vSuSvfHkF8LfdYyp5MyzDEo5K9ulUrLVrK98Q28gguFkmuVb/WKVDGXdnGP+A/SolgsQteX
+8v8AMxlmNNytCSfyZ2t14p0uyv2sp52WdWClRGx5OMc4961jXl3iX/keJv8ArtH/ACWvUjVYihGn
+GDj1RthcROtOpGX2Xb8zi/iP/wAg+w/66N/KuArv/iP/AMg+w/66N/KuAr18B/AXzPCzT/eX8vyC
+vQvBHiK1OnR6bcyLFNESIyxwHBOevrz0rz2itq9CNeHLI58LiZYepzxPULzQdXutUeSPXJobJ23B
+EyGUeg7fjW3bRW9s4gjctKEBO5yzkepzzXjkd9dxJsjup0X+6sjAfzrrPhyzPqN+zsWYxrkk5J5N
+ebiMJONNylLReVj18LjoTqqMY6vu7/cd+RkYPSsXX9csNAgUyxLJO4/dwqBk+59BW0SFBJOAOpry
+mMSeLPFoEjMEmkJ/3Yx2H4D8zXLhKKqNyn8K3O3HYiVJRjBe9LRFz/hKtc1GRjYWkYUfww22/H1J
+zUlr41vrG4Eeq2Mci/xDyvLcf0/SvQra1hs7dILaNY4kGFVRwKoeINFh1rTZInQecqkxPjlW7fhW
+qxNGT5XTsvxMHg8RGPPGq3Lt0LFhcWWp2aXNqI3iccHaMg+h96898YaE2i6mt5aApbzNuQr/AMs3
+64/qP/rVY+HuovBqslixPlzqWCns6/8A1s/kK7vU9Oh1XT5bS4GUkGM91PYj3FF3g69t1+gcqx+G
+5tpL8yl4Z1xdc0tZWIFxH8kyj19foa07m5itLaS4ncJFGpZmPYV5bp91c+EPEbJODtU7JlHR07Ef
+zFanjjxGl8yafZSB7dcPI6nhz1A+g/n9KqeC5qyUPheoqeYqNBup8cdLef8AW5kzy3fjDxIAgI8w
+7UB6RRj1/n9TXptnp1pptjHBHGixQrjcwH4kn9ayPB3h/wDsfT/PnXF3cAF89UXsv+P/ANaovH2o
+tZ6GII2Ia6fYSP7o5P8AQfjSrT9vUjRp/CtB4en9WoyxFXWT1/4Bl6x46jSZodItYnAOPOkXIb/d
+X/H8qz28ReI4E8+W2xD1y9nhfzxWv4A0SH7IdUnQNKzFYcj7oHBI985/Ku0IBBBGQe1OpWo0Jezj
+C9t2yaVDEYiHtZ1OW+yRyvhvxZbaxMLW7t4oLoj5do+WT6eh9q6fyYv+eaf98iuF1bwZfrr5uNGj
+jSHKyoS4UI3cAdeoz+NbXjXU5bDw7sU7J7kiI7T0GMtj+X41nVpQnOPsX8XTsa0a1SnTn7dfD17m
+XrnjiC2ma30q3hlKnBmdflz7AdfrWX/wkHiVU882p8rrk2fy4+uK0vAGhwyxPqdwgdg+yEMOFx1b
+69vwruq0qVaNCXs4wvbdsypUa+Jj7WU+W+yRxvh/xnbahOlrqNvDBM5wkij5GPpz0NdeIYwQRGgI
+/wBkV5/4+0WGzmhv7ZBGJ2KyKowN3UH8efyrq/C2pNqnh+3mlbdKoMbn1I4z+IwazxFODpqtT0T6
+G2ErTVWWHratbPujhPEv/I8Tf9do/wCS16ka8t8S/wDI8Tf9do/5LXqRqsb/AA6Xp/kRl/8AFrf4
+v8zi/iP/AMg+w/66N/KuAr1bxPoD6/a20aXCQmJi2WXOcjFclc/D/VYl3QSW9wPRX2n9eP1rqwWI
+pQpKMpWZw5jhK06znGN1octRVq9028059l5bSwk9Ny8H6Hoaq16SaaujyJRcXZqwV2fw3/4/77/r
+mv8AM1xldn8N/wDj/vv+ua/zNc2N/gS/rqdmXf7zD+uh3GokjTbor1EL4/I15Hotpf3l6I9LZluA
+hbKybDjvzXsbqHRkYZVhgivKLCZ/C/iseeDtgkMb8dUPGfyINefl8nyTUdz1M0gvaU5S+G9maf8A
+YXjD/nvcf+Bn/wBej+wvGH/Pe4/8DP8A69ehQzR3EKSwurxuMqynIIqtq2pw6Rp0t1Owwg+Vc8u3
+YCs1jajfKoq/obSy+jGPM5yt6nF+HvCur6fr9rdXMCrEjEu3mqTyCPX3r0GuN8KeJ9V1rUjBPHAY
+EQtI6oQR6Drjr/Wuqvr2HTrKW6uG2xRLuJ/oPeoxbqyqpTtfyNMAqMKLlTb5fM5D4jR2flWrk4vS
+SFA7p3z+PT8a53whHZyeIrcXx46xA9DJ2B/z1xSwx3fjLxKS5KiQ5YjkRRjsP89TV/xn4cXSJor2
+xQpbPhSF/wCWbjofxx+delT5acFhpS95r7jyavNVqPFxj7qa+fmek1wnxKJ3acP4cSfn8tbvhPXh
+remASsPtcGFlH970b8f51S+INg1zo0VygJNtJlsf3TwT+eK87DRdHEqMz1cZJV8HKUOqv+Jo+D8D
+wrY4/ut/6Ea2q5D4f6tFNprac7gTQsWRT/Eh54+hz+ldfWOJi41pJ9zfBzU6EGuyCuI+JRPk6eO2
+6T+S1S8VeIruXxAINIu5VWMCLETcO5PP17Ctfxppk0/heCRmMs9ntaRu7DGGP58100KLo1Kc5Pc4
+8TXWIpVacF8JzWk6T4judPjl02WVbZidoS52Drg8Z9auf2F4w/573H/gZ/8AXq/8PtZi+zvpczhZ
+AxeHJ+8D1A9wefxrt60xGKqUqji4r7jLC4KlWpRmpP7zzS48MeKLtAlyZJkByFkuQwz68mus8HaX
+d6RpMlvfIEczF1AYNwQPT6GqXi3xbJpFxFa6e0TTj5ptw3BR2H171s+H7271HR4bq+jjjklyyqgI
+G3sefXrWdepWlQTkkkzXDUaEMQ1BtyXfY8/8S/8AI8Tf9do/5LXqRry3xL/yPE3/AF2j/ktepGjG
+/wAOl6f5Dy/+LW/xf5mF4ms4tTgt7Bo83EwZoJCxAjZRnJx7VxWn+MNS0iNrZJI7iKP5UMgJxg9u
+hxgdK7jxNqFtp2mCS4u/srN8qyIm6TGOQnoTgc9q5HV/CP2LTRqem3Elym4SbWUEqh5yfXtmngql
+Np0qrv2Rlj41VU9pR3W9u3odNeeLNHi0+2/tPJF1Er+WYt4IPHPbisHUfC+nasstx4Zu4ZHj+/bq
++R+B7fjxSWd5pfiqwt9N1cvBcQkCGYP8zE++O+Oc1zUqX3gzxGHhJzGx8t2GFnT/AANcs6lbB1X0
+RFarGtFSmlKPdboqyRvDK0cqMkiHDKwwQa7D4b/8f99/1zX+Zp0ws/HWmG6tFWHV4V+ePP8ArAO3
+v2wfwpPhyrJqN+rAqyxqCCOQcmvTniY4jCylHc5sNh3RxULO8Xs/kegVgeJPCsGvKJUYQ3aDCyYy
+GHo3+NbV1EZ7SaJW2tIjKG9MjGa4n/hANQ/6DH6N/jXnYayfNz8rXke1i+aUeT2fMn52M+PQ/FWj
+Ex2fnBCf+WMoKn3wf8KUeFvEetTq2osygfxzyZ2j2UVf/wCEA1D/AKC/6N/jR/wgGof9Bf8ARv8A
+GvR+sw3U4378rPK+qT2dOVu3MrHU6JolvoVl5FvlmY5kkbq5/wA9q4jxtr51K+Gn2rFreBsNt/5a
+SdP06fXNXv8AhANQ/wCgv+jf41c0LwKNM1NLu7uEuPK5RAmMN2J+lYU5Uac3VlPmfodFWOIqwVGF
+Pkj11WxpeE9BGiaWPNUfapsNKfT0X8P55rWvbOHULOW1uF3RSrtYf1+tT0V586kpz529T1IUoQgq
+aWh5NG934O8SEHLGI4YdBLGf8/gRXqME1vqdgsse2W3nTuOCD2NZfibw1H4ghiKyCG4iPyyFc5Xu
+DXPr8Pr5F2pqoVfQKwH8676k6OIjGUpcslvoeZSp18JOUIR5oPbUj1XwHeWt19o0WTcgO5UL7XT6
+HvVZ7HxjdJ9nkN3sPB3SqAR7nNXv+EA1D/oL/o3+NH/CAah/0F/0b/Gt1iIWXNNO3dM55YWd2405
+RT6KSsX/AAx4LGlzLeX7JJcr9xF5WP39zXVsqupVgGVhggjgiuF/4QDUP+gv+jf40f8ACAah/wBB
+f9G/xrmqqnVlzSq/gzroyqUYckKOnqhus+AZkuDPozqUJ3CFm2lD/sn/ABqn9l8ZhPJze7en+tX/
+ANCz/Wr3/CAah/0F/wBG/wAaP+EA1D/oL/o3+NdEa8LWlNP1TOWWGm5NwpyjftJDdF8AzvcC41l1
+CA7jCrbmc/7RrvFUKoVQAoGAB2rhf+EA1D/oL/o3+NH/AAgGof8AQX/Rv8awrclZ3nV/BnRh/aYe
+NoUX96DWvCuqXvieS9gijMDSIwJkAOABnj8K7o1xEPgO/jnjc6tkKwYjDc4P1rtzWOKmpKMVK9vK
+x0YOm4ucnFxu76tM4X4of8g7Tv8Arq3/AKDWf4I8RWulWE0V2oji3AFyxO9j0GCcDHsOnJNaHxQ/
+5B2nf9dW/wDQa84rzJO07o4MVWdHFOUf60Oq1nw/cxXM1xY2btp5I8p4m8wFSM5yOcVftfHUkGnJ
+HJYwTXUeEjkK4UIAMcdc8dsVg+Fta1HStTjj08NMs7qHtx/y0+nocZ5re8f2sFvq0LxRBJJo9z4I
+xxx0/rXt4XExxbVOrHY5tadOVei7d169i9pfjHSoJ42TTo7SaYAXMqLtUYyeAMk//Xrp7LTYo9Xm
+1O3BRLuJd6FSp3A9cHpkV4/XrHhK/e/0ZWNoLaKM7IwM4YDvn65p4zDRoR5qeie515dinXlyVOmq
+NyiiuT1PxNqNzrcmk+HbaKaaAZmmlPyqfT/PevKbsevUqRpq7Osorl9A8TXk+sSaPrlskF8q7kaP
+7sg6+/bn86q3njO7tfEOoaalrHO0YC2saA75JDt689ACSfpS51a5n9ZpqKk+9vmdlRXF6H4t1RvE
+K6Rr1pHDLKDsKDGDjI7kEHHUVf0TxJdXnibUNIv44Ua3yYmjBG4A98n0INCmmEMTCVrdXb5nS1ke
+H/Edv4ijuHtopYxA4RvMxyfbBqKLW7i48YzaVCkRtreASTOQd249AOcdx+tZ3gvVzqNnqMgsrO1M
+L9LePYG4PJ9aXNqDrJ1Ek+/4HW0V57a+PdU1G3t4LSzjkvZJT5nlRswSMY5xnqcnn2rW1/xXeQ6w
+uj6Farc3uMuzcheM46jt1JNHOiVi6TjzI6yiuR0PxXfNrP8AY+v2qW92wzG6cBu+Op69iDXXVSaZ
+tTqxqK8SpJqdnFqUVg86i7lUukWDkjnn9DVuvMNQv9cPj6ORLGI38SMkEOeGj+bBPzehJ611eteJ
+59G0yxVrUSatdqoW3U8BuM/hk496lT3uYU8UnzOSsk+39anSUVxL+J9f0K5t28RWduLOdtpkg6xn
+8z+XtWx4p8TJ4esI5I0E1xOcQpng+pPtyPzp86NFiYcrk9Lb3N6se58R29r4it9HeKUzzqGVxjaO
+vXnP8Nc/B4r13TL61XxFYRw2t0wVZEGChPryfyPNVPFN5/Z/xEsbkRNK0cA2xr1djvAH4kipc9ND
+Gpily80dNVe6PQ6Q1wS+KPEOk63aRa9bwpb3TABUA+UE44IJ6ZGQa701UZXOilWjVvbp3OF+KH/I
+O07/AK6t/wCg15xXrfjTw9eeIbO0jsmiDROWbzGI4Ix2Brkf+Fa61/z0s/8Av43/AMTWM4tyPIx2
+HqzrOUY3Q/wM1vJPKradI6Qp5ss6tn7oJ2n2JxhR6c5qv4j8RN4hmic2yQrFuCkHLEHHU/h+tbvh
+vwrr3h++aXdayQSDbLCJTh/zWr1z4U+2XcZGl2dvG026Z1nYkpnoqgAAn9O1ehgK1Og71E7ilh68
+6CprTurfcedV6V4BtpIdHaV9+JjuG7GMDjjk8fl1pp8D2F2SJLM2aqRhorguXHoQRx2rX8P6a+lW
+b2zKVjDkpmQPwT7KP612YvG061LliVgcDUoVuaexq15f4as9WvNZ1gadqS2UyzEy7owxf5m9fTn8
+69QrkdX8J36a0+reHr1LW4l/1qP91j3PQ9fQjrXkTV7M9DFU3Jxkle3bcgg8M6gPFFlfajrdvPcw
+4wmwK7JzwAPqah0xFb4sagWGSsRI9jtQf1rS0HwrdW2qtq+t3a3d+RtTb91B09u3HT1qaz8OXFt4
+0u9ZaaIwToVVBncOF69v4anl206mSoytFqNvevvf5syPEH/JTdF/65r/ADemeJmGhePNN1Y/LDON
+krfT5W/Qg/hW1qfhy5vvF2n6tHNEsNsoDI2dxwW6du9S+LvDz+ItMjgheOOeOQOjPnGMYI4/zxQ4
+vUJ0ZuM2lre6KXgVGuo9S1iQfPfXLFc/3F6fzP5Vm/Dn/kG6x/10/wDZTXYaNpw0nR7WyBBMMYVi
+OhbufzzWP4V8NXOg2l/FcTQyNctuUx544I5yKfK1YuNGUXT02Tv6syvhbAg0y9nx+8aYIT7BQR/M
+0zwnx8QdcE3+tzJtz6bx/TFbvg/w9ceHdPnt7mWKRpJd4MecAYA7/SqfiDwnd3Orrq+iXa2t7jDh
+uA3GM5we3BGOaSi1FeRnGlOFKm7ax6Gd4y58b6CIv9duTp1x5nH9a72uT0LwldwaudW127W7vQMR
+hfup2z0H5YrrKqKerZ0YeMrynJWu9jh7r/krdp/17/8AsjVU8Xx3M3j/AEyO3nFvK0SiGVlyFbc3
+atbxP4VvtR1eDVNIukguo1CHeSOmcEEA+pGKl1fwpPrWj2QuLsLqtqoxcL0Zu/oeo69qlp6o5p0q
+jU42639TN1fwxrV7ZeVqviK3NvvBAkiCjd254qn4ig+zeJvDENzIJIo44kL/AMLEMAT/ACq8PCOu
+axNCniLU45rOFt3lRdX+vA/Pk1teKPDEfiDT4oonWCe3OYXxwB/dPtwPypcradkJ0ZTjJxi09N3q
+7F3WZ9KgghOsfZ/KMg8vzl3Dfg9PwzXK6yob4p6UCMjylP5b6ksPB2rXeo20/iLUVuYbU7o4lYtu
+I9cgegz1JxWpfeHLi68Z2esJNEIIECshzuP3unb+Kqd30NZqpVSfLbVevzMn4j/8fWh/9d2/mldw
+a53xV4cuNem057eWKMWshdvMzyCV6Y+ldEapL3mbU4SVWcns7fkRB2wOaXe3rRRVHQG9vWje3rRR
+QAb29aN7etFFABvb1o3t60UUAG9vWje3rRRQAb29aN7etFFABvb1o3t60UUAG9vWje3rRRQAb29a
+N7etFFABvb1o3t60UUAG9vWje3rRRQAb29aN7etFFABvb1pC7etFFAH/2Q==
+
+------=_NextPart_000_0001_01DD0A40.21A09660
+Content-Type: image/jpeg; name=image005.jpg
+Content-Transfer-Encoding: base64
+Content-ID: <image005.jpg@01DD0A40.1437AA40>
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAoHBwkHBgoJCAkLCwoMDxkQDw4ODx4WFxIZJCAmJSMg
+IyIoLTkwKCo2KyIjMkQyNjs9QEBAJjBGS0U+Sjk/QD3/2wBDAQsLCw8NDx0QEB09KSMpPT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT3/wAARCABjAMwDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD1bU9Z
+stGhie+kKLIdq4Qtk49qzv8AhOND/wCfl/8Av03+FZfxH/5B9h/10b+VcBXq4XBU6tJTle54mNzG
+rQrOnFKx6n/wnGh/8/L/APfpv8Ku6Z4i0/V52isXkkZRuY+UwAHuSK8fr1PwPaJbeGoZFA3zlpHP
+rzgfoKWLwlKhT5le5WBx1bE1eV2tv/Wp0FRrMGnaLZICozuKnafoelYt9o+r3mspdJqvkW8TgpCi
+nBA6555zW/XnSjGKVnf9D1YylJu6tb8RKKjuZvs1rNMV3CNC+PXAzXGj4lRf9A1/+/w/wq6VCpVu
+4K5FbE0qLSqO1ztqK4n/AIWVF/0Dn/7+j/Cj/hZUX/QOf/v6P8K1+o1/5fyMf7Rw38/4P/I7aiuJ
+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
+
+------=_NextPart_000_0001_01DD0A40.21A09660
+Content-Type: image/jpeg; name=image006.jpg
+Content-Transfer-Encoding: base64
+Content-ID: <image006.jpg@01DD0A40.1437AA40>
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAoHBwkHBgoJCAkLCwoMDxkQDw4ODx4WFxIZJCAmJSMg
+IyIoLTkwKCo2KyIjMkQyNjs9QEBAJjBGS0U+Sjk/QD3/2wBDAQsLCw8NDx0QEB09KSMpPT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT3/wAARCABjAMwDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD1bU9Z
+stGhie+kKLIdq4Qtk49qzv8AhOND/wCfl/8Av03+FZfxH/5B9h/10b+VcBXq4XBU6tJTle54mNzG
+rQrOnFKx6n/wnGh/8/L/APfpv8Ku6Z4i0/V52isXkkZRuY+UwAHuSK8fr1PwPaJbeGoZFA3zlpHP
+rzgfoKWLwlKhT5le5WBx1bE1eV2tv/Wp0FRrMGnaLZICozuKnafoelYt9o+r3mspdJqvkW8TgpCi
+nBA6555zW/XnSjGKVnf9D1YylJu6tb8RKKjuZvs1rNMV3CNC+PXAzXGj4lRf9A1/+/w/wq6VCpVu
+4K5FbE0qLSqO1ztqK4n/AIWVF/0Dn/7+j/Cj/hZUX/QOf/v6P8K1+o1/5fyMf7Rw38/4P/I7aiuJ
+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
+
+------=_NextPart_000_0001_01DD0A40.21A09660
+Content-Type: image/jpeg; name=image007.jpg
+Content-Transfer-Encoding: base64
+Content-ID: <image007.jpg@01DD0A40.1437AA40>
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAoHBwgHBgoICAgLCgoLDhgQDg0NDh0VFhEYIx8lJCIf
+IiEmKzcvJik0KSEiMEExNDk7Pj4+JS5ESUM8SDc9Pjv/2wBDAQoLCw4NDhwQEBw7KCIoOzs7Ozs7
+Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozv/wAARCABjAMwDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD1bU9Z
+sdGiikvpDGsh2rhC2Tj2rO/4TjQP+fp/+/Lf4Vl/Eb/kH2H/AF1b/wBBrgK9fC4KnVpKcr3PCxuY
+1qFZwilb+vM9T/4TjQP+fp/+/Lf4Vc0zxFpurztDYySSMo3MfKYBR7kivIK9S8D2iW3hqGRVG+4Z
+pHPryQP0AqcVhKVCnzK9/wCvIrA46viavK7W3/rU6GolmVp2h2OCozuKHafoelYt9o+tXmspeJrH
+2e3icFII1OCB1zzyTzW/XnSjGKVnf9D1oylJu6tb8QoqK5m+zWs05XcIkL4z1wM1xv8AwsqH/oFv
+/wB/h/hVUqFSqm4K5FbE0qLSqO1zt6K4j/hZUP8A0C3/AO/w/wAKP+FlQ/8AQLf/AL/D/CtvqOI/
+l/Iw/tHC/wA/4P8AyO3oriP+FlQ/9At/+/w/wrQ0Xxva6vqC2b2zWzOP3bM4YMfTpUywdeK5nHQu
+GPw05KMZav1OnooorlOwKKyPEHiG38P28byRmaWVsJErYJHc/SsD/hZUP/QLf/v8P8K6KeFrVI80
+Y6HLVxlClLlnKzO2oriP+FlQ/wDQLf8A7/D/AAo/4WVD/wBAt/8Av8P8K0+o4j+X8jL+0cL/AD/g
+/wDI7eiuI/4WVD/0C3/7/D/Cj/hZUP8A0C3/AO/w/wAKPqOI/l/IP7Rwv8/4P/I7eiuI/wCFlQ/9
+At/+/wAP8KP+FlQ/9At/+/w/wo+o4j+X8g/tHC/z/g/8jqtQ1S300xCdJj5rbUMcLPluw4HWoR4h
+0xpBH55Dm6+y7Shz5mM46fr0rkr3x5b3wg3afKnkTrMMSjkr26VTsdWsL3xDbyC3uEknulYfvFKh
+jLuzjH/AfpUSwWJWvL+X+ZjLMablaEk/kztbrxRpFlftYzzss6sFKiNjycY5x71rGvLvEv8AyO83
+/XeL+S16iarEUI04QceqN8LiJ1p1Iy+y7fmcZ8Rv+QfYf9dW/wDQa4Cu/wDiN/yD7D/rq3/oNcBX
+sYD/AHdfM8DNP96l8vyCvQfBHiK0OnR6XcyrDNESIy5wHUnPB9eelefUVvXoRrQ5ZHNhcTLD1OeJ
+6heaDrV1qjyR6/NDZO24ImQyj0GOPxratora2cW8blpQgJ3yFnI9TnmvHY768iTZHdzov91ZWA/n
+XWfDlmfUb9nYsxiXJJyTya8zEYScaTlKWi7Kx7OFx1OdZRjHV93f7jvyMjB6Vi6/rmn6BAplhWWd
+x+7hUAE+59BWySFBJOAOteVRiTxZ4tAkZgk8hP8Auxr2H4D8zXJhKMajcp/Ctzux2IlSjGMF70tE
+W/8AhKvEGoyMbCzjCj+GG234+pOaltPGuoWNwItVsI5F/iHleXIP6fpXoNtbQWdulvbRLFEgwqqM
+AVQ1/RoNa02SF4x5yqTDJjlW7fh61ssTQlLldOy/E53g8TGPNGq3Lt0LFhcWOp2aXdqI3iccHaMg
++h9DXn3jDQ20XU1vbQFLeZ9yFePKfrj29R/9arHw+1F4NVk09ifLuELBfR1/+tn8hXd6np8Gq2Et
+ncDKSDGe6nsR7ii7weItvH9A5Vj8LzbSX5/8Eo+GdcXXNLWViBcRfJMo9fX6GtO5uIrS2kuJ3CRR
+KWZj2Ary7T7q68IeI2ScHah2TKOjoejD+YrT8b+I0vmTTbKUPbrh5XU5DnqB9B/P6U54JyrJQ+F6
+k08xUcO3U+OOlu7/AK3MqeS88YeJAEBXzTtQHkRRj1/n9TXplnp1nptjHbxxosUKY3MB+JJ/Wsnw
+doH9j6f586Yu7gAvnqi9l/qf/rVF491FrPQxbxtta7fYSP7o5P8AQfjSrT9vVjRp/CtCsPT+rUZY
+irrJ6/8AAMvWPHUazNBpNpE4Bx58iZDf7q/4/lWc3iLxRAn2iW1xD1y9nhfzxWv4B0SH7IdWnjDy
+s5WHI+4BwSPfOfyrtCAQQRkHqKqpWo0ZezjC9t2yaVDEYiHtZVOW+yRy3hvxZa6xKLO7tooLoj5N
+o+WT6eh9q6byYf8Ankn/AHyK4XVvBuorr5udGijjh3LKhLhRG3cAdeoz+NbXjTU5bDw7sU7J7oiI
+7T0GMtj+X41lVpU51I+xfxdOxtRrVadOft18PXuZmueN7e3ma20q2hmKnDTuuVz/ALIHX61l/wDC
+QeKVT7QbQ+V1ybL5cfXFaPgDQ4JYn1a4jDsH2QBhkLjq317fhXdVrUq0aEvZxhe27ZjSo4jEx9rK
+fLfZI47w/wCM7XUJ0tNQtooJnOEkUfIx9OehrrhDECCI0BH+yK4Dx9osFnNDqNtGIxOxSVVGBu6g
+/jz+VdX4W1F9U8P288rbpVBjkPqV4z+IwfxrLEU4Omq1PRPobYStUVWWHq6tbPujhPEv/I7zf9d4
+v5LXqJry7xL/AMjvN/13i/kteomrxv8ADpen+RGX/wAWt/i/zOM+I3/IPsP+urf+g1wFereJ9AfX
+7W2iS5SAxMWyy53ZGK5G5+H+rxLugkt7geiuVP68frXXgsRSjSUZSszgzHC1p13OMbrQ5eirV7pt
+7pz7Ly1lgJ6F14P0PQ1Vr0001dHjSi4uzQV2fw3/AOP6+/65L/M1xldn8N/+P6+/65L/ADNcuN/3
+eX9dTty7/eof10O41AkabdFeohfH5GvI9GtdRvL0R6WzLcBCwKybDjvzXsTqHRkYZVhgivKbCZ/C
+/ioeep228hjk46oeMj8CDXnYCT5JqO562aRXtKcpfDezNL+wvGv/AD8XH/gb/wDXo/sLxr/z8XH/
+AIG//Xr0OGaO4hSaGRZI3GVZTkEVV1bU4NI06W8nYAIPlXPLt2ArNY2q3yqKv6G0svoxjzOcrev/
+AADi/D3hXWtP1+1vLm3VYkYl281SeVI9fevQa43wp4n1fWtSNvPHAYUQtI6oQR6Drjr/AFrqr69g
+06ylu7htsUS7mPr7D3rPFurKqlO1/I1wCowouVNvlv1OQ+I0dj5VrITi9JIUDunfP49PxrnvCEdj
+J4it1vjxnMQP3TJ2B/z1xSwx3njHxIS5KiQ5cjkRRjsP89TV7xl4cXSJor6xQpbPhSF/5ZuOh/HH
+516dPlpwWGlL3mvuPGqc1Wo8XGPupr5+Z6TXC/Ektu04fw4k/P5a3fCevDW9NAlYfa4MLKP73o34
+/wA6o/EGwe50aK6RSTayZbH908E/nivNw0XSxSjM9fFyVfBylDqr/iaPg/H/AAitjj+63/oRrark
+Ph/q0UumtpjuBNAxZFJ+8h54+hz+ldfWOJi41pJ9zowc4zw8GuyCuI+JJPk6eO26T+S1S8VeIryX
+xALfSbyVViAixE/DuTz9eoFbHjPTJ5/C8EjMZZ7La0jd2GMMfz5rqoUXRqU5ye5xYmusRRq04L4e
+pzOlaT4nudPjm02aZbZidoS52Drg8Z9auf2F41/5+Lj/AMDf/r1ofD/WYfs76TM4WQOXhyfvA9QP
+cHn8a7atMRiqlKq4uK+4ywuCpVqMZqb+880uPDHi27QR3JkmQHIWS6DAH15NdZ4O0u90jSZLe+jE
+bmcuoDBuCB6fQ1S8WeLZNIuIrTT2iecfNNuG4KOw+vf/APXW14fvbzUdHhvL6OOOSXLKqAgbex5P
+frWdepWlQTkkos1w1HDwxLUG3Jd9jz/xL/yO83/XeL+S16ia8u8S/wDI7zf9d4v5LXqJoxv8Ol6f
+5Dy/+LW/xf5mF4ls4dTgt9OaPNxMHa3lLECNlGcnHtXF6f4w1XSY2tVkjuYo/lQyKTjB7dDjA6V2
+/ibULXTtMEtxefZGb5VkRN0uMchPQnA56CuS1fwj9i00arptzJdJuEm1kBKIeQT69s0YKpSadKq7
+9kZY+NVVPaUd0tbdvQ6a88V6LFYW39pkkXcKuIzFvBB4OcccVgah4X0zVVluPDN5DK8f37ZZMj8D
+2/Hiks7zSPFVhb6Vq5eC4hIEMwf5mJ98d8c5rm5kv/BviMPCSTGx8t2XCzp/gf51yzqV8HVfREVq
+sa0FKaUo91uirJHJDI0UqMkiHDKwwQfeuw+G/wDx/X3/AFyX+Zp0wsvHWmG7tVWDV4V+eLP+sA7e
+/bB/Ck+HKsmo36spVljUEEYIOTXqzxMMRhJSjucuGw7o4uFneL2fyO/rB8SeFoNeUTI4gu0GFkxk
+MPRv8a2bqJp7SaFW2NJGyhvTIxmuKHgDUv8AoNfo3+NeZhuVPm5+Vryue5i+aUeT2fMn52M+PQ/F
++jEx2fnBCf8AlhKCp98H/CgeF/E+tTq+oMyAfx3EoO0eyj/61aH/AAgOpf8AQa/Rv8aP+EB1L/oN
+fo3+Nel9Zhupxv35WeR9UqbOnK3bmVjqNE0S10Ky+z2+WZjmSRhy5/w9q4nxtrx1K+Gm2rFre3bD
+befMk6fp0+uavf8ACA6l/wBBr9G/xq5ofgYaZqaXl1cpceVzGgTGG7E89qwpyoU5urKfM/Q6ascR
+VpqjCnyR66rY0vCmhDRNMHmqPtU+GmPp6L+H881q3tnDqFnLaXC7opV2sP6/Wp6K86dSU587ep6s
+KUIU1TS0PJ0e88H+JCDljEcMOgljP+fwIr1CCa21OwWWPbLb3CdxwwPUGsvxN4aj8QQxFZBDcRH5
+ZCucqeoNYC/D6/RdqawFX0VWA/nXoVJ0cRGMpS5ZLfQ8ulTr4ScoQjzQe2pHqvgS9tbr7Tosu5Ad
+yoX2vH9D3qq9j43uk+zSG7KHg7pVUH6nNX/+EB1L/oNfo3+NH/CA6l/0Gv0b/Gt1iIWXNNP1izml
+hZ3bjTlFPopKxe8M+DF0uZb6/ZJblf8AVovKx+/uf5V1bKrqVZQysMEEZBFcN/wgOpf9Br9G/wAa
+P+EB1L/oNfo3+NctVU6suaVXX0Z20ZVaMOSFHT1QzWfAM6XBuNGdShO4Qs21kP8Asn/Gqn2XxyE8
+jN7t6f61f/Qs/wBavf8ACA6l/wBBr9G/xo/4QHUv+g1+jf410xrwtaVRP1izjlhpuTcKco37SQzR
+vAVw9wLjWXUIDuMKtuZz/tH0rvFUKoVQAoGAAOlcN/wgOpf9Br9G/wAaP+EB1L/oNfo3+NYVuSs7
+yq/gzpw/tMPG0KL+9BrXhXVr3xPJfwRRmBpUYEyAHAAzx+Fdya4mHwJqMc8ch1ncEcMRhucH612x
+rDEzUlGKle3lY6cHTcXOTi4tu+rTOF+KH/IO07/rq3/oNUPBHiK00qwmhu1EcW8AuWJ3segAJwPw
+HTkn1v8AxQ/5B2nf9dW/9BrzmvKk2p3R52KrSo4tyj/Wh1Ws+H7qK5muLGxdtPJHlPE3mAqRnORz
+j9Kv2vjqSDT0jksIJrmIBIpCuFVABjjrnjtgVgeF9a1PStTjjsFaZZ3UPbD/AJafT0OM81veP7W3
+t9WhkiiCSTxbn2kY446f1r3sLiY4tqnVjscutOnKvRdu69exf0vxhpEE8bJpkdnNOALqVF2oMZPA
+GSf/AK9dNZabDHq82rW4KJeQrvRlKncD1wemR/KvIK9X8JX73+jKxsxaxRnZGBnDAdTn65p4zDRo
+w5qeiejOzLsU68+Sp01WhuUUVymp+JtTudbk0bw7axTTQDM80x+VD6dfw+vavIbSPaqVI01dnV0V
+y+geJr6fV5NE1u1S3vkXcjR/dkHX37c/nVa88Z3tr4h1DS0s47holC2saA75JDt689ACSfpU86tc
+y+s01FSfe3zOxorjND8W6s3iFdG12zjgllHyFBjBxkDqQQcHkVe0TxHeXniXUNFv4oUa2yYmjBG4
+A98k9iDQpphDE05Wt1dvmdLWR4f8R23iGO4e2hljEDhG8zHP0waii1u5uPGM2jwxxG2trcSTSEHd
+uPQDnHcfrWf4L1c6hZ6jILCztDDJgC2j2BuDyfWjm1B1k6kUn3/A6yivPbXx7q+o29vBaWUcl7JM
+fM8qNmCRDHOM9Tk89OK1tf8AFd9DrC6JoVot1e4zIz8hOM46jt1JNHOrErF0nHmX9XOsorktD8V6
+g2s/2Jr9oltdsMxOnAbvjqevOCD2xXW1SaZvTqxqK8SpJqdlFqUWnPcKLuZS6RYOSOef0NW68x1C
+/wDEB8fRypYRNfxIyQQ5+V4/mwT83XBJ611WteJrjR9MsVa0EurXiqFtlPAfjPTtk496hT3uc9PF
+J8zkrJPt/Wp0lFcU/ibxFoVzbt4isbcWdw20yQdYz+Z/L261r+KfE0fh6wjkjjE9xcHEKZ4PqT7c
+j86rnVjRYmnyuT0tvc3qyLnxHbWviK30R4ZTPcKGVxjaOvXnP8Nc9B4r8QaZfWq+ItOjhtbtgqyI
+MFCfXk/keaqeKbz+z/iJY3QiaZo4BsjTq7HeAB9SRUuemhjUxS5OaOmqTuj0OkNcGvijxLpOt2kO
+vW0KW92wAVAPlBOOCCemRkGu8NVGSZ0Uq0at7dO5wvxQ/wCQdp3/AF1b/wBBrzmvW/Gfh698QWdp
+FZNErQuWbzWI4Ix2Brkf+Fa67/z0s/8Av43/AMTWM4tyPGx2HqzruUY3Q/wM1tJPKraZJIkEfmzX
+Cvn7oJ2n2JxhR3HOar+I/ETeIJonNqkCw7ghByxBx1P4frW74b8K+IdAvml32ssEi7ZYRKcP9crV
+258KfbLuMjSbO2jabdM6zsxMeeiqFABP6dq9HAVqdB3qJ36Clh688Oqa07q2/bU87r0rwDbSQ6O0
+r78TNuXdjGBxgcnj8utNPgjT7okSWRsVUjDQ3JcuPQgjjsfrWt4f019Ks3tShWMSEx5lD8E+yj+t
+duKxlOtS5Y7l4HA1KFbmnsateYeGrPWLzWNYGnaotjMsxM26MOX+ZvX0Ofzr0+uR1fwnqKa0+seH
+r5LS4m/10b/dY9z0PXrgjrzXizV7M9HFU5ScZJN27bkMHhrUR4ns9Q1HXre4uYMYj2BXZOeAB9TU
+GmIrfFjUGYZKxEr7Hag/qa09B8K3dtqrazrd4t5fldqbfuxjp6Dtx0AHNTWfhy6tvGl3rjTRGCeM
+qqDO4cL14x/DS5Xpp1MVRlaLUbe9fe/zZkeIP+Sm6N/1zX+b0zxMw0Lx5pusn5YbgbJm+nyt/wCO
+kH8K2tT8OXV94usNYjmiWG1UBkbO44LdO3epfF3h5/EWmR28Mkcc8UodHkzjGCCOPr+lDi9QnRm4
+zaWt7oo+Bka6j1LWpB8+oXTFc/3F6fzI/Cs34df8g3WP+un/ALKa7DRtOGlaPa2AIPkRhWI6Fu5/
+PNY/hXw1daDaX0NxPDI1y+5THnjgjnIp8rTRcaMoyp6bJ39WZfwugjGmXtxt/eNMEJ9goI/maj8J
+8fEHXBN/rcybc+m8f0xW74P8P3Ph3T57a5milaSXeDHnAGAO/wBKqeIPCd5c6uutaJeLaXuMOGyA
+3GM5we3BGMGpUWoryM40pwo03bWO6M7xlz430ERf67cnTrjzOP613lcpoXhO8g1c6zrl6t5egYjC
+8qnGM9B26DGBXV1cU9Wzpw8ZXlOStd7HEXX/ACVu0/69/wD2R6qeL47qbx9pkdvcC3laJRDKy5Ct
+ubnFa3ifwrqGo6vBq+kXiW91GgQ7yR0zgggH1IxUur+FLjWtHshcXgXVbRRi5Xozd/Q9QDntUNPV
+HLOlUanG3W/qZur+GNdvbLydV8TW5t94IEkQQbu3PFU/EUBtvE3hiC5kEsUUcKF/4WIcAn+VXh4R
+1/WJoU8RarHNZwNu8qLq/wBeB+fJrZ8UeGIvEGnxQxOtvPbnMD44A7qfbgflRytp2QOjKcJSjFp6
+bvV2Lusz6RBBCdY+z+UZB5fnqGG/B6fhmuV1lVb4p6WCMjylP5b6lsPB2sXeo21x4i1NbqG0O6KJ
+WLbiPXIHoM9ScVp33hy6uvGdnraTRCC3QKyHO4/e6cY/ipu76Gk1UqpPltqvX5mT8Rv+PrQ/+u7f
+zSu4Nc94q8O3WvTac9vNFGLSQu/mZ5BK9MfSuhNUk+Zm9OElWnJ7O35EQdsDntS729aKKs6Q3t60
+b29aKKADe3rRvb1oooAN7etG9vWiigA3t60b29aKKADe3rRvb1oooAN7etG9vWiigA3t60b29aKK
+ADe3rRvb1oooAN7etG9vWiigA3t60b29aKKADe3rRvb1oooAN7etIXb1/SiigD//2Q==
+
+------=_NextPart_000_0001_01DD0A40.21A09660--
+
+

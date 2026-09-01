@@ -1273,10 +1273,10 @@ function renderTopTab(c) {
   const grid=document.createElement('div'); grid.className='chart-grid-2'; c.appendChild(grid);
   const withScore=S.clean.map(row=>{ const filled=keep.filter(col=>row[col]&&row[col]!=='').length; return {...row,_score:Math.round(filled/keep.length*100)}; }).sort((a,b)=>b._score-a._score);
   const topCard=document.createElement('div'); topCard.className='chart-card';
-  topCard.innerHTML=`<div class="chart-card-title">Most Complete Records</div><div class="top-list">${withScore.slice(0,10).map((row,i)=>{ const name=companyCols.length?row[companyCols[0]]||`Record ${i+1}`:`Record ${i+1}`; return `<div class="tl-row"><div class="tl-rank ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}</div><div class="tl-name">${name}</div><div class="tl-bar-bg"><div class="tl-bar-fg" style="width:${row._score}%"></div></div><div class="tl-count">${row._score}%</div></div>`; }).join('')}</div>`;
+  topCard.innerHTML=`<div class="chart-card-title">Most Complete Records</div><div class="top-list">${withScore.slice(0,10).map((row,i)=>{ const name=companyCols.length?row[companyCols[0]]||`Record ${i+1}`:`Record ${i+1}`; return `<div class="tl-row"><div class="tl-rank ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}</div><div class="tl-name">${escapeHTML(name)}</div><div class="tl-bar-bg"><div class="tl-bar-fg" style="width:${row._score}%"></div></div><div class="tl-count">${row._score}%</div></div>`; }).join('')}</div>`;
   grid.appendChild(topCard);
   const btmCard=document.createElement('div'); btmCard.className='chart-card';
-  btmCard.innerHTML=`<div class="chart-card-title">Least Complete Records</div><div class="top-list">${withScore.slice(-10).reverse().map((row,i)=>{ const name=companyCols.length?row[companyCols[0]]||`Record ${i+1}`:`Record ${i+1}`; return `<div class="tl-row"><div class="tl-rank">${i+1}</div><div class="tl-name">${name}</div><div class="tl-bar-bg"><div class="tl-bar-fg" style="width:${row._score}%;background:var(--rose)"></div></div><div class="tl-count" style="color:var(--rose)">${row._score}%</div></div>`; }).join('')}</div>`;
+  btmCard.innerHTML=`<div class="chart-card-title">Least Complete Records</div><div class="top-list">${withScore.slice(-10).reverse().map((row,i)=>{ const name=companyCols.length?row[companyCols[0]]||`Record ${i+1}`:`Record ${i+1}`; return `<div class="tl-row"><div class="tl-rank">${i+1}</div><div class="tl-name">${escapeHTML(name)}</div><div class="tl-bar-bg"><div class="tl-bar-fg" style="width:${row._score}%;background:var(--rose)"></div></div><div class="tl-count" style="color:var(--rose)">${row._score}%</div></div>`; }).join('')}</div>`;
   grid.appendChild(btmCard);
 }
 
@@ -1341,7 +1341,7 @@ function buildDedup() {
     const rows=group.map(idx=>S.clean[idx]);
     const companyName=cc?rows[0][cc]:`Group ${gi+1}`;
     const card=document.createElement('div'); card.className='dedup-card'; card.id=`dg-${gi}`;
-    card.innerHTML=`<div class="dedup-header"><div><div class="dedup-title">🏢 ${companyName}</div><div class="dedup-meta">${rows.length} similar records</div></div><div style="display:flex;gap:8px"><button class="btn btn-danger btn-sm" onclick="keepFirst(${gi})">Keep First, Remove Others</button></div></div><div class="dedup-rows">${rows.map((row,ri)=>{const phone=phoneCols.length?row[phoneCols[0]]||'—':'—';const email=emailCols.length?row[emailCols[0]]||'—':'—';return `<div class="dedup-row-item ${ri===0?'primary':'dupe'}"><span class="badge ${ri===0?'b-blue':'b-rose'}" style="width:54px;justify-content:center">${ri===0?'KEEP':'DUPE'}</span><span style="flex:1;font-weight:${ri===0?700:400}">${cc?row[cc]||'—':'Row '+(ri+1)}</span><span style="color:var(--text-3);font-size:11px;min-width:120px">📞 ${phone}</span><span style="color:var(--text-3);font-size:11px;min-width:160px">📧 ${email}</span></div>`;}).join('')}</div>`;
+    card.innerHTML=`<div class="dedup-header"><div><div class="dedup-title">🏢 ${escapeHTML(companyName)}</div><div class="dedup-meta">${rows.length} similar records</div></div><div style="display:flex;gap:8px"><button class="btn btn-danger btn-sm" onclick="keepFirst(${gi})">Keep First, Remove Others</button></div></div><div class="dedup-rows">${rows.map((row,ri)=>{const phone=phoneCols.length?row[phoneCols[0]]||'—':'—';const email=emailCols.length?row[emailCols[0]]||'—':'—';return `<div class="dedup-row-item ${ri===0?'primary':'dupe'}"><span class="badge ${ri===0?'b-blue':'b-rose'}" style="width:54px;justify-content:center">${ri===0?'KEEP':'DUPE'}</span><span style="flex:1;font-weight:${ri===0?700:400}">${cc?escapeHTML(row[cc]||'—'):'Row '+(ri+1)}</span><span style="color:var(--text-3);font-size:11px;min-width:120px">📞 ${escapeHTML(phone)}</span><span style="color:var(--text-3);font-size:11px;min-width:160px">📧 ${escapeHTML(email)}</span></div>`;}).join('')}</div>`;
     c.appendChild(card);
   });
 }
@@ -2057,12 +2057,12 @@ async function showContactPanel(idx) {
   detailsDiv.innerHTML = keep.map(col => {
     const ft = FT[S.mapping[col].type];
     const val = row[col] || '—';
-    return `<div class="pd-row"><span class="pd-label">${ft ? ft.icon : ''} ${col}</span><span class="pd-val">${val}</span></div>`;
+    return `<div class="pd-row"><span class="pd-label">${ft ? ft.icon : ''} ${col}</span><span class="pd-val">${escapeHTML(val)}</span></div>`;
   }).join('');
 
   // Foreign number flag
   if (row._phoneCountry && row._phoneCountry !== 'IN') {
-    detailsDiv.innerHTML += `<div class="pd-row"><span class="pd-label">🌍 Country</span><span class="pd-val"><span class="badge b-amber">${row._phoneCountry} — Foreign Number</span></span></div>`;
+    detailsDiv.innerHTML += `<div class="pd-row"><span class="pd-label">🌍 Country</span><span class="pd-val"><span class="badge b-amber">${escapeHTML(row._phoneCountry)} — Foreign Number</span></span></div>`;
   }
 
   // Call logs section — fetch from backend if contact is in DB
@@ -2506,10 +2506,16 @@ function parseEml(fileName) {
     if(!seen.has(email)){seen.add(email);EML.contacts.push({name:emailToName(email),email,source:'BODY',domain:email.split('@')[1]||''});}
   }
   EML.filtered=[...EML.contacts];
-  EML.sigData = {};
-  if (API_BASE && EML.parsed?.body) {
+  EML.sigData = extractSignatureData(EML.parsed.body, EML.parsed.bodyHtml, EML.parsed.from?.[0]?.email, EML.parsed.from?.[0]?.name);
+  if (Object.values(EML.sigData).some(v => v)) {
+    renderSigPanel();
+  }
+
+  const aiConfig = typeof getAiSettings === 'function' ? getAiSettings() : { chain: [] };
+  const hasAiKey = (aiConfig.chain || []).some(c => c.apiKey);
+
+  if (API_BASE && EML.parsed?.body && hasAiKey && (EML.sigData.confidence || 0) < 80) {
     EML.sigLoading = true;
-    const aiConfig = getAiSettings();
     apiHeaders().then(sigH => {
       fetch(`${API_BASE}/api/parse-signature`, {
         method: 'POST',
@@ -2523,10 +2529,13 @@ function parseEml(fileName) {
       .then(r => r.json())
       .then(data => {
         EML.sigLoading = false;
-        if (data.ok && data.fields && Object.values(data.fields).some(v => v)) {
-          EML.sigData = data.fields;
-          renderSigPanel();
-          showNotification('🪪 Signature intelligence extracted by AI', 'success');
+        if (data.ok && data.fields) {
+          const aiFields = Array.isArray(data.fields) ? data.fields[0] : data.fields;
+          if (aiFields && typeof aiFields === 'object') {
+            EML.sigData = { ...EML.sigData, ...aiFields };
+            renderSigPanel();
+            showNotification('🪪 Signature intelligence enriched by AI', 'success');
+          }
         }
       })
       .catch(() => { EML.sigLoading = false; });
@@ -2555,63 +2564,126 @@ function decodeEmlEncoding(str) {
   });
 }
 
-function extractSignatureData(bodyText) {
-  if (!bodyText) return {};
-  // Signatures typically appear after "-- " or the last quoted block
-  // Take the last 40 lines of body as signature zone
-  const lines = bodyText.split('\n').map(l => l.trim()).filter(Boolean);
-  const sigStart = Math.max(0, lines.length - 40);
-  const sigLines = lines.slice(sigStart);
+function extractSignatureData(bodyText, htmlBody, fromEmail, fromName) {
+  const result = {
+    name: fromName || null,
+    company: null,
+    designation: null,
+    phone_primary: null,
+    phone_secondary: null,
+    email: fromEmail || null,
+    website: null,
+    address: null,
+    city: null,
+    pincode: null,
+    confidence: 0
+  };
 
-  const result = { company: null, designation: null, phone: null, website: null, address: null };
-
-  // Phone — already extracted globally, pick first
-  const phoneRe = /(?:\+?91[\s\-]?)?[6-9]\d{9}|\+\d{1,3}[\s\-]?\d{6,14}/;
-  for (const l of sigLines) {
-    if (!result.phone && phoneRe.test(l.replace(/[\s\(\)\-\.]/g,''))) {
-      result.phone = l.replace(/^(ph|phone|mob|mobile|tel|cell)[:\s]*/i,'').trim();
-    }
+  // 1. Try HTML structural parsing if htmlBody available
+  if (htmlBody) {
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlBody, 'text/html');
+      const sigEl = doc.querySelector('.gmail_signature, #signature, .signature, footer, [class*="sig"]');
+      if (sigEl) {
+        const sigText = sigEl.textContent || '';
+        if (sigText.length > 10 && sigText.length < 2500) {
+          bodyText = sigText + '\n' + (bodyText || '');
+        }
+      }
+    } catch(e) {}
   }
 
-  // Website
+  if (!bodyText && !fromEmail) return result;
+  bodyText = bodyText || '';
+
+  // 2. Isolate Signature Zone Lines
+  const textNoThreads = bodyText.replace(/(-{3,}\s*Forwarded message\s*-{3,}|-{3,}\s*Original Message\s*-{3,}|From:\s*.*?\nSent:\s*|On\s+.*?\s+wrote:)[\s\S]*/i, '');
+  const lines = textNoThreads.split('\n').map(l => l.trim()).filter(Boolean);
+  
+  const sigDelimRe = /^(?:--|regards|best regards|thanks|warm regards|sincerely|cheers|thanks & regards|thanks and regards|sent from my|with regards)/i;
+  let sigIdx = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (sigDelimRe.test(lines[i])) {
+      sigIdx = Math.max(0, i - 1);
+      break;
+    }
+  }
+  const sigLines = sigIdx !== -1 ? lines.slice(sigIdx) : lines.slice(Math.max(0, lines.length - 35));
+
+  // 3. Extract Phone Numbers
+  const phoneRe = /(?:\+?91[\s\-]?)?[6-9]\d{9}|\+\d{1,3}[\s\-]?\d{6,14}/g;
+  const foundPhones = [];
+  for (const l of sigLines) {
+    const cleaned = l.replace(/[\s\(\)\-\.]/g, '');
+    let m;
+    while ((m = phoneRe.exec(cleaned)) !== null) {
+      if (!foundPhones.includes(m[0])) foundPhones.push(m[0]);
+    }
+  }
+  if (foundPhones.length > 0) result.phone_primary = foundPhones[0];
+  if (foundPhones.length > 1) result.phone_secondary = foundPhones[1];
+
+  // 4. Extract Website
   const webRe = /(?:www\.|https?:\/\/)[^\s<>,"']+/i;
   for (const l of sigLines) {
     const m = l.match(webRe);
-    if (m && !result.website) result.website = m[0].trim();
-  }
-
-  // Designation — lines with common title keywords
-  const desgRe = /\b(ceo|cto|cfo|coo|founder|co-founder|director|manager|head|vp|vice president|president|engineer|developer|consultant|analyst|executive|officer|lead|partner|proprietor|md|gm|agm|dgm)\b/i;
-  for (const l of sigLines) {
-    if (!result.designation && desgRe.test(l) && l.length < 80) {
-      result.designation = l.replace(/^[|\-•·]\s*/,'').trim();
+    if (m && !result.website) {
+      result.website = m[0].replace(/[.,;:!?)]+$/, '');
+      break;
     }
   }
 
-  // Company — line after name/designation that looks like an org
-  // Heuristic: all-caps or contains Ltd/Pvt/Inc/Corp/LLP/Industries/Solutions/Technologies
-  const compRe = /\b(ltd|pvt|inc|corp|llp|llc|industries|solutions|technologies|systems|services|enterprises|group|associates|consulting|trading|mfg|manufacturing|exports|imports)\b/i;
+  // 5. Extract Designation
+  const desgRe = /\b(ceo|cto|cfo|coo|founder|co-founder|director|managing director|md|manager|general manager|gm|head|vp|vice president|president|engineer|architect|developer|consultant|analyst|executive|senior executive|officer|lead|team lead|partner|proprietor|agm|dgm|commercial manager|purchase officer|sales manager|bdm)\b/i;
   for (const l of sigLines) {
-    if (!result.company && compRe.test(l) && l.length < 100) {
-      result.company = l.replace(/^[|\-•·]\s*/,'').trim();
+    if (!result.designation && desgRe.test(l) && l.length < 90) {
+      result.designation = l.replace(/^[|\-•·]\s*/, '').trim();
     }
   }
-  // Fallback: line that's mostly uppercase and 3-60 chars
-  if (!result.company) {
-    for (const l of sigLines) {
-      if (l.length >= 3 && l.length <= 60 && l === l.toUpperCase() && /[A-Z]{3,}/.test(l)) {
-        result.company = l; break;
+
+  // 6. Extract Company Name & Domain Fallback
+  const compSuffixRe = /\b(ltd|pvt|pvt\.?\s*ltd\.?|inc|corp|llp|llc|industries|solutions|technologies|systems|services|enterprises|group|associates|consulting|trading|mfg|manufacturing|exports|imports|infra|works|packers|logistics)\b/i;
+  for (const l of sigLines) {
+    if (!result.company && compSuffixRe.test(l) && l.length < 100) {
+      result.company = l.replace(/^[|\-•·]\s*/, '').trim();
+    }
+  }
+  if (fromEmail) {
+    const domain = fromEmail.split('@')[1] || '';
+    const publicDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'rediffmail.com', 'icloud.com', 'protonmail.com', 'live.com'];
+    if (domain && !publicDomains.includes(domain.toLowerCase())) {
+      if (!result.website) result.website = 'www.' + domain;
+      if (!result.company) {
+        const compName = domain.split('.')[0];
+        result.company = compName.charAt(0).toUpperCase() + compName.slice(1);
       }
     }
   }
 
-  // Address — line with pincode or common address keywords
-  const addrRe = /\d{6}|\b(road|rd|street|st|nagar|colony|sector|plot|phase|industrial|estate|ahmedabad|surat|mumbai|gujarat|maharashtra)\b/i;
+  // 7. Pincode, City, & Address
+  const pinMatch = bodyText.match(/\b([1-9]\d{5})\b/);
+  if (pinMatch) result.pincode = pinMatch[1];
+
+  const cityRe = /\b(mumbai|delhi|new delhi|bangalore|bengaluru|hyderabad|ahmedabad|chennai|kolkata|surat|pune|jaipur|vadodara|baroda|rajkot|noida|gurgaon|gurugram|thane|ghaziabad|faridabad|ludhiana|chandigarh|indore)\b/i;
+  const cityMatch = bodyText.match(cityRe);
+  if (cityMatch) result.city = cityMatch[0].charAt(0).toUpperCase() + cityMatch[0].slice(1).toLowerCase();
+
+  const addrRe = /\b(road|rd|street|st|nagar|colony|sector|plot|phase|industrial|estate|gidc|complex|tower|building|floor)\b/i;
   for (const l of sigLines) {
-    if (!result.address && addrRe.test(l) && l.length > 10 && l.length < 150) {
-      result.address = l.replace(/^[|\-•·]\s*/,'').trim();
+    if (!result.address && (addrRe.test(l) || (result.pincode && l.includes(result.pincode))) && l.length > 10 && l.length < 160) {
+      result.address = l.replace(/^[|\-•·]\s*/, '').trim();
     }
   }
+
+  // Calculate Confidence Score
+  let score = 0;
+  if (result.name) score += 20;
+  if (result.email) score += 20;
+  if (result.phone_primary) score += 25;
+  if (result.company) score += 20;
+  if (result.designation) score += 15;
+  result.confidence = score;
 
   return result;
 }
@@ -3046,145 +3118,135 @@ async function handleBulkEml(fileList) {
 
   showBulkProgress(BULK.files.length);
 
-  // Phase 1: Local Parse
+  // Phase 1: Deep Local Parse
   const parsedFiles = [];
   for (let i = 0; i < BULK.files.length; i++) {
     const file = BULK.files[i];
     try {
       const text = await readFileAsText(file);
       const parsed = parseSingleEml(text, file.name);
-      parsedFiles.push({ file, parsed });
+      const localSig = extractSignatureData(parsed.bodyText, parsed.htmlBody, parsed.from?.[0]?.email, parsed.from?.[0]?.name);
+      parsedFiles.push({ file, parsed, localSig });
     } catch (e) {
       console.error(e);
       BULK.errors++;
     }
-    updateBulkProgress(i + 1, BULK.files.length, `Reading & parsing file ${i + 1} of ${BULK.files.length} locally…`);
+    updateBulkProgress(i + 1, BULK.files.length, `Local Heuristic Extraction (${i + 1} / ${BULK.files.length})…`);
   }
 
-  // Phase 2: AI Parsing (Parallel with Concurrency Limit)
-  let aiSent = 0;
-  let aiReceived = 0;
+  // Phase 2: AI Parsing via BATCH endpoint (5 per batch, sequential)
+  const aiConfig = typeof getAiSettings === 'function' ? getAiSettings() : { chain: [] };
+  const hasAiKey = (aiConfig.chain || []).some(c => c.apiKey);
   const total = parsedFiles.length;
-  const CONCURRENCY = 2; // Lowered to avoid API rate limits (e.g., Gemini 15 RPM)
+  const BATCH_SIZE = 5;
 
-  const updateAiProgress = () => {
-    updateBulkProgress(aiReceived, total, `AI Extraction<br>Sent to AI: <span style="color:#6C5CE7;font-weight:600">${aiSent}</span> / ${total} &nbsp;|&nbsp; Received: <span style="color:#2ECC71;font-weight:600">${aiReceived}</span> / ${total}`);
-  };
+  if (hasAiKey && total > 0) {
+    let aiReceived = 0;
 
-  updateAiProgress();
+    const updateAiProgress = () => {
+      updateBulkProgress(aiReceived, total, `AI Enrichment (Batch)<br>Processed: <span style="color:#2ECC71;font-weight:600">${aiReceived}</span> / ${total} files`);
+    };
 
-  let currentIndex = 0;
-
-  async function processNext() {
-    if (currentIndex >= total) return;
-    const idx = currentIndex++;
-    const item = parsedFiles[idx];
-    
-    aiSent++;
     updateAiProgress();
 
-    let success = false;
-    let attempts = 0;
-    while (!success && attempts < 3) {
-      attempts++;
+    // Filter to files needing AI (confidence < 80)
+    const needsAi = parsedFiles.filter(f => (f.localSig?.confidence || 0) < 80);
+    const skipped = parsedFiles.length - needsAi.length;
+    if (skipped > 0) {
+      needsAi.forEach(f => { f.aiData = [f.localSig]; });
+      aiReceived = skipped;
+      updateAiProgress();
+    }
+
+    // Process in batches of BATCH_SIZE
+    for (let bi = 0; bi < needsAi.length; bi += BATCH_SIZE) {
+      const batch = needsAi.slice(bi, bi + BATCH_SIZE);
+      const items = batch.map((f, i) => ({
+        id: `bulk_${bi + i}`,
+        body_text: f.parsed.bodyText || '',
+        subject: f.parsed.subject || ''
+      }));
+
       try {
-        const aiConfig = getAiSettings();
         const bulkSigH = await apiHeaders();
-        const aiResp = await fetch(`${API_BASE}/api/parse-signature`, {
+        const aiResp = await fetch(`${API_BASE}/api/parse-signature-batch`, {
           method: 'POST',
           headers: bulkSigH,
-          body: JSON.stringify({ 
-            body_text: item.parsed.bodyText, 
-            subject: item.parsed.subject,
+          body: JSON.stringify({
+            items,
             chain: (aiConfig.chain || []).map(c => ({ provider: c.provider, model: c.model, api_key: c.apiKey || '' }))
           })
         });
-        if (!aiResp.ok) {
-          let errMsg = `Server returned status: ${aiResp.status}`;
-          try {
-            const errText = await aiResp.text();
-            try {
-              const errJson = JSON.parse(errText);
-              if (errJson.detail) errMsg += ` - ${errJson.detail}`;
-              else if (errJson.error) errMsg += ` - ${errJson.error}`;
-            } catch(e) {
-              errMsg += ` - ${errText.substring(0, 100)}`;
-            }
-          } catch(e) {}
-          throw new Error(errMsg);
-        }
+
         const resJson = await aiResp.json();
-        if (resJson.ok && Array.isArray(resJson.fields)) {
-          item.aiData = resJson.fields;
-        } else if (resJson.ok && resJson.fields && typeof resJson.fields === 'object') {
-          item.aiData = [resJson.fields];
+        if (resJson.ok && resJson.results) {
+          batch.forEach((f, i) => {
+            const itemId = `bulk_${bi + i}`;
+            const result = resJson.results[itemId];
+            if (result && Array.isArray(result.fields) && result.fields.length > 0) {
+              f.aiData = result.fields;
+            } else if (result && result.fields && typeof result.fields === 'object') {
+              f.aiData = [result.fields];
+            } else {
+              f.aiData = [];
+            }
+          });
         } else {
-          if (resJson.error) throw new Error(resJson.error);
-          item.aiData = [];
+          batch.forEach(f => { f.aiData = []; });
         }
-        success = true;
       } catch (err) {
-        console.error(`AI parse failed for ${item.file.name} (Attempt ${attempts})`, err);
-        if (attempts < 3) {
-          updateBulkProgress(aiReceived, total, `API Error. Cooling down for 60 seconds before retrying ${item.file.name}...`);
-          await new Promise(r => setTimeout(r, 60000));
-        } else {
-          item.aiData = [];
-          BULK.errors++;
-          BULK.errorList.push(`${item.file.name}: ${err.message || 'Extraction failed'}`);
-        }
+        console.warn(`Batch AI request failed for batch starting at ${bi}, using local fallback.`, err);
+        batch.forEach(f => { f.aiData = []; });
+      }
+
+      aiReceived += batch.length;
+      updateAiProgress();
+
+      // Delay between batches (skip on last batch)
+      if (bi + BATCH_SIZE < needsAi.length) {
+        await new Promise(r => setTimeout(r, 3000));
       }
     }
+  }
 
-    aiReceived++;
-    updateAiProgress();
+  // Phase 3: Build master rows (Local + AI combined)
+  parsedFiles.forEach(item => {
+    const { file, parsed, localSig, aiData } = item;
+    const lSig = localSig || {};
     
-    await new Promise(r => setTimeout(r, 1500)); // 1.5s delay to prevent 429 Too Many Requests
-    await processNext();
-  }
+    parsed.contacts.forEach(c => {
+      const matchingAi = (aiData || []).find(a => a.email && c.email && a.email.toLowerCase() === c.email.toLowerCase()) || 
+                         (aiData || []).find(a => a.name && c.name && a.name.toLowerCase().includes(c.name.split(' ')[0].toLowerCase())) ||
+                         ((aiData || []).length > 0 ? aiData[0] : {});
 
-  const workers = [];
-  for (let i = 0; i < Math.min(CONCURRENCY, total); i++) {
-    workers.push(processNext());
-  }
-  await Promise.all(workers);
+      const phoneFallback = (parsed.contacts.length === 1 || c.source === 'FROM') ? (parsed.phones[0] || '') : '';
 
-      // Build one row per unique contact in this email
-      parsedFiles.forEach(item => {
-        const { file, parsed, aiData } = item;
-        
-        parsed.contacts.forEach(c => {
-          const matchingAi = (aiData || []).find(a => a.email && c.email && a.email.toLowerCase() === c.email.toLowerCase()) || 
-                             (aiData || []).find(a => a.name && c.name && a.name.toLowerCase().includes(c.name.split(' ')[0].toLowerCase())) ||
-                             ((aiData || []).length > 0 ? aiData[0] : {});
-
-          // Only fallback to parsed.phones[0] if it's the sender or there's only one contact
-          const phoneFallback = (parsed.contacts.length === 1 || c.source === 'FROM') ? (parsed.phones[0] || '') : '';
-
-          BULK.rows.push({
-            'File Name':    file.name,
-            'Subject':      parsed.subject,
-            'Date':         parsed.date,
-            'From Name':    parsed.from[0]?.name  || '',
-            'From Email':   parsed.from[0]?.email || '',
-            'Contact Name': matchingAi.name || c.name,
-            'Email':        c.email,
-            'Domain':       c.domain,
-            'Source':       c.source,
-            'Company':        matchingAi.company || c.company || '',
-            'Designation':    matchingAi.designation || c.designation || '',
-            'Phone Primary':  matchingAi.phone_primary || c.phone_primary || phoneFallback,
-            'Phone Secondary':matchingAi.phone_secondary || c.phone_secondary|| '',
-            'Website':        matchingAi.website || c.website || '',
-            'City':           matchingAi.city || c.city || '',
-            'Attachments':  parsed.attachments.join(', '),
-            'Is Reply':     parsed.isReply  ? 'Yes' : 'No',
-            'Is Forward':   parsed.isForwarded ? 'Yes' : 'No',
-            'Links':        parsed.urls.slice(0, 3).join(', '),
-          });
-        });
-        BULK.processed++;
+      BULK.rows.push({
+        'File Name':    file.name,
+        'Subject':      parsed.subject,
+        'Date':         parsed.date,
+        'From Name':    parsed.from[0]?.name  || '',
+        'From Email':   parsed.from[0]?.email || '',
+        'Contact Name': matchingAi.name || c.name || lSig.name || '',
+        'Email':        c.email,
+        'Domain':       c.domain,
+        'Source':       c.source,
+        'Company':        matchingAi.company || lSig.company || '',
+        'Designation':    matchingAi.designation || lSig.designation || '',
+        'Phone Primary':  matchingAi.phone_primary || lSig.phone_primary || phoneFallback,
+        'Phone Secondary':matchingAi.phone_secondary || lSig.phone_secondary || '',
+        'Website':        matchingAi.website || lSig.website || '',
+        'City':           matchingAi.city || lSig.city || '',
+        'Pincode':        matchingAi.pincode || lSig.pincode || '',
+        'Address':        matchingAi.address || lSig.address || '',
+        'Attachments':  parsed.attachments.join(', '),
+        'Is Reply':     parsed.isReply  ? 'Yes' : 'No',
+        'Is Forward':   parsed.isForwarded ? 'Yes' : 'No',
+        'Links':        parsed.urls.slice(0, 3).join(', '),
       });
+    });
+    BULK.processed++;
+  });
 
   showBulkDashboard();
 }

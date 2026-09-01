@@ -30,6 +30,14 @@ class LRUCache:
 
 _cache = LRUCache(500)
 
+_shared_client = None
+
+def get_http_client():
+    global _shared_client
+    if _shared_client is None or _shared_client.is_closed:
+        _shared_client = httpx.AsyncClient(timeout=30.0)
+    return _shared_client
+
 SYSTEM_PROMPT = """You are an expert contact information extractor specialized in parsing emails. 
 
 Your task is to identify and extract structured data for EVERY distinct individual found in the email, particularly focusing on email signature blocks which contain the richest information.
@@ -82,9 +90,37 @@ PROVIDERS = {
 }
 
 def clean_email_text(text: str) -> str:
-    """Basic cleaning to save tokens (removes long continuous non-space strings like base64)."""
-    text = re.sub(r'([A-Za-z0-9+/=]{100,})', '', text)
-    return text[:100000] # Limit to 100k chars
+    """Isolate signature zone and clean text to drastically reduce token usage."""
+    if not text:
+        return ""
+    # Strip base64 / binary blobs
+    text = re.sub(r'([A-Za-z0-9+/=]{80,})', '', text)
+    
+    # Strip forwarded message headers and quoted thread history
+    thread_split = re.split(r'(-{3,}\s*Forwarded message\s*-{3,}|-{3,}\s*Original Message\s*-{3,}|From:\s*.*?\nSent:\s*|On\s+.*?\s+wrote:)', text, flags=re.I)
+    if thread_split:
+        text = thread_split[0] # Keep the top/primary message only
+        
+    lines = [l.strip() for l in text.split('\n') if l.strip()]
+    if not lines:
+        return ""
+        
+    # Look for signature delimiter markers
+    sig_delim_pattern = re.compile(r'^(?:--|regards|best regards|thanks|warm regards|sincerely|cheers|thanks & regards|thanks and regards|sent from my|with regards)', re.I)
+    sig_start_idx = -1
+    for idx, l in enumerate(lines):
+        if sig_delim_pattern.search(l):
+            sig_start_idx = max(0, idx - 1)
+            break
+            
+    if sig_start_idx != -1:
+        sig_lines = lines[sig_start_idx:]
+    else:
+        # Take last 35 lines max
+        sig_lines = lines[-35:]
+        
+    sig_text = "\n".join(sig_lines)
+    return sig_text[:2500] # Limit signature text payload to 2.5k chars max (huge token savings)
 
 async def call_llm(provider, model, api_key, system_prompt, user_prompt):
     url = PROVIDERS.get(provider)
@@ -100,7 +136,7 @@ async def call_llm(provider, model, api_key, system_prompt, user_prompt):
         headers["anthropic-version"] = "2023-06-01"
         payload = {
             "model": model,
-            "max_tokens": 4096,
+            "max_tokens": 2048,
             "temperature": 0.1,
             "system": system_prompt,
             "messages": [
@@ -118,7 +154,7 @@ async def call_llm(provider, model, api_key, system_prompt, user_prompt):
             }],
             "generationConfig": {
                 "temperature": 0.1,
-                "maxOutputTokens": 4096
+                "maxOutputTokens": 2048
             }
         }
     else:
@@ -135,27 +171,29 @@ async def call_llm(provider, model, api_key, system_prompt, user_prompt):
                 {"role": "user", "content": user_prompt}
             ],
             "temperature": 0.1,
-            "max_tokens": 4096,
+            "max_tokens": 2048,
         }
         if provider in ["openai", "groq", "deepseek"]:
             payload["response_format"] = {"type": "json_object"}
 
-    async with httpx.AsyncClient(timeout=45.0) as client:
-        response = await client.post(url, headers=headers, json=payload)
-        
-        if response.status_code != 200:
-            raise Exception(f"{provider} API Error ({response.status_code}): {response.text}")
-            
-        data = response.json()
-        if provider == "anthropic":
-            return data["content"][0]["text"].strip()
-        elif provider == "gemini":
-            try:
-                return data["candidates"][0]["content"]["parts"][0]["text"].strip()
-            except (KeyError, IndexError):
-                raise Exception(f"Gemini API returned unexpected structure: {data}")
-        else:
-            return data["choices"][0]["message"]["content"].strip()
+    client = get_http_client()
+    response = await client.post(url, headers=headers, json=payload)
+
+    if response.status_code == 429:
+        raise Exception("RATE_LIMIT: 429 Too Many Requests from LLM provider")
+    elif response.status_code != 200:
+        raise Exception(f"{provider} API Error ({response.status_code}): {response.text}")
+
+    data = response.json()
+    if provider == "anthropic":
+        return data["content"][0]["text"].strip()
+    elif provider == "gemini":
+        try:
+            return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+        except (KeyError, IndexError):
+            raise Exception(f"Gemini API returned unexpected structure: {data}")
+    else:
+        return data["choices"][0]["message"]["content"].strip()
 
 @router.post("/parse-signature")
 @limiter.limit("200/minute")
@@ -180,6 +218,8 @@ async def parse_signature(request: Request, body: SignatureRequest):
 
     raw = None
     last_err = None
+    is_rate_limit = False
+
     for attempt in chain:
         prov = attempt.provider
         mod = attempt.model
@@ -189,20 +229,29 @@ async def parse_signature(request: Request, body: SignatureRequest):
             continue
             
         success = False
-        for i in range(3): # 3 Retries per provider
+        for i in range(2): # 2 Retries per provider
             try:
                 raw = await call_llm(prov, mod, key, SYSTEM_PROMPT, user_prompt)
                 success = True
                 break
             except Exception as e:
                 last_err = str(e)
-                await asyncio.sleep(2 ** i) # 1, 2, 4
+                if "429" in last_err or "RATE_LIMIT" in last_err:
+                    is_rate_limit = True
+                await asyncio.sleep(1.5 * (i + 1))
         
         if success:
             break
 
     if raw is None:
-        raise HTTPException(500, f"All models/retries failed. Last error: {last_err}")
+        # Gracefully handle rate limit or API failures without 500 error
+        logger.warning(f"parse-signature failed: {last_err}")
+        return JSONResponse({
+            "ok": False,
+            "rate_limited": is_rate_limit,
+            "error": "Rate limit exceeded" if is_rate_limit else "All AI models failed",
+            "fields": []
+        })
 
     # Robust JSON extraction
     fields = None
@@ -221,4 +270,76 @@ async def parse_signature(request: Request, body: SignatureRequest):
         return JSONResponse({"ok": True, "fields": [], "error": "Parse failed"})
     
     _cache.put(cache_key, fields)
-    return JSONResponse({"ok": True, "fields": fields, "cached": False})
+    return JSONResponse({"ok": True, "fields": fields, "cached": False})
+
+@router.get("/parse-signature/cache-stats")
+async def cache_stats():
+    return {"size": len(_cache.cache), "max_size": _cache.capacity}
+
+class BatchSignatureItem(BaseModel):
+    id: str
+    body_text: str
+    subject: str = ""
+
+class BatchSignatureRequest(BaseModel):
+    items: List[BatchSignatureItem]
+    chain: List[ModelConfig] = []
+
+@router.post("/parse-signature-batch")
+@limiter.limit("50/minute")
+async def parse_signature_batch(request: Request, body: BatchSignatureRequest):
+    """Process up to 5 email signatures in a single LLM request to save API calls and avoid 429s."""
+    if not body.items:
+        return JSONResponse({"ok": True, "results": {}})
+    
+    items = body.items[:5] # Max 5 per batch
+    chain = body.chain
+    if not chain:
+        return JSONResponse({"ok": False, "error": "No AI configuration provided."})
+
+    # Combine items into a single structured prompt
+    prompt_blocks = []
+    for item in items:
+        cleaned = clean_email_text(item.body_text)
+        prompt_blocks.append(f"--- EMAIL ID: {item.id} (Subject: {item.subject}) ---\n{cleaned}")
+
+    combined_prompt = (
+        "Extract contact info for each email below. Return a JSON object mapping each EMAIL ID to an array of contact objects as defined in the system prompt.\n"
+        "Example format: {\"id_1\": [{...}], \"id_2\": [{...}]}\n\n"
+        + "\n\n".join(prompt_blocks)
+    )
+
+    raw = None
+    last_err = None
+    is_rate_limit = False
+
+    for attempt in chain:
+        prov, mod, key = attempt.provider, attempt.model, attempt.api_key
+        if not key:
+            continue
+        try:
+            raw = await call_llm(prov, mod, key, SYSTEM_PROMPT, combined_prompt)
+            break
+        except Exception as e:
+            last_err = str(e)
+            if "429" in last_err or "RATE_LIMIT" in last_err:
+                is_rate_limit = True
+
+    if not raw:
+        return JSONResponse({"ok": False, "rate_limited": is_rate_limit, "error": last_err, "results": {}})
+
+    results = {}
+    try:
+        parsed = json.loads(raw)
+        if isinstance(parsed, dict):
+            results = parsed
+    except Exception:
+        json_match = re.search(r'\{.*\}', raw, re.DOTALL)
+        if json_match:
+            try:
+                results = json.loads(json_match.group(0))
+            except Exception:
+                pass
+
+    return JSONResponse({"ok": True, "results": results})
+

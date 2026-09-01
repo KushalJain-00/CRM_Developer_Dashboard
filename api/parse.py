@@ -32,7 +32,7 @@ async def parse_file(file: UploadFile = File(...)):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(422, f"Could not parse file: {str(e)}")
+        raise HTTPException(422, "Could not parse file")
 
     return JSONResponse(content={
         "ok": True,

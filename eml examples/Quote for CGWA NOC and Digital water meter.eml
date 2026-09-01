@@ -1,0 +1,1333 @@
+Delivered-To: mitul@excelenviro.com
+Authentication-Results: mx.zohomail.in;
+	dkim=pass;
+	spf=pass (zohomail.in: domain of torrentpower.com designates 40.107.51.75 as permitted sender)  smtp.mailfrom=kaushikpatel@torrentpower.com;
+	arc=pass (i=2 dmarc=pass fromdomain=torrentpower.com);
+	dmarc=pass(p=reject dis=none)  header.from=torrentpower.com
+ARC-Seal: i=3; a=rsa-sha256; t=1783051591; cv=pass; 
+	d=zohomail.in; s=zohoarc; 
+	b=faTrdfBM10eENby+eMAw/X/jS9kHt5lEnsImPE5jM1CG/L7jAmWV1dzdKJ50SJTnvITlpCWgxfl2EVDef0REo+rBe/4DDbLslvx2CO1jhId8FnzBWsFBo5e1hOMgkpKvaDNcooFrFbJWkdnZTL/mZxIKo9XeuM6Zwjr6NHhd5I4=
+ARC-Message-Signature: i=3; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.in; s=zohoarc; 
+	t=1783051591; h=Content-Type:Cc:Cc:Date:Date:From:From:MIME-Version:Message-ID:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=A9v5RNPtoQZDtW+r/fV2l2ix5unboq1ddcy7af36SAU=; 
+	b=T7Qp9gcsnjwwPvt9IVjlt1Ax83hTl312CXg+yoHHJAQP26qBFdHR17tS74xT3xN4L45PZBBH/0pChtsmC73ACTLvVswJcw+87BRHMFKIt67XkI8Vk91MQjOfpZAc4jxVvzfJuXQt+jtBzaGdEkEJw6xs6kUNr66lAj2XR6xp3RE=
+ARC-Authentication-Results: i=3; mx.zohomail.in;
+	dkim=pass;
+	spf=pass (zohomail.in: domain of torrentpower.com designates 40.107.51.75 as permitted sender)  smtp.mailfrom=kaushikpatel@torrentpower.com;
+	arc=pass (i=2 dmarc=pass fromdomain=torrentpower.com);
+	dmarc=pass header.from=<kaushikpatel@torrentpower.com> (p=reject dis=none)
+Received: from PNZPR01CU001.outbound.protection.outlook.com (mail-centralindiaazon11021075.outbound.protection.outlook.com [40.107.51.75]) by mx.zoho.in
+	with SMTPS id 1783051591495422.6095131169184; Fri, 3 Jul 2026 09:36:31 +0530 (IST)
+Received: from PN3PR01CA0105.INDPRD01.PROD.OUTLOOK.COM (2603:1096:c01:9b::9)
+ by MA0PR01MB8004.INDPRD01.PROD.OUTLOOK.COM (2603:1096:a01:8f::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.181.11; Fri, 3 Jul
+ 2026 04:06:28 +0000
+Received: from PN2PEPF0000018E.INDPRD01.PROD.OUTLOOK.COM
+ (2603:1096:c01:9b:cafe::11) by PN3PR01CA0105.outlook.office365.com
+ (2603:1096:c01:9b::9) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.21.181.11 via Frontend Transport; Fri, 3
+ Jul 2026 04:06:28 +0000
+Received: from DLP-EMAIL02.torrentpower.com (52.140.124.114) by
+ PN2PEPF0000018E.mail.protection.outlook.com (10.167.242.21) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.21.181.6 via Frontend Transport; Fri, 3 Jul 2026 04:06:28 +0000
+Received: from DLPMGMT.TORRENTPOWER.COM (unknown [10.96.4.59])
+	by Forcepoint Email with ESMTP id 17A534B4E5EBEB1E7F61
+	for <mitul@excelenviro.com>; Fri,  3 Jul 2026 09:36:28 +0530 (IST)
+Received: from PNZPR01CU001.outbound.protection.outlook.com (unknown [40.93.132.27])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by Forcepoint Email with ESMTPS id 862486F850DB6954C399
+	for <mitul@excelenviro.com>; Thu,  2 Jul 2026 18:47:31 +0530 (IST)
+Received: from PN0PR01MB10054.INDPRD01.PROD.OUTLOOK.COM
+ (2603:1096:c01:1ea::11) by PNZPR01MB12466.INDPRD01.PROD.OUTLOOK.COM
+ (2603:1096:c01:298::7) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.181.10; Thu, 2 Jul
+ 2026 13:17:29 +0000
+Received: from PN0PR01MB10054.INDPRD01.PROD.OUTLOOK.COM
+ ([fe80::7320:6f2:a90a:2cf5]) by PN0PR01MB10054.INDPRD01.PROD.OUTLOOK.COM
+ ([fe80::7320:6f2:a90a:2cf5%5]) with mapi id 15.21.0181.008; Thu, 2 Jul 2026
+ 13:17:29 +0000
+Return-Path: <kaushikpatel@torrentpower.com>
+Return-Path: kaushikpatel@torrentpower.com
+ARC-Seal: i=2; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=pass;
+ b=wn7fFNmgBpClwb0Jwzz1zrA4eUO49VwjtFqI4FMNADyxpNKGflTCBSFZJr2Rnwfx/SnUuZ7q8pNNqUFOkp4t07be86ad867fx0EaYQFCg2hBKeoY1n14hCNetEEjuYCR4FL2lsFxIIjQ25iUZF3B7R6XeXVCc17xWj7VPnVmMl8o0aljWe/EO3qdqckM4xQLVRDZ7fkAIlrZ+Sm8PEQ+GUlYeJi3Z/LVE0JSGQYfBWrpwi0xkuq8Zfok9rmQp4SEn6jgtGieRPWISsFRqp+hkuBI9G++GRxCOlnMgVXxfMc47M8y6yN/vV+5T1ulX+7yPDqmfJDlSeztIIJpv1akNQ==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=A9v5RNPtoQZDtW+r/fV2l2ix5unboq1ddcy7af36SAU=;
+ b=eKOL3vdOuWV1ReKpMLAukmoxEvwddW7WNDGFkRYzLyIqWq3PJtEDp++GHMotqgyy2G4QHcYN5PyoasPMZWyc/zgrK+zH5ZYoIQY7OeLG5tnlUh9lD2u5k11wzdWwqEFUYpqxywzNICgA0NJZecAQ+geffydfFyilDEte3dsswpKQQVBTn8ZCAusanxTqD9OeIo0spWmVsAqmMS03IFH3HxSEZQ5S7WhkxuQOfW6gBvu6F9WdoY99HvHIo1zhYL62T3ouCnsFK7YiLETA9yJwTUYPO0kI3oTrLVOxjpwYfFi3mEtX9rtDmUTpainUcNLq2+SyQuoSBFLl+KyVIsyfEA==
+ARC-Authentication-Results: i=2; mx.microsoft.com 1; spf=pass (sender ip is
+ 52.140.124.114) smtp.rcpttodomain=excelenviro.com
+ smtp.mailfrom=torrentpower.com; dmarc=pass (p=reject sp=reject pct=100)
+ action=none header.from=torrentpower.com; dkim=pass (signature was verified)
+ header.d=torrentpower.com; arc=pass (0 oda=1 ltdi=1
+ spf=[1,1,smtp.mailfrom=torrentpower.com] dkim=[1,1,header.d=torrentpower.com]
+ dmarc=[1,1,header.from=torrentpower.com])
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=torrentpower.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=A9v5RNPtoQZDtW+r/fV2l2ix5unboq1ddcy7af36SAU=;
+ b=hHsvAC6CxzqtLEXQcpicaJY/sAjOrNlg0m9ueoIoHYgsa6UAsao5c1jzs0IrfDZFTzEPNfMn18xLUzHACE6MbBHw4MBrpKNW96GVEkS+DBh0FGtTy/xaC5Voa27Kb7h+6WIEM4KhjKWwQo9e+mo2iBdEOeyfWhFxhY7IsGxQmwkXTpP0PDymVa4n0EUW0BgmbA3JzXhVIF0HOdRXMsDZDDQC+Rp+7Zyen/K7YGKvbJ/GdrNDemzumU0EQvJ/NHXnZXBCOEi20Y54jJDSsZmFipZrIiqojLTLTqjXTORCN28GtDS6tmt8hYeWdDHc7B0NzoEkw6oUxZOphkLFDLI3EA==
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 52.140.124.114)
+ smtp.mailfrom=torrentpower.com; dkim=pass (signature was verified)
+ header.d=torrentpower.com;dmarc=pass action=none
+ header.from=torrentpower.com;
+Received-SPF: pass (zohomail.in: domain of torrentpower.com designates 40.107.51.75 as permitted sender) client-ip=40.107.51.75; envelope-from=kaushikpatel@torrentpower.com; helo=PNZPR01CU001.outbound.protection.outlook.com;
+Received-SPF: Pass (protection.outlook.com: domain of torrentpower.com
+ designates 52.140.124.114 as permitted sender)
+ receiver=protection.outlook.com; client-ip=52.140.124.114;
+ helo=DLP-EMAIL02.torrentpower.com; pr=C
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=VG14tZt1kuvq9PHVS72RL0pLlO7xTg2CWbxrcvBu+xgSDhChTr5f3yK7LSKtbCfV8BpJaCdYbSxHilEKdji4Xvez1yhQ5p4sTtbjF1rZ8c5EKrfomdweLIRGEiDByr6rKolXCjdqEOImL5PM3VKdsjoHhdBPa8Gt6sOX3LyiNl7xn6lzCG1iexxNeBVb0OBISefAjymG1mL5fZS7ovpKfKaJzmqxvC1uShU/3QpWdR2jvkDW4sk4qjxay3+94cPT0knR72nJNG5nVEOaSs3QA3wXQPmJQ3M+ozdMMeUYTz5ArhjMOiKu4V0M/mRIsmjMIThitGZUfpnnDLaDPZRpLQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=A9v5RNPtoQZDtW+r/fV2l2ix5unboq1ddcy7af36SAU=;
+ b=m47IQoIgDM66E6yxnuMoJf21AUk2cTgt1sRkY8pxcO6yiwwZ230MSKGt5Qk3/2RAUGmyN68y6lMsNKyodPkdYJQ/EwobwrKL9WS517M+k6oeYoZEfj+FTBBoP0fjdwMsooe4jXWVJpfVFEOATE8I6j/EWp2twWbzQi61FEJQ8Lzft+2ao+owo+5gAqJ2Pp8XdR669w/yzmDPZC0bBCWV3CuM7W10MkUqC1kJ2ogCtQOuIgGQTqjc+VRfkxYDA7M/KXdp0wITkx0t5NhaxuViJ0Ku7sMIMVQbnyJ6Zo4rj6GgV85vG09bfKBo1OYvGUYTQ6LnPNJSS4+MH+qSvojWUQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=torrentpower.com; dmarc=pass action=none
+ header.from=torrentpower.com; dkim=pass header.d=torrentpower.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=torrentpower.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=A9v5RNPtoQZDtW+r/fV2l2ix5unboq1ddcy7af36SAU=;
+ b=hHsvAC6CxzqtLEXQcpicaJY/sAjOrNlg0m9ueoIoHYgsa6UAsao5c1jzs0IrfDZFTzEPNfMn18xLUzHACE6MbBHw4MBrpKNW96GVEkS+DBh0FGtTy/xaC5Voa27Kb7h+6WIEM4KhjKWwQo9e+mo2iBdEOeyfWhFxhY7IsGxQmwkXTpP0PDymVa4n0EUW0BgmbA3JzXhVIF0HOdRXMsDZDDQC+Rp+7Zyen/K7YGKvbJ/GdrNDemzumU0EQvJ/NHXnZXBCOEi20Y54jJDSsZmFipZrIiqojLTLTqjXTORCN28GtDS6tmt8hYeWdDHc7B0NzoEkw6oUxZOphkLFDLI3EA==
+From: <kaushikpatel@torrentpower.com>
+To: <mitul@excelenviro.com>
+CC: <krunalshah@torrentpower.com>
+Subject: Quote for CGWA NOC and Digital water meter
+Thread-Topic: Quote for CGWA NOC and Digital water meter
+Thread-Index: Ad0KJR6mqPHHhQxKQNi01zFWM15Egg==
+Date: Thu, 2 Jul 2026 13:17:29 +0000
+Message-ID: <PN0PR01MB10054AD36E54286F31893D18FA4F52@PN0PR01MB10054.INDPRD01.PROD.OUTLOOK.COM>
+Accept-Language: en-US, en-IN
+Content-Language: en-US
+X-MS-Has-Attach: yes
+X-MS-TNEF-Correlator: 
+Authentication-Results-Original: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=torrentpower.com;
+x-ms-traffictypediagnostic: PN0PR01MB10054:EE_|PNZPR01MB12466:EE_|PN2PEPF0000018E:EE_|MA0PR01MB8004:EE_
+X-MS-Office365-Filtering-Correlation-Id: 01c45adc-2cfd-4582-fd3e-08ded8b87510
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam-Untrusted: BCL:0;ARA:13230040|376014|6049299003|366016|1800799024|23010399003|38070700021|13003099007|4053099003|56012099006|18002099003|8096899003;
+X-Microsoft-Antispam-Message-Info-Original: g+Yu2EBgrkjp/cREc1cWv8QID19083cm7JsKwdb4elQF1g90GoZYc1HPMvGvKFOi06sViFnQd1LW0HGUnVNSeb8rJj7Iib7dNJWiLmTuw0UaLDFKOPvHHlGp0nPVTZKEY6MnxrPUOtbydCBD5pFWxNxriq6iH/w9dS/QC+7TYElI+0W6f03kYuFXE6h0P7M9/RC7zUt12Fx3+0csuJ/PPhVovSYOnU5J/cHtclAPebcQcMHhyD8BEgvQWo6QsbJHxMCOH6BB4EWEITkBTTkT/onEH0MmPdcY1sAserZ5mF6Ohj2wo45mwRblP/VShOytMFufm5fWWG9ibuIZn5ZO1Fulaa2/Mr18KuQ+DVzmPu8gyw7OFiA1rEetSntXuNEtDO4YF2QNbRsMYkKZYvxc1iddkq7qTTVE4pPFmWqIL6/lY2o3hgnGS59e3EETADR5rgLti9BLk4sBhJZRLtMX7z9q0JSIJumqKqBG/9MwzU8ELa+uZ6IcnHzreGDMfk+bI8LlsRot5WR11sjZnMRbrEkeDBls1xuz2tT9Wr4h3X0mjJqCWSLmHJ/RUnMkHxuzM6D0A/5htuw7i1A+ZslsGfBbp1FI1HSImBykcnrZvczy7Tq9IZQsfHDbALQsV3fsh59mDGxfj2bMMUDwvemoN/ng9U/9fWa0mPxnEsgMD+U=
+X-Forefront-Antispam-Report-Untrusted: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PN0PR01MB10054.INDPRD01.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(376014)(6049299003)(366016)(1800799024)(23010399003)(38070700021)(13003099007)(4053099003)(56012099006)(18002099003)(8096899003);DIR:OUT;SFP:1102;
+Content-Type: multipart/related;
+	boundary="_004_PN0PR01MB10054AD36E54286F31893D18FA4F52PN0PR01MB10054IN_";
+	type="multipart/alternative"
+MIME-Version: 1.0
+X-Exchange-RoutingPolicyChecked: fzUY146evaboSdTWnVtq3vuDWknR3an0ZcZmTYcJbUjEzYGNs6WlqN0QkO8yJ8UsbpW/hfhkZUu4/Z3ZMobzO9TJ87pHh5tfP2Fa+7P0gQnuyihJ058rcLMDDWoCtWR4Fx0F/wT83PRm5dxsNU3/lNwBVEP2PDd5JCNdKMXOCUzxe2eLi7D7eTIiF+h9g0w4/iOSgS/14L3wRGUq6VinsbYUZ9E+NmED6srkGQoQSkLWAHlNWUwzyC5AqwAPKrQEx5/yTJXFYIvbRMbNAIc5QOfO+nTrMTV33/fH3xD4OpxlyBng6dqUtdwTXcg2GC97BZwOtDdZiLKGMGDN/S2xPA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PNZPR01MB12466
+X-CHECK_THIS: ___Block Start___
+ Do not alter this block
+ #qH^YyY
+ {2;B}eM1YmV8dZM5bz2qyCFKk5MclgkhyOMxHCUpW2DvE12CxzJRXB5ggLIU6c6I
+ uGPnZepACjrYFqVWjIsZSDKOTFQWswReFf/dqNGoQCury/tZ0OsCetjHuantvUL
+ CVFTRNnkd0r8tM2yeP2vX7+en9wwbdzxHPGYt881+KbsMmY4exHKP3FSAip+R4v
+ Afd5q1+
+ gggvyYy___Block End___
+X-PE_TransactionId: 17456564707656369677
+X-EOPAttributedMessage: 0
+X-MS-Exchange-Transport-CrossTenantHeadersStripped: PN2PEPF0000018E.INDPRD01.PROD.OUTLOOK.COM
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id-Prvs: 106f421f-3487-463c-e4a0-08ded83c44a1
+X-Microsoft-Antispam: BCL:0;ARA:13230040|36860700016|376014|6049299003|82310400026|23010399003|1800799024|35042699022|14060799003|4053099003|13003099007|18002099003|56012099006|6133799003|8096899003;
+X-Microsoft-Antispam-Message-Info: pA0O0tU56Zc2OjNj9EwK7EtPEKPW4jqgdPjsR+G/fQbBHKyXiaMFJwcgoCySswa1DfCoMOCp6yqmYNhn4D2Az+159LP3f/6iUNbZryS5Z59X2rNcAxNQ7btv5MDjgRwQfqQkf8/RqDnW4A4crd2rAP2XAWChabBaEk74TOPDlSjt1QJ1wCS3SR5T1dnDiB4PSPuGvzGA27Hpr/4fdTQP631EDIzXnytHpJYLeGtTyVIVhB6AnbCK59+aUCpsa+WSCdJ8sBE6nWVWJ8D0GQdXbqyFtDSAfrPrjv2Q0AOGhpMuOsXUZc7N3SlGsS5N4yQLlnd0fwPjv3BhU8v5D/AXnhgFCCA7+P3l64GLLLOMoghQ5TyVScQ/j+cuSHWoPTeWIvpY7BQC94wJ6FNM8RQB92SGisQ42yzrMglAu/9sZSIgLIez9GSnmhLXNQS/AVf3MIPb2p9o46iAeQM+/GZWSf8Nfa7V1wYeoltDt+RrNxJdOKXqLi+KoqRhwyS4+uzgg1bpMg0Sk+2LUaFeoS18J3wCAgBreqyt3hSRXyoGwjdtPZGSUg7elc7uPQeKZZXyMZcMkcrf6zokAQfZhTHdvd4rK/FoohVRM73sPlIf+KOLqqYwzpF/ngmOFCKd0cNtZSwTaZs5OOBB3gVd+M+z6g==
+X-Forefront-Antispam-Report: CIP:52.140.124.114;CTRY:IN;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:DLP-EMAIL02.torrentpower.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230040)(36860700016)(376014)(6049299003)(82310400026)(23010399003)(1800799024)(35042699022)(14060799003)(4053099003)(13003099007)(18002099003)(56012099006)(6133799003)(8096899003);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: fhak9Q4GToDRmwBKRbm4WatHrQKsDdIl3Ts0XqcGEjRbrfuaPuic8C7YYu19FCKiFcTa4HUf4c5FtyDzbzMe1klQMvHMszzOignjqpk4heGhTFI4EvY0BpLwahbFX9xhIhJqbWsAHWLVe7OmqhHXTZw0NrBnS0NCyvoh53tA7XEI9fEXzXqCkoPGToiAFb1Q3MK/EBgSxYbT2mrDvdzKfLuSn+m6Z2b36uM5DJASOh+MwQ74BqsHdConMXc73kMj6QzmNEcVRNlDMmw1hUKvDoVCSc3kPKfnkckMocHwAI6NQoFXQCg5zn2jCxOtRnfZ3k/HB2i6Rjks5e/joQNBze/pKIdSJsikNhEP/IFljD2aou2wSFuUYRSE1ZdhMvwjgyenNO6iIrFGFkyFx2pfuts6mCtDjFcQYPpc0yT76UfK/MaZcKY4Fh+ux376wtrh
+X-OriginatorOrg: torrentpower.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 03 Jul 2026 04:06:28.2378
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 01c45adc-2cfd-4582-fd3e-08ded8b87510
+X-MS-Exchange-CrossTenant-Id: 82476f6b-9376-4b7f-8c7d-1ef9c7fb28aa
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=82476f6b-9376-4b7f-8c7d-1ef9c7fb28aa;Ip=[52.140.124.114];Helo=[DLP-EMAIL02.torrentpower.com]
+X-MS-Exchange-CrossTenant-AuthSource: PN2PEPF0000018E.INDPRD01.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MA0PR01MB8004
+X-Zoho-Virus-Status: 1
+X-Zoho-AV-Stamp: zmail-av-0.2.10.1.5.2/283.16.77
+X-ZohoMail-DKIM: pass (identity @torrentpower.com)
+
+--_004_PN0PR01MB10054AD36E54286F31893D18FA4F52PN0PR01MB10054IN_
+Content-Type: multipart/alternative;
+	boundary="_000_PN0PR01MB10054AD36E54286F31893D18FA4F52PN0PR01MB10054IN_"
+
+--_000_PN0PR01MB10054AD36E54286F31893D18FA4F52PN0PR01MB10054IN_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+Kind Attention : Mr. Mitul Jain.
+With reference to our telephonic talk, as per CGWA guideline, we require NO=
+C for borewell as well as installation of water meter wherever it is requir=
+ed in various EHV Sub Station.
+Kindly find below mentioned list of substations where CGWA NOC is required.
+
+SR NO.
+Voltage level (kV)
+Name of Project
+Water Source
+1
+400/132
+Nicol-2
+Borewell
+2
+220/132
+Thaltej
+Borewell
+3
+400
+Pirana
+Borewell
+4
+220
+GOTA
+Borewell
+5
+220
+GANDHINAGAR
+Borewell
+6
+220
+ACHER
+Borewell
+7
+132
+Amraiwadi GIS
+Borewell
+8
+132
+Dudheshwar
+Borewell
+9
+132
+Gandhinagar
+Borewell
+10
+132
+IT-Park
+Borewell
+11
+132
+Naroda GIS
+Borewell
+12
+132
+Prahlad Nagar
+Borewell
+13
+132
+Vasna GIS
+Borewell
+14
+132
+Vastral
+Borewell
+15
+132
+Airport
+Borewell
+16
+132
+ISRO
+Borewell
+17
+132
+Pirana
+Borewell
+18
+132
+Nicol 1
+Borewell
+19
+132
+Lambha
+Borewell
+20
+132
+KAZIPUR
+Borewell
+21
+33
+Appreal park
+Borewell
+22
+33
+GIDC PH-4 CC Store & SS
+Borewell
+23
+33
+Shrinandnagar
+Borewell
+24
+33
+GITAMANDIR(HUBTOWN)
+Borewell
+
+You are kindly requested to forward quotation for budgetary provision separ=
+ately for receiving CGWA NOC as well as supply & installation of digital wa=
+ter meter at various EHV SS located in Ahmedabad and Gandhinagar jurisdicti=
+on.
+
+
+Regards,
+Kaushik Patel
+Manager (EHV - Civil)
+M: +91-9227494235, T: 079 66520000, Ext: 7926
+4th Floor, New Building, Naranpura Zonal Office
+Sola Road | Ahmedabad - 380013
+[cid:image001.png@01DD0A51.BCD928C0]
+www.torrentpower.com<http://www.torrentpower.com/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Disclaimer : This email along with any attachments may contain confidential=
+, proprietary or legally privileged information and is for the intended rec=
+ipient only. Any other use of email, such as, unauthorized access, disclosu=
+re, copying, distribution or reliance on any contents of it by anyone else =
+is prohibited and unlawful. If you are not the intended recipient, please n=
+otify the sender immediately and delete the email.
+
+--_000_PN0PR01MB10054AD36E54286F31893D18FA4F52PN0PR01MB10054IN_
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
+osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns:x=3D"urn:schemas-microsoft-com:office:excel" xmlns:m=3D"http://schema=
+s.microsoft.com/office/2004/12/omml" xmlns=3D"http://www.w3.org/TR/REC-html=
+40">
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
+>
+<meta name=3D"Generator" content=3D"Microsoft Word 15 (filtered medium)">
+<!--[if !mso]><style>v\:* {behavior:url(#default#VML);}
+o\:* {behavior:url(#default#VML);}
+w\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style><![endif]--><style><!--
+/* Font Definitions */
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:Aptos;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0cm;
+	font-size:12.0pt;
+	font-family:"Aptos",sans-serif;
+	mso-ligatures:standardcontextual;}
+a:link, span.MsoHyperlink
+	{mso-style-priority:99;
+	color:#467886;
+	text-decoration:underline;}
+span.EmailStyle18
+	{mso-style-type:personal-compose;
+	font-family:"Aptos",sans-serif;
+	color:windowtext;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	font-size:10.0pt;
+	mso-ligatures:none;}
+@page WordSection1
+	{size:612.0pt 792.0pt;
+	margin:72.0pt 72.0pt 72.0pt 72.0pt;}
+div.WordSection1
+	{page:WordSection1;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext=3D"edit">
+<o:idmap v:ext=3D"edit" data=3D"1" />
+</o:shapelayout></xml><![endif]-->
+</head>
+<body lang=3D"EN-US" link=3D"#467886" vlink=3D"#96607D" style=3D"word-wrap:=
+break-word">
+<div class=3D"WordSection1">
+<p class=3D"MsoNormal">Kind Attention : Mr. Mitul Jain.<o:p></o:p></p>
+<p class=3D"MsoNormal">With reference to our telephonic talk, as per CGWA g=
+uideline, we require NOC for borewell as well as installation of water mete=
+r wherever it is required in various EHV Sub Station.<o:p></o:p></p>
+<p class=3D"MsoNormal">Kindly find below mentioned list of substations wher=
+e CGWA NOC is required.<o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<table class=3D"MsoNormalTable" border=3D"0" cellspacing=3D"0" cellpadding=
+=3D"0" width=3D"571" style=3D"width:428.0pt;margin-left:-.15pt;border-colla=
+pse:collapse">
+<tbody>
+<tr style=3D"height:41.25pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;backgr=
+ound:#F4B084;padding:0cm 5.4pt 0cm 5.4pt;height:41.25pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><b><spa=
+n style=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligat=
+ures:none">SR NO.<o:p></o:p></span></b></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border:solid windowtext 1.0pt;borde=
+r-left:none;background:#F4B084;padding:0cm 5.4pt 0cm 5.4pt;height:41.25pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><b><spa=
+n style=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligat=
+ures:none">Voltage level (kV)<o:p></o:p></span></b></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border:solid windowtext 1.0pt;bord=
+er-left:none;background:#F4B084;padding:0cm 5.4pt 0cm 5.4pt;height:41.25pt"=
+>
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><b><spa=
+n style=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligat=
+ures:none">Name of Project<o:p></o:p></span></b></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border:solid windowtext 1.0pt;borde=
+r-left:none;background:#F4B084;padding:0cm 5.4pt 0cm 5.4pt;height:41.25pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><b><spa=
+n style=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligat=
+ures:none">Water Source<o:p></o:p></span></b></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">1<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">400/132<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">Nicol-2<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">2<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">220/132<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">Thaltej<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">3<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">400<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">Pirana<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">4<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">220<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">GOTA<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">5<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">220<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">GANDHINAGAR<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">6<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">220<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">ACHER<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">7<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">132<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">Amraiwadi GIS<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">8<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">132<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">Dudheshwar<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">9<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">132<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">Gandhinagar
+<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">10<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">132<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">IT-Park<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">11<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">132<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">Naroda GIS<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">12<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">132<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">Prahlad Nagar&nbsp;
+<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">13<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">132<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">Vasna GIS<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">14<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">132<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">Vastral<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">15<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">132<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">Airport<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">16<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">132<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">ISRO<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">17<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">132<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">Pirana<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">18<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">132<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">Nicol 1<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">19<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">132<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">Lambha<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">20<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">132<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">KAZIPUR<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">21<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">33<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">Appreal park<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">22<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">33<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">GIDC PH-4 CC Store &amp; SS<o:p></o:p=
+></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">23<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">33<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">Shrinandnagar<o:p></o:p></span></p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:24.95pt">
+<td width=3D"80" style=3D"width:60.0pt;border:solid windowtext 1.0pt;border=
+-top:none;padding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">24<o:p></o:p></span></p>
+</td>
+<td width=3D"124" style=3D"width:93.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">33<o:p></o:p></span></p>
+</td>
+<td width=3D"237" style=3D"width:178.0pt;border-top:none;border-left:none;b=
+order-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;pad=
+ding:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Calibri&quot;,sans-=
+serif;color:black;mso-ligatures:none">GITAMANDIR(HUBTOWN)<o:p></o:p></span>=
+</p>
+</td>
+<td width=3D"129" style=3D"width:97.0pt;border-top:none;border-left:none;bo=
+rder-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;padd=
+ing:0cm 5.4pt 0cm 5.4pt;height:24.95pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"text-align:center"><span s=
+tyle=3D"font-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligature=
+s:none">Borewell<o:p></o:p></span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">You are kindly requested to forward quotation for bu=
+dgetary provision separately for receiving CGWA NOC as well as supply &amp;=
+ installation of digital water meter at various EHV SS located in Ahmedabad=
+ and Gandhinagar jurisdiction.<o:p></o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal">Regards,<o:p></o:p></p>
+<p class=3D"MsoNormal"><b><span lang=3D"EN-IN" style=3D"font-size:11.0pt;fo=
+nt-family:&quot;Calibri&quot;,sans-serif;color:#F8A930;mso-ligatures:none">=
+Kaushik Patel</span></b><span lang=3D"EN-IN" style=3D"font-size:10.0pt;font=
+-family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligatures:none"><br>
+Manager (EHV &#8211; Civil)<br>
+M: +91-9227494235, T: 079 66520000, Ext: 7926<br>
+4<sup>th</sup> Floor, New Building, Naranpura Zonal Office<o:p></o:p></span=
+></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-IN" style=3D"font-size:10.0pt;font-=
+family:&quot;Calibri&quot;,sans-serif;color:black;mso-ligatures:none">Sola =
+Road | Ahmedabad - 380013</span><span lang=3D"EN-IN" style=3D"font-size:11.=
+0pt;font-family:&quot;Calibri&quot;,sans-serif;mso-ligatures:none"><o:p></o=
+:p></span></p>
+<table class=3D"MsoNormalTable" border=3D"0" cellpadding=3D"0">
+<tbody>
+<tr style=3D"height:10.0pt">
+<td style=3D"padding:.75pt .75pt .75pt .75pt;height:10.0pt"></td>
+<td valign=3D"bottom" style=3D"padding:0cm 5.4pt 0cm 5.4pt;height:10.0pt">
+<p class=3D"MsoNormal"><span lang=3D"EN-IN" style=3D"font-size:11.0pt;font-=
+family:&quot;Calibri&quot;,sans-serif;mso-ligatures:none;mso-fareast-langua=
+ge:EN-IN"><img width=3D"131" height=3D"41" style=3D"width:1.3645in;height:.=
+427in" id=3D"Picture_x0020_4" src=3D"cid:image001.png@01DD0A51.BCD928C0"><o=
+:p></o:p></span></p>
+<p class=3D"MsoNormal"><a href=3D"http://www.torrentpower.com/"><span style=
+=3D"font-size:10.0pt;font-family:&quot;Calibri&quot;,sans-serif;color:blue;=
+mso-ligatures:none">www.torrentpower.com</span></a><span lang=3D"EN-IN" sty=
+le=3D"font-size:11.0pt;font-family:&quot;Calibri&quot;,sans-serif;mso-ligat=
+ures:none;mso-fareast-language:EN-IN"><o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;mso-ligatures:none">=
+<o:p>&nbsp;</o:p></span></p>
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"font-family:&quot;Times New Roman&quot;,serif"><o:p=
+>&nbsp;</o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:10.0pt">
+<td style=3D"padding:.75pt .75pt .75pt .75pt;height:10.0pt">
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;font-family:&quot;Ca=
+libri&quot;,sans-serif;mso-ligatures:none"><o:p>&nbsp;</o:p></span></p>
+</td>
+<td style=3D"padding:0cm 5.4pt 0cm 5.4pt;height:10.0pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"font-family:&quot;Times New Roman&quot;,serif"><o:p=
+>&nbsp;</o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:10.0pt">
+<td style=3D"padding:.75pt .75pt .75pt .75pt;height:10.0pt">
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;font-family:&quot;Ca=
+libri&quot;,sans-serif;mso-ligatures:none"><o:p>&nbsp;</o:p></span></p>
+</td>
+<td style=3D"padding:0cm 5.4pt 0cm 5.4pt;height:10.0pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"font-family:&quot;Times New Roman&quot;,serif"><o:p=
+>&nbsp;</o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:10.0pt">
+<td style=3D"padding:.75pt .75pt .75pt .75pt;height:10.0pt">
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;font-family:&quot;Ca=
+libri&quot;,sans-serif;mso-ligatures:none"><o:p>&nbsp;</o:p></span></p>
+</td>
+<td style=3D"padding:0cm 5.4pt 0cm 5.4pt;height:10.0pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"font-family:&quot;Times New Roman&quot;,serif"><o:p=
+>&nbsp;</o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:10.0pt">
+<td style=3D"padding:.75pt .75pt .75pt .75pt;height:10.0pt">
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;font-family:&quot;Ca=
+libri&quot;,sans-serif;mso-ligatures:none"><o:p>&nbsp;</o:p></span></p>
+</td>
+<td valign=3D"bottom" style=3D"padding:0cm 5.4pt 0cm 5.4pt;height:10.0pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"font-family:&quot;Times New Roman&quot;,serif"><o:p=
+>&nbsp;</o:p></span></p>
+</td>
+</tr>
+<tr style=3D"height:10.0pt">
+<td style=3D"padding:.75pt .75pt .75pt .75pt;height:10.0pt">
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;font-family:&quot;Ca=
+libri&quot;,sans-serif;mso-ligatures:none"><o:p>&nbsp;</o:p></span></p>
+</td>
+<td style=3D"padding:0cm 5.4pt 0cm 5.4pt;height:10.0pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"font-family:&quot;Times New Roman&quot;,serif"><o:p=
+>&nbsp;</o:p></span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class=3D"MsoNormal"><span lang=3D"EN-IN" style=3D"font-size:11.0pt"><o:p=
+>&nbsp;</o:p></span></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+</div>
+Disclaimer : This email along with any attachments may contain confidential=
+, proprietary or legally privileged information and is for the intended rec=
+ipient only. Any other use of email, such as, unauthorized access, disclosu=
+re, copying, distribution or reliance
+ on any contents of it by anyone else is prohibited and unlawful. If you ar=
+e not the intended recipient, please notify the sender immediately and dele=
+te the email.
+</body>
+</html>
+
+--_000_PN0PR01MB10054AD36E54286F31893D18FA4F52PN0PR01MB10054IN_--
+
+--_004_PN0PR01MB10054AD36E54286F31893D18FA4F52PN0PR01MB10054IN_
+Content-Type: image/png; name="image001.png"
+Content-Description: image001.png
+Content-Disposition: inline; filename="image001.png"; size=7079;
+	creation-date="Thu, 02 Jul 2026 13:17:29 GMT";
+	modification-date="Thu, 02 Jul 2026 13:17:29 GMT"
+Content-ID: <image001.png@01DD0A51.BCD928C0>
+Content-Transfer-Encoding: base64
+
+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
+AAAASUVORK5CYII=
+
+--_004_PN0PR01MB10054AD36E54286F31893D18FA4F52PN0PR01MB10054IN_--
