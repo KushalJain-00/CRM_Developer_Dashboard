@@ -58,7 +58,7 @@ from core.rate_limit import limiter
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "https://crmdevloper.vercel.app,http://localhost:8000").split(",")
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "https://crmdevloper.vercel.app,http://localhost:8000,http://localhost:3000,http://localhost:5500").split(",")
 
 app.add_middleware(
     CORSMiddleware,
