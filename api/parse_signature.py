@@ -6,8 +6,10 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from core.rate_limit import limiter
 from core.auth import verify_token
-import os, hashlib, json, httpx, re, asyncio
+import os, hashlib, json, httpx, re, asyncio, logging
 from collections import OrderedDict
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -326,7 +328,8 @@ async def parse_signature_batch(request: Request, body: BatchSignatureRequest):
                 is_rate_limit = True
 
     if not raw:
-        return JSONResponse({"ok": False, "rate_limited": is_rate_limit, "error": last_err, "results": {}})
+        logger.warning(f"parse-signature-batch failed: {last_err}")
+        return JSONResponse({"ok": False, "rate_limited": is_rate_limit, "error": "Rate limit exceeded" if is_rate_limit else "All AI models failed", "results": {}})
 
     results = {}
     try:
