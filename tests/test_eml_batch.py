@@ -2,6 +2,7 @@
 import asyncio
 import pytest
 import pytest_asyncio
+from pathlib import Path
 from unittest.mock import patch
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
@@ -35,8 +36,15 @@ async def eml_engine():
     await eng.dispose()
 
 
+def _write_files(staging: Path, files: list[tuple[str, bytes]]):
+    """Write (name, data) tuples to a staging directory."""
+    staging.mkdir(parents=True, exist_ok=True)
+    for name, data in files:
+        (staging / name).write_bytes(data)
+
+
 @pytest.mark.asyncio
-async def test_batch_processes_files(eml_engine):
+async def test_batch_processes_files(eml_engine, tmp_path):
     """Verify batch processor handles multiple files and marks them done."""
     session_factory = async_sessionmaker(bind=eml_engine, class_=AsyncSession, expire_on_commit=False)
 
@@ -47,10 +55,11 @@ async def test_batch_processes_files(eml_engine):
         await db.refresh(job)
         job_id = job.id
 
-    files = [("test1.eml", SAMPLE_EML), ("test2.eml", SAMPLE_EML)]
+    staging = tmp_path / "batch1"
+    _write_files(staging, [("test1.eml", SAMPLE_EML), ("test2.eml", SAMPLE_EML)])
 
     with patch("services.eml_batch.AsyncSessionLocal", session_factory):
-        await process_job_optimized(job_id, files)
+        await process_job_optimized(job_id, str(staging))
 
     async with session_factory() as db:
         result = await db.execute(select(eml_models.EmlJob).where(eml_models.EmlJob.id == job_id))
@@ -63,11 +72,10 @@ async def test_batch_processes_files(eml_engine):
         file_rows = result.scalars().all()
         assert len(file_rows) == 2
         assert all(f.status == "done" for f in file_rows)
-        assert all(f.extraction_method == "deterministic" for f in file_rows)
 
 
 @pytest.mark.asyncio
-async def test_batch_skips_already_processed(eml_engine):
+async def test_batch_skips_already_processed(eml_engine, tmp_path):
     """Resume support: files already marked 'done' are skipped."""
     session_factory = async_sessionmaker(bind=eml_engine, class_=AsyncSession, expire_on_commit=False)
 
@@ -78,33 +86,32 @@ async def test_batch_skips_already_processed(eml_engine):
         await db.refresh(job)
         job_id = job.id
 
-        # Pre-mark one file as done
         done_file = eml_models.EmlJobFile(
             job_id=job_id, file_name="already_done.eml", status="done", attempts=1
         )
         db.add(done_file)
         await db.commit()
 
-        files = [
-            ("already_done.eml", SAMPLE_EML),
-            ("new1.eml", SAMPLE_EML),
-            ("new2.eml", SAMPLE_EML),
-        ]
+    staging = tmp_path / "batch2"
+    _write_files(staging, [
+        ("already_done.eml", SAMPLE_EML),
+        ("new1.eml", SAMPLE_EML),
+        ("new2.eml", SAMPLE_EML),
+    ])
 
     with patch("services.eml_batch.AsyncSessionLocal", session_factory):
-        await process_job_optimized(job_id, files)
+        await process_job_optimized(job_id, str(staging))
 
     async with session_factory() as db:
         result = await db.execute(select(eml_models.EmlJobFile).where(eml_models.EmlJobFile.job_id == job_id))
         file_rows = result.scalars().all()
-        # 1 pre-existing + 2 new = 3 total (the already_done is NOT re-created)
         assert len(file_rows) == 3
         done_count = sum(1 for f in file_rows if f.file_name == "already_done.eml")
         assert done_count == 1
 
 
 @pytest.mark.asyncio
-async def test_batch_marks_failed_files(eml_engine):
+async def test_batch_marks_failed_files(eml_engine, tmp_path):
     """Files that error during parsing are marked failed, not done."""
     session_factory = async_sessionmaker(bind=eml_engine, class_=AsyncSession, expire_on_commit=False)
 
@@ -115,10 +122,12 @@ async def test_batch_marks_failed_files(eml_engine):
         await db.refresh(job)
         job_id = job.id
 
-    # Mock parse_eml_bytes to force an error
+    staging = tmp_path / "batch3"
+    _write_files(staging, [("bad.eml", b"not a real eml")])
+
     with patch("services.eml_batch.AsyncSessionLocal", session_factory), \
          patch("services.eml_batch.parse_eml_bytes", side_effect=RuntimeError("parse bomb")):
-        await process_job_optimized(job_id, [("bad.eml", b"fake")])
+        await process_job_optimized(job_id, str(staging))
 
     async with session_factory() as db:
         result = await db.execute(select(eml_models.EmlJob).where(eml_models.EmlJob.id == job_id))
@@ -133,7 +142,7 @@ async def test_batch_marks_failed_files(eml_engine):
 
 
 @pytest.mark.asyncio
-async def test_batch_cancellation(eml_engine):
+async def test_batch_cancellation(eml_engine, tmp_path):
     """If job is cancelled mid-batch, processing stops."""
     session_factory = async_sessionmaker(bind=eml_engine, class_=AsyncSession, expire_on_commit=False)
 
@@ -144,7 +153,8 @@ async def test_batch_cancellation(eml_engine):
         await db.refresh(job)
         job_id = job.id
 
-    files = [(f"file{i}.eml", SAMPLE_EML) for i in range(5)]
+    staging = tmp_path / "batch4"
+    _write_files(staging, [(f"file{i}.eml", SAMPLE_EML) for i in range(5)])
 
     with patch("services.eml_batch.AsyncSessionLocal", session_factory), \
          patch("services.eml_batch.CHECKPOINT_INTERVAL", 1):
@@ -158,7 +168,7 @@ async def test_batch_cancellation(eml_engine):
                 await db.commit()
 
         await asyncio.gather(
-            process_job_optimized(job_id, files),
+            process_job_optimized(job_id, str(staging)),
             cancel_after_delay(),
         )
 

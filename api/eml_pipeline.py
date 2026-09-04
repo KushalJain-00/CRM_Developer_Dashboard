@@ -1,6 +1,11 @@
 """EML Pipeline API — upload, process, and track .eml file batches."""
+import os
+import json
 import time
 import logging
+import tempfile
+import shutil
+from pathlib import Path
 from datetime import datetime, timezone
 from uuid import UUID
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile, File, Form
@@ -12,19 +17,72 @@ from db.eml_models import EmlJob, EmlJobFile
 from services.eml_parser import parse_eml_bytes
 from services.eml_signature import extract_signature
 from services.eml_dedup import deduplicate_contacts
-from services.eml_retry import retry_failed_files, get_dead_letter_queue, delete_dead_letter, MAX_RETRIES
+from services.eml_retry import get_dead_letter_queue, delete_dead_letter, MAX_RETRIES
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["eml-pipeline"])
+
+CONFIDENCE_THRESHOLD = 80  # heuristic >= this → skip AI
+STAGING_DIR = Path(tempfile.gettempdir()) / "eml_uploads"
 
 
 # ---------------------------------------------------------------------------
 # Background processing
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# AI enrichment
+# ---------------------------------------------------------------------------
+
 async def _call_ai_enrichment(sig_data: dict, body_text: str, html_body: str) -> dict | None:
-    """Placeholder for Phase 2 AI enrichment."""
+    """Call Groq LLM to validate/improve heuristic extraction. Returns enriched fields or None.
+
+    Only runs when GROQ_API_KEY is set. Free tier: 30 RPM, 14,400 RPD —
+    enough for 1,500 files if routed only low-confidence cases.
+    """
+    api_key = os.environ.get("GROQ_API_KEY", "")
+    if not api_key:
+        return None  # No key → skip AI, rely on heuristic
+
+    from api.parse_signature import call_llm, clean_email_text, SYSTEM_PROMPT
+
+    # Build context from heuristic result — tell LLM what we already found
+    existing = {k: v for k, v in sig_data.items() if v and k != "confidence"}
+    text = clean_email_text(body_text) or clean_email_text(html_body) or ""
+    if not text or len(text) < 10:
+        return None
+
+    prompt = (
+        f"Extract and VALIDATE contact info from this email.\n"
+        f"We already extracted (verify/correct):\n{json.dumps(existing, indent=2)}\n\n"
+        f"Email text:\n{text[:2500]}"
+    )
+
+    try:
+        raw = await call_llm("groq", "llama-3.3-70b-versatile", api_key, SYSTEM_PROMPT, prompt)
+        parsed = json.loads(raw)
+        if isinstance(parsed, list) and parsed:
+            return parsed[0]  # Take first contact
+        if isinstance(parsed, dict):
+            return parsed
+    except Exception as e:
+        logger.debug("AI enrichment failed for file: %s", e)
     return None
+
+
+def _merge_ai_into_sig(sig_data: dict, ai_result: dict | None) -> dict:
+    """Merge AI results into heuristic data. AI fills gaps, heuristic wins on conflicts."""
+    if not ai_result:
+        return sig_data
+    merged = dict(sig_data)
+    for key in ["name", "company", "designation", "phone_primary", "phone_secondary",
+                "email", "website", "address", "city", "pincode"]:
+        existing = merged.get(key)
+        ai_val = ai_result.get(key)
+        # AI fills empty fields; if both exist and differ, prefer heuristic (deterministic)
+        if not existing and ai_val:
+            merged[key] = ai_val
+    return merged
 
 
 def _route_to_status(sig_data: dict, ai_result: dict | None) -> str:
@@ -32,42 +90,47 @@ def _route_to_status(sig_data: dict, ai_result: dict | None) -> str:
     if ai_result:
         return "ai_extract"
     confidence = sig_data.get("confidence", 0)
-    if confidence >= 60:
+    if confidence >= CONFIDENCE_THRESHOLD:
         return "deterministic"
     return "heuristic"
 
 
-async def process_job_background(job_id: UUID, file_contents: list[tuple[str, bytes]]):
-    """Process all files in a job. Runs as a background task with its own DB session."""
+async def process_job_background(job_id: UUID, staging_dir: str):
+    """Process all files in a job. Reads from disk staging dir, not memory."""
     async with AsyncSessionLocal() as db:
-        # Mark job as processing
         await db.execute(
             update(EmlJob).where(EmlJob.id == job_id).values(status="processing")
         )
         await db.commit()
 
+        staging = Path(staging_dir)
+        if not staging.exists():
+            logger.error("Staging dir %s not found for job %s", staging_dir, job_id)
+            return
+
+        file_paths = sorted(staging.glob("*.eml"))
         batch_size = 50
         try:
-            for batch_start in range(0, len(file_contents), batch_size):
-                batch = file_contents[batch_start:batch_start + batch_size]
+            for batch_start in range(0, len(file_paths), batch_size):
+                batch = file_paths[batch_start:batch_start + batch_size]
 
-                # Check for cancellation
                 job = (await db.execute(select(EmlJob).where(EmlJob.id == job_id))).scalar_one_or_none()
                 if not job or job.status == "cancelled":
                     return
 
                 contacts_batch = []
 
-                for file_name, raw_bytes in batch:
+                for fp in batch:
                     t0 = time.monotonic()
-                    file_record = EmlJobFile(job_id=job_id, file_name=file_name, status="parsing")
+                    file_record = EmlJobFile(job_id=job_id, file_name=fp.name, status="parsing")
                     db.add(file_record)
                     await db.flush()
 
                     try:
-                        parsed = parse_eml_bytes(raw_bytes, file_name)
+                        raw_bytes = fp.read_bytes()
+                        parsed = parse_eml_bytes(raw_bytes, fp.name)
 
-                        # Signature extraction
+                        # Heuristic signature extraction
                         file_record.status = "signature"
                         await db.flush()
                         sig_data = extract_signature(
@@ -75,10 +138,14 @@ async def process_job_background(job_id: UUID, file_contents: list[tuple[str, by
                             parsed.from_name, parsed.from_email,
                         )
 
-                        # AI enrichment placeholder
-                        file_record.status = "ai"
-                        await db.flush()
-                        ai_result = await _call_ai_enrichment(sig_data, parsed.body_text, parsed.html_body)
+                        # AI enrichment — only when heuristic confidence is low
+                        confidence = sig_data.get("confidence", 0)
+                        ai_result = None
+                        if confidence < CONFIDENCE_THRESHOLD:
+                            file_record.status = "ai"
+                            await db.flush()
+                            ai_result = await _call_ai_enrichment(sig_data, parsed.body_text, parsed.html_body)
+                            sig_data = _merge_ai_into_sig(sig_data, ai_result)
 
                         # Finalize
                         method = _route_to_status(sig_data, ai_result)
@@ -88,10 +155,9 @@ async def process_job_background(job_id: UUID, file_contents: list[tuple[str, by
                         file_record.extracted_data = sig_data
                         file_record.processing_time_ms = int((time.monotonic() - t0) * 1000)
 
-                        # Update job counters
                         job.processed += 1
                         job.succeeded += 1
-                        if method.startswith("ai"):
+                        if method == "ai_extract":
                             job.ai_enriched += 1
 
                         contacts_batch.append(sig_data)
@@ -103,15 +169,14 @@ async def process_job_background(job_id: UUID, file_contents: list[tuple[str, by
                         file_record.processing_time_ms = int((time.monotonic() - t0) * 1000)
                         job.processed += 1
                         job.failed += 1
-                        logger.warning("EML file %s failed: %s", file_name, e)
+                        logger.warning("EML file %s failed: %s", fp.name, e)
 
                     await db.flush()
 
-                # Dedup within batch (informational — groups stored for future use)
                 if contacts_batch:
                     deduplicate_contacts(contacts_batch)
 
-            # Finalize job
+            # Finalize
             job = (await db.execute(select(EmlJob).where(EmlJob.id == job_id))).scalar_one_or_none()
             if job and job.status != "cancelled":
                 job.status = "completed"
@@ -125,6 +190,12 @@ async def process_job_background(job_id: UUID, file_contents: list[tuple[str, by
                 job.status = "failed"
                 job.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
             await db.commit()
+        finally:
+            # Cleanup staging dir after processing
+            try:
+                shutil.rmtree(staging_dir, ignore_errors=True)
+            except Exception:
+                pass
 
 
 # ---------------------------------------------------------------------------
@@ -139,7 +210,11 @@ async def upload_eml_files(
     db: AsyncSession = Depends(get_db),
 ):
     """Upload .eml files, create a job, and start background processing."""
-    valid_files: list[tuple[str, bytes]] = []
+    job_id = UUID(bytes=os.urandom(16))
+    staging = STAGING_DIR / str(job_id)
+    staging.mkdir(parents=True, exist_ok=True)
+
+    saved = 0
     errors: list[str] = []
 
     for f in files:
@@ -147,29 +222,31 @@ async def upload_eml_files(
             errors.append(f"Skipped non-EML file: {f.filename}")
             continue
         raw = await f.read()
-        if len(raw) > 10 * 1024 * 1024:  # 10MB per file
+        if len(raw) > 10 * 1024 * 1024:
             errors.append(f"Skipped {f.filename}: exceeds 10MB limit")
             continue
-        valid_files.append((f.filename, raw))
+        (staging / f.filename).write_bytes(raw)
+        saved += 1
 
-    if not valid_files:
+    if not saved:
+        shutil.rmtree(staging, ignore_errors=True)
         raise HTTPException(400, detail={"error": "No valid .eml files provided", "errors": errors})
 
     job = EmlJob(
+        id=job_id,
         job_name=job_name or f"EML batch {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')}",
-        total_files=len(valid_files),
+        total_files=saved,
         status="pending",
     )
     db.add(job)
     await db.commit()
-    await db.refresh(job)
 
-    background_tasks.add_task(process_job_background, job.id, valid_files)
+    background_tasks.add_task(process_job_background, job_id, str(staging))
 
     return {
         "ok": True,
-        "job_id": str(job.id),
-        "total_files": len(valid_files),
+        "job_id": str(job_id),
+        "total_files": saved,
         "errors": errors,
     }
 
@@ -279,12 +356,26 @@ async def retry_job_files(
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ):
-    """Retry all failed files in a job (up to {MAX_RETRIES} attempts each)."""
+    """Retry all failed files in a job. Requires staging dir to still exist."""
     job = (await db.execute(select(EmlJob).where(EmlJob.id == job_id))).scalar_one_or_none()
     if not job:
         raise HTTPException(404, detail="Job not found")
 
-    background_tasks.add_task(retry_failed_files, job_id, db)
+    staging = STAGING_DIR / str(job_id)
+    if not staging.exists():
+        raise HTTPException(400, detail="Staging files cleaned up. Re-upload to retry.")
+
+    # Mark failed files as pending for re-processing
+    await db.execute(
+        update(EmlJobFile).where(
+            EmlJobFile.job_id == job_id,
+            EmlJobFile.status == "failed",
+            EmlJobFile.attempts < MAX_RETRIES,
+        ).values(status="retrying")
+    )
+    await db.commit()
+
+    background_tasks.add_task(process_job_background, job_id, str(staging))
     return {"ok": True, "message": "Retry started in background"}
 
 

@@ -3770,8 +3770,14 @@ function emlPipelineReset() {
   document.getElementById('emlPipelineResults').style.display = 'none';
 }
 
-function emlPipelineExportExcel() { showNotification('Export coming soon', 'info'); }
-function emlPipelineExportCSV() { showNotification('Export coming soon', 'info'); }
+function emlPipelineExportExcel() {
+  if (!EML_PIPELINE.jobId) return showNotification('No job to export', 'error');
+  window.open(API_BASE + '/api/eml/jobs/' + EML_PIPELINE.jobId + '/export/excel', '_blank');
+}
+function emlPipelineExportCSV() {
+  if (!EML_PIPELINE.jobId) return showNotification('No job to export', 'error');
+  window.open(API_BASE + '/api/eml/jobs/' + EML_PIPELINE.jobId + '/export/csv', '_blank');
+}
 function emlPipelinePushCRM() { showNotification('Push to CRM coming soon', 'info'); }
 
 async function emlPipelineShowMonitor() {
