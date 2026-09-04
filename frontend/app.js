@@ -3652,7 +3652,7 @@ function pushBulkToCRM() {
 
 /* ═══ EML Pipeline ═══════════════════════════════════════════════════ */
 
-let EML_PIPELINE = { files: [], jobId: null, pollTimer: null };
+let EML_PIPELINE = { files: [], jobId: null, pollTimer: null, eventSource: null };
 
 function emlPipelineDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
 function emlPipelineDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
@@ -3689,11 +3689,31 @@ async function emlPipelineStartUpload() {
     const data = await res.json();
     if (!data.ok) throw new Error(data.detail || 'Upload failed');
     EML_PIPELINE.jobId = data.job_id;
-    emlPipelineStartPolling();
+    emlPipelineStartSSE();
   } catch (err) {
     showNotification('Upload failed: ' + err.message, 'error');
     emlPipelineReset();
   }
+}
+
+function emlPipelineStartSSE() {
+  if (!EML_PIPELINE.jobId) return;
+  const evtSource = new EventSource(API_BASE + '/api/eml/jobs/' + EML_PIPELINE.jobId + '/stream');
+  EML_PIPELINE.eventSource = evtSource;
+  evtSource.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    if (data.type === 'done') { evtSource.close(); emlPipelineShowResults(data); return; }
+    if (data.type === 'progress') {
+      const bar = document.getElementById('emlPipelineProgressBar');
+      if (bar) bar.style.width = data.percent + '%';
+      const elS = document.getElementById('emlPipeSucceeded'); if(elS) elS.textContent = data.succeeded;
+      const elF = document.getElementById('emlPipeFailed'); if(elF) elF.textContent = data.failed;
+      const elA = document.getElementById('emlPipeAi'); if(elA) elA.textContent = data.ai_enriched;
+      const elT = document.getElementById('emlPipeTotal'); if(elT) elT.textContent = data.total_files;
+      const elP = document.getElementById('emlPipelineProgressTitle'); if(elP) elP.textContent = 'Processing... ' + data.percent + '%';
+    }
+  };
+  evtSource.onerror = function() { evtSource.close(); emlPipelineStartPolling(); };
 }
 
 function emlPipelineStartPolling() {
@@ -3734,6 +3754,7 @@ async function emlPipelineCancel() {
   if (!EML_PIPELINE.jobId) return;
   try {
     await fetch(API_BASE + '/api/eml/jobs/' + EML_PIPELINE.jobId + '/cancel', { method: 'POST', headers: apiHeaders() });
+    if (EML_PIPELINE.eventSource) { EML_PIPELINE.eventSource.close(); EML_PIPELINE.eventSource = null; }
     clearInterval(EML_PIPELINE.pollTimer);
     emlPipelineReset();
     showNotification('Job cancelled', 'info');
@@ -3741,8 +3762,9 @@ async function emlPipelineCancel() {
 }
 
 function emlPipelineReset() {
+  if (EML_PIPELINE.eventSource) { EML_PIPELINE.eventSource.close(); EML_PIPELINE.eventSource = null; }
   clearInterval(EML_PIPELINE.pollTimer);
-  EML_PIPELINE = { files: [], jobId: null, pollTimer: null };
+  EML_PIPELINE = { files: [], jobId: null, pollTimer: null, eventSource: null };
   document.getElementById('emlPipelineUpload').style.display = 'block';
   document.getElementById('emlPipelineProgress').style.display = 'none';
   document.getElementById('emlPipelineResults').style.display = 'none';
