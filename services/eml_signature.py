@@ -34,7 +34,7 @@ _COMP_SUFFIX_RE = re.compile(
     r'\b(ltd|pvt|pvt\.?\s*ltd\.?|inc|corp|llp|llc|industries|solutions|'
     r'technologies|systems|services|enterprises|group|associates|consulting|'
     r'trading|mfg|manufacturing|exports|imports|infra|works|packers|logistics|'
-    r'company|co\.?|corporation|holdings|ventures|enterprises|agency|'
+    r'company|co\.?|corporation|holdings|ventures|agency|'
     r'developers|constructors|fabricators|engineers|analysts|'
     r'pharma|textiles|metals|chemicals|electronics|automobiles|motors|'
     r'foundation|institute|academy|college|school|university)\b',
@@ -78,10 +78,10 @@ _CITIES = (
     'coimbatore', 'madurai', 'thiruvananthapuram', 'trivandrum', 'kochi',
     'ernakulam', 'mysore', 'mysuru', 'hubli', 'dharwad', 'belgaum',
     'belagavi', 'mangalore', 'mangaluru', 'goa', 'panaji', 'udaipur',
-    'jodhpur', 'ajmer', 'varanasi', 'prayagraj', 'allahabad', 'allahabad',
+    'jodhpur', 'ajmer', 'varanasi', 'prayagraj', 'allahabad',
     'dehradun', 'haridwar', 'rishikesh', 'jammu', 'srinagar', 'amritsar',
     'jalandhar', 'patiala', 'bathinda', 'hisar', 'karnal', 'rohtak',
-    'panipat', 'sonipat', 'ambala', 'yamunanagar', 'karnal',
+    'panipat', 'sonipat', 'ambala', 'yamunanagar',
     'raipur', 'bilaspur', 'bhilai', 'ranchi', 'jamshedpur', 'dhanbad',
     'bokaro', 'siliguri', 'darjeeling', 'guwahati', 'dispur', 'shillong',
     'imphal', 'agartala', 'aizawl', 'kohima', 'dimapur', 'gangtok',
@@ -97,14 +97,14 @@ _CITIES = (
     'tirunelveli', 'thoothukudi', 'tuticorin', 'kanyakumari',
     'nagercoil', 'ramanathapuram', 'sivaganga', 'pudukkottai',
     'dindigul', 'virudhunagar', 'theni', 'cuddalore', 'tiruvannamalai',
-    'viluppuram', 'krishnagiri', 'dharmapuri',
+    'viluppuram',
     'nashik', 'aurangabad', 'nagpur', 'solapur', 'kolhapur',
     'sangli', 'satara', 'sindhudurg', 'ratnagiri', 'raigad',
-    'pune', 'ahmednagar', 'beed', 'osmanabad', 'latur',
+    'ahmednagar', 'beed', 'osmanabad', 'latur',
     'parbhani', 'hingoli', 'jalna', 'washim', 'buldhana',
     'akola', 'amravati', 'yeotmal', 'wardha', 'gondia',
     'bhandara', 'chandrapur', 'gadchiroli', 'nandurbar', 'dhule',
-    'jalgaon', 'pic', 'chalisgaon', 'bhusawal',
+    'jalgaon', 'chalisgaon', 'bhusawal',
 )
 
 _CITY_RE = re.compile(r'\b(' + '|'.join(_CITIES) + r')\b', re.IGNORECASE)
