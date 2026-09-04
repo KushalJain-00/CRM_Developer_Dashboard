@@ -1585,9 +1585,9 @@ function showView(id) {
   const nav=document.querySelector(`.nav-item[data-view="${id}"]`);
   if (nav) nav.classList.add('active');
   S.currentView=id;
-  const titles={upload:'Import File',mapping:'Field Mapping',processing:'Processing',dashboard:'Dashboard',analytics:'Analytics',table:'Data Table',quality:'Data Quality',dedup:'Deduplication',history:'Upload History'};
+  const titles={upload:'Import File',mapping:'Field Mapping',processing:'Processing',dashboard:'Dashboard',analytics:'Analytics',table:'Data Table',quality:'Data Quality',dedup:'Deduplication',history:'Upload History','eml-pipeline':'EML Pipeline'};
   document.getElementById('topTitle').textContent=titles[id]||id;
-  if (!['upload','mapping','processing'].includes(id))
+  if (!['upload','mapping','processing','eml-pipeline'].includes(id))
     document.getElementById('topSub').textContent=`${S.fileName} · ${S.clean.length.toLocaleString()} records`;
   else
     document.getElementById('topSub').textContent='Supports .xlsx · .xls · .csv · .txt · .pdf — any column structure';
@@ -3649,3 +3649,105 @@ function pushBulkToCRM() {
   if (ta) ta.style.display = 'flex';
   showView('table');
 }
+
+/* ═══ EML Pipeline ═══════════════════════════════════════════════════ */
+
+let EML_PIPELINE = { files: [], jobId: null, pollTimer: null };
+
+function emlPipelineDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function emlPipelineDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function emlPipelineDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const files = [...e.dataTransfer.files].filter(f => f.name.toLowerCase().endsWith('.eml'));
+  if (files.length) emlPipelineFilesSelected(files);
+}
+
+function emlPipelineFilesSelected(fileList) {
+  EML_PIPELINE.files = [...fileList];
+  const list = document.getElementById('emlPipelineFileList');
+  const actions = document.getElementById('emlPipelineActions');
+  if (!list || !actions) return;
+  list.style.display = 'block';
+  actions.style.display = 'block';
+  list.innerHTML = '<p><strong>' + EML_PIPELINE.files.length + '</strong> .eml files ready</p>';
+}
+
+async function emlPipelineStartUpload() {
+  if (!EML_PIPELINE.files.length) return;
+  showView('eml-pipeline');
+  document.getElementById('emlPipelineUpload').style.display = 'none';
+  document.getElementById('emlPipelineProgress').style.display = 'block';
+
+  const formData = new FormData();
+  for (const f of EML_PIPELINE.files) formData.append('files', f);
+
+  try {
+    const headers = apiHeaders();
+    delete headers['Content-Type'];
+    const res = await fetch(API_BASE + '/api/eml/upload', { method: 'POST', headers, body: formData });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.detail || 'Upload failed');
+    EML_PIPELINE.jobId = data.job_id;
+    emlPipelineStartPolling();
+  } catch (err) {
+    showNotification('Upload failed: ' + err.message, 'error');
+    emlPipelineReset();
+  }
+}
+
+function emlPipelineStartPolling() {
+  EML_PIPELINE.pollTimer = setInterval(emlPipelinePollStatus, 2000);
+  emlPipelinePollStatus();
+}
+
+async function emlPipelinePollStatus() {
+  if (!EML_PIPELINE.jobId) return;
+  try {
+    const res = await fetch(API_BASE + '/api/eml/jobs/' + EML_PIPELINE.jobId, { headers: apiHeaders() });
+    const data = await res.json();
+    if (!data.ok) return;
+    const j = data.job;
+    const bar = document.getElementById('emlPipelineProgressBar');
+    if (bar) bar.style.width = j.percent + '%';
+    setText('emlPipeSucceeded', j.succeeded);
+    setText('emlPipeFailed', j.failed);
+    setText('emlPipeAi', j.ai_enriched);
+    setText('emlPipeTotal', j.total_files);
+    setText('emlPipelineProgressTitle', 'Processing... ' + j.percent + '%');
+    if (j.status === 'completed' || j.status === 'failed' || j.status === 'cancelled') {
+      clearInterval(EML_PIPELINE.pollTimer);
+      emlPipelineShowResults(j);
+    }
+  } catch (err) { console.error('Poll error:', err); }
+}
+
+function emlPipelineShowResults(job) {
+  document.getElementById('emlPipelineProgress').style.display = 'none';
+  document.getElementById('emlPipelineResults').style.display = 'block';
+  setText('emlResTotal', job.succeeded);
+  setText('emlResAi', job.ai_enriched);
+  showNotification('Processing complete: ' + job.succeeded + ' succeeded, ' + job.failed + ' failed', 'info');
+}
+
+async function emlPipelineCancel() {
+  if (!EML_PIPELINE.jobId) return;
+  try {
+    await fetch(API_BASE + '/api/eml/jobs/' + EML_PIPELINE.jobId + '/cancel', { method: 'POST', headers: apiHeaders() });
+    clearInterval(EML_PIPELINE.pollTimer);
+    emlPipelineReset();
+    showNotification('Job cancelled', 'info');
+  } catch (err) { showNotification('Cancel failed: ' + err.message, 'error'); }
+}
+
+function emlPipelineReset() {
+  clearInterval(EML_PIPELINE.pollTimer);
+  EML_PIPELINE = { files: [], jobId: null, pollTimer: null };
+  document.getElementById('emlPipelineUpload').style.display = 'block';
+  document.getElementById('emlPipelineProgress').style.display = 'none';
+  document.getElementById('emlPipelineResults').style.display = 'none';
+}
+
+function emlPipelineExportExcel() { showNotification('Export coming soon', 'info'); }
+function emlPipelineExportCSV() { showNotification('Export coming soon', 'info'); }
+function emlPipelinePushCRM() { showNotification('Push to CRM coming soon', 'info'); }

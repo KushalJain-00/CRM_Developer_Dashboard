@@ -65,6 +65,9 @@
     <div class="nav-item" data-view="history" title="History" onclick="showView('history'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">🕐</span> <span class="ni-label">History</span>
     </div>
+    <div class="nav-item" data-view="eml-pipeline" title="EML Pipeline" onclick="showView('eml-pipeline'); if(window.innerWidth<=768)toggleSidebar()">
+      <span class="ni-icon">⚙</span> <span class="ni-label">EML Pipeline</span>
+    </div>
     <div class="sb-section">Export</div>
     <div class="nav-item" title="Save to CRM" onclick="saveToCRM(); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">💾</span> <span class="ni-label">Save to CRM</span>
@@ -331,6 +334,76 @@
           <div class="eml-panel-title">🌐 Domain Intelligence</div>
           <div class="eml-domain-grid" id="emlDomainGrid"></div>
         </div>
+      </div>
+    </div>
+
+    <!-- EML Pipeline — Batch Enterprise Processing -->
+    <div class="view" id="view-eml-pipeline">
+      <div id="emlPipelineUpload">
+        <div class="sec-hd">
+          <div>
+            <div class="sec-title">⚙ EML Pipeline</div>
+            <div class="sec-sub">Batch process hundreds of .eml files with AI-powered extraction</div>
+          </div>
+        </div>
+        <div class="drop-zone" id="emlPipelineDropZone" onclick="document.getElementById('emlPipelineInput').click()" style="margin-top:16px"
+             ondragover="emlPipelineDragOver(event)" ondragleave="emlPipelineDragLeave(event)" ondrop="emlPipelineDrop(event)">
+          <div class="drop-circle">📧</div>
+          <div class="drop-title">Drop .eml files here, or click to browse</div>
+          <div class="drop-desc">Supports 100+ files at once. Each file is parsed and enriched via AI.</div>
+          <button class="btn btn-primary" onclick="event.stopPropagation();document.getElementById('emlPipelineInput').click()">Choose Files</button>
+          <input type="file" id="emlPipelineInput" accept=".eml" multiple style="display:none" onchange="emlPipelineFilesSelected(this.files)">
+          <div class="ft-chips">
+            <span class="ft-chip eml-chip">📧 .eml</span>
+          </div>
+        </div>
+        <div id="emlPipelineFileList" style="display:none;margin-top:16px"></div>
+        <div id="emlPipelineActions" style="display:none;margin-top:16px;text-align:center">
+          <button class="btn btn-primary btn-lg" onclick="emlPipelineStartUpload()">🚀 Start Processing</button>
+        </div>
+      </div>
+
+      <div id="emlPipelineProgress" style="display:none">
+        <div class="sec-hd">
+          <div>
+            <div class="sec-title" id="emlPipelineProgressTitle">Processing...</div>
+            <div class="sec-sub">Your files are being parsed and enriched</div>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="emlPipelineCancel()">✕ Cancel</button>
+        </div>
+        <div style="margin:24px 0">
+          <div class="progress-track" style="height:12px;border-radius:6px">
+            <div class="progress-fill" id="emlPipelineProgressBar" style="width:0%;border-radius:6px;transition:width 0.5s"></div>
+          </div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-card"><div class="kpi-value" id="emlPipeSucceeded">0</div><div class="kpi-label">Succeeded</div></div>
+          <div class="kpi-card"><div class="kpi-value" id="emlPipeFailed">0</div><div class="kpi-label">Failed</div></div>
+          <div class="kpi-card"><div class="kpi-value" id="emlPipeAi">0</div><div class="kpi-label">AI Enriched</div></div>
+          <div class="kpi-card"><div class="kpi-value" id="emlPipeTotal">0</div><div class="kpi-label">Total Files</div></div>
+        </div>
+      </div>
+
+      <div id="emlPipelineResults" style="display:none">
+        <div class="sec-hd">
+          <div>
+            <div class="sec-title">Processing Complete</div>
+            <div class="sec-sub">Results from your EML pipeline run</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-secondary btn-sm" onclick="emlPipelineReset()">↩ New Batch</button>
+          </div>
+        </div>
+        <div class="kpi-grid" style="margin:16px 0">
+          <div class="kpi-card"><div class="kpi-value" id="emlResTotal">0</div><div class="kpi-label">Contacts Extracted</div></div>
+          <div class="kpi-card"><div class="kpi-value" id="emlResAi">0</div><div class="kpi-label">AI Enriched</div></div>
+        </div>
+        <div style="display:flex;gap:12px;margin:24px 0">
+          <button class="btn btn-success btn-sm" onclick="emlPipelineExportExcel()">⬇ Export Excel</button>
+          <button class="btn btn-secondary btn-sm" onclick="emlPipelineExportCSV()">⬇ Export CSV</button>
+          <button class="btn btn-primary btn-sm" onclick="emlPipelinePushCRM()">💾 Push to CRM</button>
+        </div>
+        <div id="emlPipelineTableArea"></div>
       </div>
     </div>
 
