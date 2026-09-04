@@ -12,6 +12,7 @@ from db.eml_models import EmlJob, EmlJobFile
 from services.eml_parser import parse_eml_bytes
 from services.eml_signature import extract_signature
 from services.eml_dedup import deduplicate_contacts
+from services.eml_retry import retry_failed_files, get_dead_letter_queue, delete_dead_letter, MAX_RETRIES
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["eml-pipeline"])
@@ -84,6 +85,7 @@ async def process_job_background(job_id: UUID, file_contents: list[tuple[str, by
                         file_record.status = "done"
                         file_record.extraction_method = method
                         file_record.confidence = sig_data.get("confidence", 0)
+                        file_record.extracted_data = sig_data
                         file_record.processing_time_ms = int((time.monotonic() - t0) * 1000)
 
                         # Update job counters
@@ -269,3 +271,62 @@ async def cancel_job(
     await db.commit()
 
     return {"ok": True, "status": "cancelled"}
+
+
+@router.post("/eml/jobs/{job_id}/retry")
+async def retry_job_files(
+    job_id: UUID,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+):
+    """Retry all failed files in a job (up to {MAX_RETRIES} attempts each)."""
+    job = (await db.execute(select(EmlJob).where(EmlJob.id == job_id))).scalar_one_or_none()
+    if not job:
+        raise HTTPException(404, detail="Job not found")
+
+    background_tasks.add_task(retry_failed_files, job_id, db)
+    return {"ok": True, "message": "Retry started in background"}
+
+
+@router.get("/eml/jobs/{job_id}/dead-letter")
+async def get_dead_letter(
+    job_id: UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    """Get files that have exhausted all retry attempts."""
+    job = (await db.execute(select(EmlJob).where(EmlJob.id == job_id))).scalar_one_or_none()
+    if not job:
+        raise HTTPException(404, detail="Job not found")
+
+    files = await get_dead_letter_queue(job_id, db)
+    return {
+        "ok": True,
+        "files": [
+            {
+                "id": str(f.id),
+                "file_name": f.file_name,
+                "attempts": f.attempts,
+                "error": f.error,
+                "updated_at": f.updated_at.isoformat() if f.updated_at else None,
+            }
+            for f in files
+        ],
+    }
+
+
+@router.post("/eml/jobs/{job_id}/dead-letter/abandon")
+async def abandon_dead_letter(
+    job_id: UUID,
+    file_ids: list[UUID] = [],
+    db: AsyncSession = Depends(get_db),
+):
+    """Mark dead letter files as abandoned (give up on them)."""
+    if not file_ids:
+        raise HTTPException(400, detail="No file IDs provided")
+
+    job = (await db.execute(select(EmlJob).where(EmlJob.id == job_id))).scalar_one_or_none()
+    if not job:
+        raise HTTPException(404, detail="Job not found")
+
+    result = await delete_dead_letter(job_id, file_ids, db)
+    return {"ok": True, **result}
