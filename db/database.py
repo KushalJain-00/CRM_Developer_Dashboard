@@ -52,6 +52,7 @@ async def get_db():
 async def init_db():
     """Initialize database - create all tables asynchronously"""
     from db import models  # noqa
+    from db import eml_models  # noqa
     from sqlalchemy import text
     
     async with engine.begin() as conn:
