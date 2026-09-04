@@ -3710,11 +3710,11 @@ async function emlPipelinePollStatus() {
     const j = data.job;
     const bar = document.getElementById('emlPipelineProgressBar');
     if (bar) bar.style.width = j.percent + '%';
-    setText('emlPipeSucceeded', j.succeeded);
-    setText('emlPipeFailed', j.failed);
-    setText('emlPipeAi', j.ai_enriched);
-    setText('emlPipeTotal', j.total_files);
-    setText('emlPipelineProgressTitle', 'Processing... ' + j.percent + '%');
+    const elS = document.getElementById('emlPipeSucceeded'); if(elS) elS.textContent = j.succeeded;
+    const elF = document.getElementById('emlPipeFailed'); if(elF) elF.textContent = j.failed;
+    const elA = document.getElementById('emlPipeAi'); if(elA) elA.textContent = j.ai_enriched;
+    const elT = document.getElementById('emlPipeTotal'); if(elT) elT.textContent = j.total_files;
+    const elP = document.getElementById('emlPipelineProgressTitle'); if(elP) elP.textContent = 'Processing... ' + j.percent + '%';
     if (j.status === 'completed' || j.status === 'failed' || j.status === 'cancelled') {
       clearInterval(EML_PIPELINE.pollTimer);
       emlPipelineShowResults(j);
@@ -3725,8 +3725,8 @@ async function emlPipelinePollStatus() {
 function emlPipelineShowResults(job) {
   document.getElementById('emlPipelineProgress').style.display = 'none';
   document.getElementById('emlPipelineResults').style.display = 'block';
-  setText('emlResTotal', job.succeeded);
-  setText('emlResAi', job.ai_enriched);
+  const elR = document.getElementById('emlResTotal'); if(elR) elR.textContent = job.succeeded;
+  const elRA = document.getElementById('emlResAi'); if(elRA) elRA.textContent = job.ai_enriched;
   showNotification('Processing complete: ' + job.succeeded + ' succeeded, ' + job.failed + ' failed', 'info');
 }
 
