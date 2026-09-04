@@ -62,5 +62,8 @@ async def init_db():
         try:
             await conn.execute(text("ALTER TABLE contacts ADD COLUMN files TEXT"))
         except Exception:
-            # Column likely already exists
+            pass
+        try:
+            await conn.execute(text("ALTER TABLE eml_job_files ADD COLUMN extracted_data JSON"))
+        except Exception:
             pass

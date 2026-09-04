@@ -3751,3 +3751,47 @@ function emlPipelineReset() {
 function emlPipelineExportExcel() { showNotification('Export coming soon', 'info'); }
 function emlPipelineExportCSV() { showNotification('Export coming soon', 'info'); }
 function emlPipelinePushCRM() { showNotification('Push to CRM coming soon', 'info'); }
+
+async function emlPipelineShowMonitor() {
+  try {
+    const [stats, throughput, errors] = await Promise.all([
+      fetch(API_BASE + '/api/eml/stats', { headers: apiHeaders() }).then(function(r) { return r.json(); }),
+      fetch(API_BASE + '/api/eml/stats/throughput', { headers: apiHeaders() }).then(function(r) { return r.json(); }),
+      fetch(API_BASE + '/api/eml/stats/errors', { headers: apiHeaders() }).then(function(r) { return r.json(); }),
+    ]);
+
+    var s = stats.stats || {};
+    var t = throughput.throughput || {};
+    var e = errors.errors || {};
+
+    var html = '<div class="stats-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;">';
+    html += '<div class="kpi-card"><div class="kpi-value">' + (s.total_files || 0) + '</div><div class="kpi-label">Total Files</div></div>';
+    html += '<div class="kpi-card"><div class="kpi-value">' + (s.total_succeeded || 0) + '</div><div class="kpi-label">Succeeded</div></div>';
+    html += '<div class="kpi-card"><div class="kpi-value">' + (s.total_failed || 0) + '</div><div class="kpi-label">Failed</div></div>';
+    html += '<div class="kpi-card"><div class="kpi-value">$' + (s.estimated_ai_cost_usd || 0) + '</div><div class="kpi-label">AI Cost</div></div>';
+    html += '</div>';
+
+    html += '<div class="card" style="padding:1.5rem;margin-bottom:1rem;">';
+    html += '<h3>Throughput</h3>';
+    html += '<p>Avg processing time: ' + (t.avg_processing_time_ms || 0) + 'ms</p>';
+    html += '<p>Est. files/hour: ' + (t.estimated_files_per_hour || 0) + '</p>';
+    html += '</div>';
+
+    if (e.top_errors && e.top_errors.length > 0) {
+      html += '<div class="card" style="padding:1.5rem;">';
+      html += '<h3>Top Errors</h3><ul>';
+      e.top_errors.forEach(function(err) {
+        html += '<li>' + escapeHTML(err.error) + ' (' + err.count + ' times)</li>';
+      });
+      html += '</ul></div>';
+    }
+
+    var container = document.getElementById('emlPipelineResults');
+    if (container) {
+      container.innerHTML = html;
+      container.style.display = 'block';
+    }
+  } catch (err) {
+    showNotification('Failed to load stats: ' + err.message, 'error');
+  }
+}

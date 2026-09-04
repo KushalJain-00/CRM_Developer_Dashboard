@@ -86,6 +86,7 @@ async def process_job_optimized(job_id: UUID, file_contents: list[tuple[str, byt
                     file_record.status = "done"
                     file_record.extraction_method = method
                     file_record.confidence = confidence
+                    file_record.extracted_data = sig_data
                     file_record.processing_time_ms = int((time.monotonic() - t0) * 1000)
                     file_record.attempts = 1
 

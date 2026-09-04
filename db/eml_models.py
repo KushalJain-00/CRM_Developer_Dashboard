@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Uuid
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Uuid, JSON
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from .database import Base
@@ -45,6 +45,7 @@ class EmlJobFile(Base):
     extraction_method = Column(String(50), nullable=True)
     # deterministic | heuristic | ai_validate | ai_extract | ocr
     confidence = Column(Integer, default=0)
+    extracted_data = Column(JSON, nullable=True)  # Full extracted contact data
     processing_time_ms = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=_utcnow)
     updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
