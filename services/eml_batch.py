@@ -26,10 +26,9 @@ CHECKPOINT_INTERVAL = 50
 CONFIDENCE_THRESHOLD = 80  # Match eml_pipeline.py
 
 
-async def _call_ai_enrichment(sig_data: dict, body_text: str, html_body: str) -> dict | None:
-    """Call Groq LLM to validate/improve heuristic extraction."""
-    api_key = os.environ.get("GROQ_API_KEY", "")
-    if not api_key:
+async def _call_ai_enrichment(sig_data: dict, body_text: str, html_body: str, ai_chain: list | None) -> dict | None:
+    """Call client's LLM provider chain to validate/improve heuristic extraction."""
+    if not ai_chain:
         return None
 
     from api.parse_signature import call_llm, clean_email_text, SYSTEM_PROMPT
@@ -45,15 +44,21 @@ async def _call_ai_enrichment(sig_data: dict, body_text: str, html_body: str) ->
         f"Email text:\n{text[:2500]}"
     )
 
-    try:
-        raw = await call_llm("groq", "llama-3.3-70b-versatile", api_key, SYSTEM_PROMPT, prompt)
-        parsed = json.loads(raw)
-        if isinstance(parsed, list) and parsed:
-            return parsed[0]
-        if isinstance(parsed, dict):
-            return parsed
-    except Exception as e:
-        logger.debug("AI enrichment failed: %s", e)
+    for attempt in ai_chain:
+        api_key = attempt.get("api_key", "") if isinstance(attempt, dict) else getattr(attempt, "api_key", "")
+        provider = attempt.get("provider", "") if isinstance(attempt, dict) else getattr(attempt, "provider", "")
+        model = attempt.get("model", "") if isinstance(attempt, dict) else getattr(attempt, "model", "")
+        if not api_key or not provider or not model:
+            continue
+        try:
+            raw = await call_llm(provider, model, api_key, SYSTEM_PROMPT, prompt)
+            parsed = json.loads(raw)
+            if isinstance(parsed, list) and parsed:
+                return parsed[0]
+            if isinstance(parsed, dict):
+                return parsed
+        except Exception as e:
+            logger.debug("AI enrichment failed (%s/%s): %s", provider, model, e)
     return None
 
 
@@ -88,6 +93,10 @@ async def process_job_optimized(job_id: UUID, staging_dir: str):
             update(EmlJob).where(EmlJob.id == job_id).values(status="processing")
         )
         await db.commit()
+
+        # Load client's AI chain
+        job = (await db.execute(select(EmlJob).where(EmlJob.id == job_id))).scalar_one_or_none()
+        ai_chain = job.ai_chain if job else None
 
         # Resume support — skip files that already completed
         result = await db.execute(
@@ -137,7 +146,7 @@ async def process_job_optimized(job_id: UUID, staging_dir: str):
                     confidence = sig_data.get("confidence", 0)
                     ai_result = None
                     if confidence < CONFIDENCE_THRESHOLD:
-                        ai_result = await _call_ai_enrichment(sig_data, parsed.body_text, parsed.html_body)
+                        ai_result = await _call_ai_enrichment(sig_data, parsed.body_text, parsed.html_body, ai_chain)
                         sig_data = _merge_ai_into_sig(sig_data, ai_result)
 
                     method = "ai_extract" if ai_result else ("deterministic" if confidence >= CONFIDENCE_THRESHOLD else "heuristic")

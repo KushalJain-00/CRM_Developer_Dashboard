@@ -3681,6 +3681,7 @@ async function emlPipelineStartUpload() {
 
   const formData = new FormData();
   for (const f of EML_PIPELINE.files) formData.append('files', f);
+  formData.append('ai_chain', JSON.stringify(getAiSettings().chain || []));
 
   try {
     const headers = apiHeaders();

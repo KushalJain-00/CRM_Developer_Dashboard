@@ -23,6 +23,7 @@ class EmlJob(Base):
     failed = Column(Integer, nullable=False, default=0)
     ai_enriched = Column(Integer, nullable=False, default=0)
     ocr_used = Column(Integer, nullable=False, default=0)
+    ai_chain = Column(JSON, nullable=True)  # Client's AI provider chain for enrichment
     created_at = Column(DateTime, default=_utcnow)
     updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
     completed_at = Column(DateTime, nullable=True)

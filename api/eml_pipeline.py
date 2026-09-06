@@ -34,19 +34,17 @@ STAGING_DIR = Path(tempfile.gettempdir()) / "eml_uploads"
 # AI enrichment
 # ---------------------------------------------------------------------------
 
-async def _call_ai_enrichment(sig_data: dict, body_text: str, html_body: str) -> dict | None:
-    """Call Groq LLM to validate/improve heuristic extraction. Returns enriched fields or None.
+async def _call_ai_enrichment(sig_data: dict, body_text: str, html_body: str, ai_chain: list | None) -> dict | None:
+    """Call client's LLM provider chain to validate/improve heuristic extraction.
 
-    Only runs when GROQ_API_KEY is set. Free tier: 30 RPM, 14,400 RPD —
-    enough for 1,500 files if routed only low-confidence cases.
+    Uses the same provider chain the user configured in AI Settings.
+    Falls back through the chain if a provider fails.
     """
-    api_key = os.environ.get("GROQ_API_KEY", "")
-    if not api_key:
-        return None  # No key → skip AI, rely on heuristic
+    if not ai_chain:
+        return None
 
     from api.parse_signature import call_llm, clean_email_text, SYSTEM_PROMPT
 
-    # Build context from heuristic result — tell LLM what we already found
     existing = {k: v for k, v in sig_data.items() if v and k != "confidence"}
     text = clean_email_text(body_text) or clean_email_text(html_body) or ""
     if not text or len(text) < 10:
@@ -58,15 +56,21 @@ async def _call_ai_enrichment(sig_data: dict, body_text: str, html_body: str) ->
         f"Email text:\n{text[:2500]}"
     )
 
-    try:
-        raw = await call_llm("groq", "llama-3.3-70b-versatile", api_key, SYSTEM_PROMPT, prompt)
-        parsed = json.loads(raw)
-        if isinstance(parsed, list) and parsed:
-            return parsed[0]  # Take first contact
-        if isinstance(parsed, dict):
-            return parsed
-    except Exception as e:
-        logger.debug("AI enrichment failed for file: %s", e)
+    for attempt in ai_chain:
+        api_key = attempt.get("api_key", "") if isinstance(attempt, dict) else getattr(attempt, "api_key", "")
+        provider = attempt.get("provider", "") if isinstance(attempt, dict) else getattr(attempt, "provider", "")
+        model = attempt.get("model", "") if isinstance(attempt, dict) else getattr(attempt, "model", "")
+        if not api_key or not provider or not model:
+            continue
+        try:
+            raw = await call_llm(provider, model, api_key, SYSTEM_PROMPT, prompt)
+            parsed = json.loads(raw)
+            if isinstance(parsed, list) and parsed:
+                return parsed[0]
+            if isinstance(parsed, dict):
+                return parsed
+        except Exception as e:
+            logger.debug("AI enrichment failed (%s/%s): %s", provider, model, e)
     return None
 
 
@@ -102,6 +106,10 @@ async def process_job_background(job_id: UUID, staging_dir: str):
             update(EmlJob).where(EmlJob.id == job_id).values(status="processing")
         )
         await db.commit()
+
+        # Load client's AI chain from job
+        job = (await db.execute(select(EmlJob).where(EmlJob.id == job_id))).scalar_one_or_none()
+        ai_chain = job.ai_chain if job else None
 
         staging = Path(staging_dir)
         if not staging.exists():
@@ -144,7 +152,7 @@ async def process_job_background(job_id: UUID, staging_dir: str):
                         if confidence < CONFIDENCE_THRESHOLD:
                             file_record.status = "ai"
                             await db.flush()
-                            ai_result = await _call_ai_enrichment(sig_data, parsed.body_text, parsed.html_body)
+                            ai_result = await _call_ai_enrichment(sig_data, parsed.body_text, parsed.html_body, ai_chain)
                             sig_data = _merge_ai_into_sig(sig_data, ai_result)
 
                         # Finalize
@@ -206,10 +214,17 @@ async def process_job_background(job_id: UUID, staging_dir: str):
 async def upload_eml_files(
     files: list[UploadFile] = File(...),
     job_name: str = Form(""),
+    ai_chain: str = Form("[]"),
     background_tasks: BackgroundTasks = BackgroundTasks(),
     db: AsyncSession = Depends(get_db),
 ):
     """Upload .eml files, create a job, and start background processing."""
+    # Parse client's AI chain from JSON string
+    try:
+        chain_data = json.loads(ai_chain) if ai_chain else []
+    except json.JSONDecodeError:
+        chain_data = []
+
     job_id = UUID(bytes=os.urandom(16))
     staging = STAGING_DIR / str(job_id)
     staging.mkdir(parents=True, exist_ok=True)
@@ -237,6 +252,7 @@ async def upload_eml_files(
         job_name=job_name or f"EML batch {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')}",
         total_files=saved,
         status="pending",
+        ai_chain=chain_data if chain_data else None,
     )
     db.add(job)
     await db.commit()
