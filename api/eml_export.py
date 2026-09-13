@@ -32,7 +32,7 @@ def _files_to_contacts(files) -> list[dict]:
     """Convert EmlJobFile records to contact dicts using persisted extracted_data."""
     contacts = []
     for f in files:
-        data = json.loads(f.extracted_data) if f.extracted_data else {}
+        data = f.extracted_data if isinstance(f.extracted_data, dict) else (json.loads(f.extracted_data) if f.extracted_data else {})
         data["extraction_method"] = f.extraction_method or ""
         data["confidence"] = f.confidence or 0
         contacts.append(data)

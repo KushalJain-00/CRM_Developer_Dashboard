@@ -67,3 +67,7 @@ async def init_db():
             await conn.execute(text("ALTER TABLE eml_job_files ADD COLUMN extracted_data JSON"))
         except Exception:
             pass
+        try:
+            await conn.execute(text("ALTER TABLE eml_jobs ADD COLUMN ai_chain JSON"))
+        except Exception:
+            pass
