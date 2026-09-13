@@ -2594,6 +2594,16 @@ function extractSignatureData(bodyText, htmlBody, fromEmail, fromName) {
     } catch(e) {}
   }
 
+  // 1b. Fallback: extract plain text from HTML if bodyText is empty/short
+  if (htmlBody && (!bodyText || bodyText.trim().length < 20)) {
+    try {
+      const parser2 = new DOMParser();
+      const doc2 = parser2.parseFromString(htmlBody, 'text/html');
+      const htmlText = (doc2.body?.textContent || '').trim();
+      if (htmlText && htmlText.length > (bodyText || '').length) bodyText = htmlText;
+    } catch(e) {}
+  }
+
   if (!bodyText && !fromEmail) return result;
   bodyText = bodyText || '';
 
@@ -2611,7 +2621,7 @@ function extractSignatureData(bodyText, htmlBody, fromEmail, fromName) {
   }
   const sigLines = sigIdx !== -1 ? lines.slice(sigIdx) : lines.slice(Math.max(0, lines.length - 35));
 
-  // 3. Extract Phone Numbers
+  // 3. Extract Phone Numbers — search signature zone AND full body
   const phoneRe = /(?:\+?91[\s\-]?)?[6-9]\d{9}|\+\d{1,3}[\s\-]?\d{6,14}/g;
   const foundPhones = [];
   for (const l of sigLines) {
@@ -2619,6 +2629,16 @@ function extractSignatureData(bodyText, htmlBody, fromEmail, fromName) {
     let m;
     while ((m = phoneRe.exec(cleaned)) !== null) {
       if (!foundPhones.includes(m[0])) foundPhones.push(m[0]);
+    }
+  }
+  if (foundPhones.length === 0) {
+    const allLines = bodyText.split('\n').map(l => l.trim()).filter(Boolean);
+    for (const l of allLines) {
+      const cleaned = l.replace(/[\s\(\)\-\.]/g, '');
+      let m;
+      while ((m = phoneRe.exec(cleaned)) !== null) {
+        if (!foundPhones.includes(m[0])) foundPhones.push(m[0]);
+      }
     }
   }
   if (foundPhones.length > 0) result.phone_primary = foundPhones[0];
@@ -2634,11 +2654,19 @@ function extractSignatureData(bodyText, htmlBody, fromEmail, fromName) {
     }
   }
 
-  // 5. Extract Designation
+  // 5. Extract Designation — search signature zone AND full body
   const desgRe = /\b(ceo|cto|cfo|coo|founder|co-founder|director|managing director|md|manager|general manager|gm|head|vp|vice president|president|engineer|architect|developer|consultant|analyst|executive|senior executive|officer|lead|team lead|partner|proprietor|agm|dgm|commercial manager|purchase officer|sales manager|bdm)\b/i;
   for (const l of sigLines) {
     if (!result.designation && desgRe.test(l) && l.length < 90) {
       result.designation = l.replace(/^[|\-•·]\s*/, '').trim();
+    }
+  }
+  if (!result.designation) {
+    const allLines = bodyText.split('\n').map(l => l.trim()).filter(Boolean);
+    for (const l of allLines) {
+      if (!result.designation && desgRe.test(l) && l.length < 90) {
+        result.designation = l.replace(/^[|\-•·]\s*/, '').trim();
+      }
     }
   }
 
@@ -2661,16 +2689,17 @@ function extractSignatureData(bodyText, htmlBody, fromEmail, fromName) {
     }
   }
 
-  // 7. Pincode, City, & Address
+  // 7. Pincode, City, & Address — search full body
   const pinMatch = bodyText.match(/\b([1-9]\d{5})\b/);
   if (pinMatch) result.pincode = pinMatch[1];
 
-  const cityRe = /\b(mumbai|delhi|new delhi|bangalore|bengaluru|hyderabad|ahmedabad|chennai|kolkata|surat|pune|jaipur|vadodara|baroda|rajkot|noida|gurgaon|gurugram|thane|ghaziabad|faridabad|ludhiana|chandigarh|indore)\b/i;
+  const cityRe = /\b(mumbai|delhi|new delhi|bangalore|bengaluru|hyderabad|ahmedabad|ahmadabad|chennai|kolkata|surat|pune|jaipur|vadodara|baroda|rajkot|noida|gurgaon|gurugram|thane|ghaziabad|faridabad|ludhiana|chandigarh|indore|bhopal|patna|nagpur|lucknow|kanpur|coimbatore|madurai|kochi|mysore|goa|udaipur|jodhpur|varanasi|dehradun|jammu|srinagar|amritsar|raipur|ranchi|siliguri|guwahati|bhubaneswar|warangal|nellore|tirupati|vijayawada|nashik|aurangabad|solapur|kolhapur|hosur|salem|erode|tiruchirappalli|tuticorin)\b/i;
   const cityMatch = bodyText.match(cityRe);
   if (cityMatch) result.city = cityMatch[0].charAt(0).toUpperCase() + cityMatch[0].slice(1).toLowerCase();
 
-  const addrRe = /\b(road|rd|street|st|nagar|colony|sector|plot|phase|industrial|estate|gidc|complex|tower|building|floor)\b/i;
-  for (const l of sigLines) {
+  const addrRe = /\b(road|rd|street|st|nagar|colony|sector|plot|phase|industrial|estate|gidc|complex|tower|building|floor|lane|avenue|marg|cross|junction|market|area|district)\b/i;
+  const addrLines = bodyText.split('\n').map(l => l.trim()).filter(Boolean);
+  for (const l of addrLines) {
     if (!result.address && (addrRe.test(l) || (result.pincode && l.includes(result.pincode))) && l.length > 10 && l.length < 160) {
       result.address = l.replace(/^[|\-•·]\s*/, '').trim();
     }
