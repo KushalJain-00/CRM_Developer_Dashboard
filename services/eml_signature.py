@@ -164,6 +164,22 @@ def _extract_html_signature(html_body):
     return None
 
 
+def _extract_text_from_html(html):
+    """Strip HTML tags to get plain text for heuristic extraction."""
+    if not html:
+        return ""
+    text = re.sub(r'<style[^>]*>.*?</style>', '', html, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r'<script[^>]*>.*?</script>', '', text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r'<br\s*/?>', '\n', text, flags=re.IGNORECASE)
+    text = re.sub(r'</?(?:p|div|tr|li|td|th|h[1-6])[^>]*>', '\n', text, flags=re.IGNORECASE)
+    text = re.sub(r'<[^>]+>', '', text)
+    text = text.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>')
+    text = text.replace('&nbsp;', ' ').replace('&quot;', '"')
+    text = re.sub(r'[ \t]+', ' ', text)
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    return text.strip()
+
+
 def _isolate_signature_zone(text):
     """Strip thread/forwarding content, find signature delimiter, return sig lines."""
     if not text:
@@ -309,38 +325,57 @@ def extract_signature(body_text, html_body, from_name, from_email):
         if sig_text:
             body_text = sig_text + '\n' + (body_text or '')
 
+    # 2. Fallback: extract plain text from HTML if body_text is empty/short
+    if html_body and (not body_text or len(body_text.strip()) < 20):
+        html_text = _extract_text_from_html(html_body)
+        if html_text and len(html_text) > len(body_text or ''):
+            body_text = html_text
+
     if not body_text and not from_email:
         return result
     body_text = body_text or ''
 
-    # 2. Isolate signature zone
+    # 3. Isolate signature zone
     sig_lines = _isolate_signature_zone(body_text)
 
-    # 3. Extract phones
+    # 4. Extract phones — search signature zone AND full body
     result['phone_primary'], result['phone_secondary'] = _extract_phones(sig_lines)
+    if not result['phone_primary']:
+        result['phone_primary'], result['phone_secondary'] = _extract_phones(
+            [l.strip() for l in body_text.split('\n') if l.strip()]
+        )
 
-    # 4. Extract website
+    # 5. Extract website
     result['website'] = _extract_website(sig_lines)
 
-    # 5. Extract designation
+    # 6. Extract designation — search signature zone AND full body
     result['designation'] = _extract_designation(sig_lines)
+    if not result['designation']:
+        result['designation'] = _extract_designation(
+            [l.strip() for l in body_text.split('\n') if l.strip()]
+        )
 
-    # 6. Extract company (from signature lines)
+    # 7. Extract company (from signature lines)
     result['company'] = _extract_company(sig_lines)
 
-    # 7. Domain fallback for company + website
+    # 8. Domain fallback for company + website
     dom_company, dom_website = _company_from_domain(from_email)
     if dom_website and not result['website']:
         result['website'] = dom_website
     if dom_company and not result['company']:
         result['company'] = dom_company
 
-    # 8. Pincode, city, address
+    # 9. Pincode, city, address — search full body
     result['pincode'] = _extract_pincode(body_text)
     result['city'] = _extract_city(body_text)
     result['address'] = _extract_address(sig_lines, result['pincode'])
+    if not result['address']:
+        result['address'] = _extract_address(
+            [l.strip() for l in body_text.split('\n') if l.strip()],
+            result['pincode'],
+        )
 
-    # 9. Confidence
+    # 10. Confidence
     result['confidence'] = _calculate_confidence(result)
 
     return result

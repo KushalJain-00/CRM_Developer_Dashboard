@@ -144,3 +144,50 @@ class TestAddressExtraction:
         body = "Visit our office at Plot 45, Industrial Area\nMumbai 400069"
         r = extract_signature(body, None, 'Test', 'test@test.com')
         assert r['address'] is not None
+
+
+class TestHtmlFallback:
+    def test_html_only_email_extracts_contact(self):
+        """HTML-only emails (no text/plain) should still extract contact info."""
+        html = """
+        <html><body>
+        <p>Hello, please find the report.</p>
+        <p>Best Regards,</p>
+        <p>Amit Sharma</p>
+        <p>Sales Manager</p>
+        <p>Sharma Industries Pvt Ltd</p>
+        <p>Phone: +91 98765 43210</p>
+        <p>Website: www.sharmaindustries.com</p>
+        <p>456 Industrial Area, GIDC</p>
+        <p>Ahmedabad 382110</p>
+        </body></html>
+        """
+        r = extract_signature(None, html, 'Amit Sharma', 'amit@sharmaindustries.com')
+        assert r['phone_primary'] is not None
+        assert r['designation'] is not None
+        assert r['city'] is not None
+        assert r['address'] is not None
+
+    def test_html_with_signature_class(self):
+        """HTML with signature div should extract from it."""
+        html = """
+        <html><body>
+        <p>Thanks for your inquiry.</p>
+        <div class="gmail_signature">
+        <p>Vivek Sanghvi</p>
+        <p>Director</p>
+        <p>Sanghvi Enterprises</p>
+        <p>+91 98123 45678</p>
+        </div>
+        </body></html>
+        """
+        r = extract_signature(None, html, 'Vivek Sanghvi', 'vivek@sanghvi.com')
+        assert r['phone_primary'] is not None
+        assert r['designation'] is not None
+
+    def test_body_and_html_combined(self):
+        """When both body_text and html_body exist, combine them."""
+        body = "Phone: +91 98765 12345"
+        html = "<html><body><p>Director</p><p>Acme Corp</p></body></html>"
+        r = extract_signature(body, html, 'Test', 'test@acme.com')
+        assert r['phone_primary'] is not None
