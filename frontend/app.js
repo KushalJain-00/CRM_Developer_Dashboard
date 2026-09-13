@@ -3603,6 +3603,8 @@ function pushBulkToCRM() {
     'Website':       r['Website'],
     'City':          r['City'],
     'Location':      r['City'],
+    'Address':       r['Address'] || '',
+    'Pincode':       r['Pincode'] || '',
     'From':          r['From Email'],
     'Subject':       r['Subject'],
     'Source':        r['Source'],
@@ -3612,7 +3614,7 @@ function pushBulkToCRM() {
   }));
 
   S.rawData = crmRows;
-  S.headers = ['Person Name 1','Email 1','Company Name','Designation','Domain','Mobile 1','Mobile 2','Website','City','Location','From','Subject','Source','File','Files','Date'];
+  S.headers = ['Person Name 1','Email 1','Company Name','Designation','Domain','Mobile 1','Mobile 2','Website','City','Location','Address','Pincode','From','Subject','Source','File','Files','Date'];
   S.fileName = `Bulk EML — ${BULK.processed} files`;
   S.sheetName = 'EML Bulk Import';
   S.mapping = {
@@ -3626,6 +3628,8 @@ function pushBulkToCRM() {
     'Website':       { type: 'website', keep: true },
     'City':          { type: 'city',    keep: true },
     'Location':      { type: 'location',keep: true },
+    'Address':       { type: 'address', keep: true },
+    'Pincode':       { type: 'pincode', keep: true },
     'From':          { type: 'email',   keep: true },
     'Subject':       { type: 'other',   keep: true },
     'Source':        { type: 'other',   keep: true },
