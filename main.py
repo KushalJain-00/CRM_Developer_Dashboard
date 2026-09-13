@@ -62,7 +62,9 @@ from core.rate_limit import limiter
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "https://crmdevloper.vercel.app,http://localhost:8000,http://localhost:3000,http://localhost:5500").split(",")
+ALLOWED_ORIGINS = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "https://crmdevloper.vercel.app,http://localhost:8000,http://localhost:3000,http://localhost:5500").split(",") if o.strip()]
+if not ALLOWED_ORIGINS:
+    ALLOWED_ORIGINS = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -81,9 +83,16 @@ import traceback
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Unhandled error on {request.method} {request.url.path}: {exc}")
     logger.error(traceback.format_exc())
+    origin = request.headers.get("origin", "")
+    headers = {}
+    if origin in ALLOWED_ORIGINS or "*" in ALLOWED_ORIGINS:
+        headers["Access-Control-Allow-Origin"] = origin
+        headers["Access-Control-Allow-Methods"] = "*"
+        headers["Access-Control-Allow-Headers"] = "*"
     return JSONResponse(
         status_code=500,
-        content={"detail": "Internal server error"}
+        content={"detail": "Internal server error"},
+        headers=headers,
     )
 
 from fastapi.staticfiles import StaticFiles
