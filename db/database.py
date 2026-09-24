@@ -52,7 +52,6 @@ async def get_db():
 async def init_db():
     """Initialize database - create all tables asynchronously"""
     from db import models  # noqa
-    from db import eml_models  # noqa
     from sqlalchemy import text
     
     async with engine.begin() as conn:
@@ -61,13 +60,5 @@ async def init_db():
         # Dynamically add the files column if it doesn't exist to support existing DBs
         try:
             await conn.execute(text("ALTER TABLE contacts ADD COLUMN files TEXT"))
-        except Exception:
-            pass
-        try:
-            await conn.execute(text("ALTER TABLE eml_job_files ADD COLUMN extracted_data JSON"))
-        except Exception:
-            pass
-        try:
-            await conn.execute(text("ALTER TABLE eml_jobs ADD COLUMN ai_chain JSON"))
         except Exception:
             pass
