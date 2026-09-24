@@ -1,5 +1,5 @@
 # services/eml_dedup_rules.py
-"""Pure dedup helpers — ported from n8n workflow rules."""
+"""Pure dedup helpers — email match or normalized phone ≥10 digits."""
 import re
 
 def normalize_email(email: str | None) -> str:
