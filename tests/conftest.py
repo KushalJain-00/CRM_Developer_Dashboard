@@ -7,7 +7,6 @@ import asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from db.database import Base
 from db import models  # noqa — registers models with Base
-from db import eml_models  # noqa — registers EML models with Base
 
 
 @pytest.fixture(scope="session")

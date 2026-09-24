@@ -571,16 +571,6 @@ Routes:
 | `emlSaveToSupabase()` | Supabase `eml_emails` + `eml_contacts` | Saves to EML-specific Supabase tables |
 | `emlSendToCRM()` | — | Pushes EML contacts into main CRM pipeline |
 
-#### Bulk EML Processor
-| Function | API Call | Purpose |
-|----------|----------|---------|
-| `handleBulkEml(fileList)` | `POST /api/parse-signature` (per file) | Batch process 100-200 EML files with parallel AI (concurrency=2, 1.5s delay, 3 retries, 60s cooldown) |
-| `parseSingleEml(raw, fileName)` | — | Standalone EML parser |
-| `showBulkProgress/updateBulkProgress/hideBulkProgress` | — | Progress overlay |
-| `showBulkDashboard()` | — | Bulk results with data table + domain breakdown |
-| `exportBulkExcel()` | — | 3-sheet Excel (All Contacts, Unique, Domain Summary) |
-| `pushBulkToCRM()` | — | Deduplicates, normalizes, pushes to CRM |
-
 ### 5.4 Styling & Theming
 
 **`style.css`** (1,914 lines, 78KB):
@@ -686,12 +676,6 @@ Single EML:
     5. POST /api/parse-signature (AI signature extraction)
     6. Build EML dashboard
 
-Bulk EML (100-200 files):
-  handleBulkEml()
-    → parseSingleEml() per file (local parsing)
-    → Parallel AI calls (concurrency=2, 1.5s delay)
-    → 3 retries with 60s cooldown on rate limit
-    → showBulkDashboard() with results
 ```
 
 ### Export Flow

@@ -1912,3 +1912,9 @@ body.eml-mode .sb-logo-mark {
 .eml-sig-val        { color:var(--text); flex:1; }
 .eml-sig-badge      { background:linear-gradient(135deg,#6366F1,#8B5CF6); color:#fff; font-size:9px; font-weight:700; padding:2px 7px; border-radius:10px; margin-left:8px; letter-spacing:.05em; }
 .eml-sig-loading    { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-3); padding:12px 0; }
+/* Fresh EML views */
+#view-eml-upload .drop-zone.drag-over,
+.eml-mail-row:hover { border-color: var(--accent, #378ADD); }
+.eml-mail-row { transition: border-color .15s ease; }
+#emlContactsTable th { text-transform: capitalize; font-size: 11px; color: var(--text-2); }
+#emlContactsTable td { font-size: 12px; padding: 8px 10px; border-bottom: 1px solid var(--border); }

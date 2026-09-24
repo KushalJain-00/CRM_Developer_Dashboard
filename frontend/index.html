@@ -65,8 +65,17 @@
     <div class="nav-item" data-view="history" title="History" onclick="showView('history'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">🕐</span> <span class="ni-label">History</span>
     </div>
-    <div class="nav-item" data-view="eml-pipeline" title="EML Pipeline" onclick="showView('eml-pipeline'); if(window.innerWidth<=768)toggleSidebar()">
-      <span class="ni-icon">⚙</span> <span class="ni-label">EML Pipeline</span>
+    <div class="nav-item" data-view="eml-upload" title="EML Upload" onclick="showView('eml-upload'); if(window.innerWidth<=768)toggleSidebar()">
+      <span class="ni-icon">✉</span> <span class="ni-label">EML Upload</span>
+    </div>
+    <div class="nav-item" data-view="eml-contacts" title="EML Contacts" onclick="showView('eml-contacts'); if(window.innerWidth<=768)toggleSidebar()">
+      <span class="ni-icon">👥</span> <span class="ni-label">EML Contacts</span>
+    </div>
+    <div class="nav-item" data-view="eml-emails" title="EML Emails" onclick="showView('eml-emails'); if(window.innerWidth<=768)toggleSidebar()">
+      <span class="ni-icon">📨</span> <span class="ni-label">EML Emails</span>
+    </div>
+    <div class="nav-item" data-view="eml-settings" title="LLM Settings" onclick="showView('eml-settings'); if(window.innerWidth<=768)toggleSidebar()">
+      <span class="ni-icon">⚙</span> <span class="ni-label">LLM Settings</span>
     </div>
     <div class="sb-section">Export</div>
     <div class="nav-item" title="Save to CRM" onclick="saveToCRM(); if(window.innerWidth<=768)toggleSidebar()">
@@ -148,14 +157,13 @@
           <button class="btn btn-primary" id="chooseFileBtn" onclick="event.stopPropagation();document.getElementById('fileInput').click()">
             Choose File
           </button>
-          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.txt,.pdf,.eml" multiple style="display:none" onchange="handleMultipleFiles(this.files)">
+          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.txt,.pdf" multiple style="display:none" onchange="handleMultipleFiles(this.files)">
           <div class="ft-chips">
             <span class="ft-chip">📗 .xlsx</span>
             <span class="ft-chip">📘 .xls</span>
             <span class="ft-chip">📄 .csv</span>
             <span class="ft-chip">📝 .txt</span>
             <span class="ft-chip">📑 .pdf</span>
-            <span class="ft-chip eml-chip">📧 .eml</span>
           </div>
         </div>
         <div class="upload-grid">
@@ -283,127 +291,65 @@
     </div>
 
 
-    <!-- EML EMAIL EXTRACTOR DASHBOARD -->
-    <div class="view" id="view-eml">
-      <div class="eml-dashboard">
-        <div class="eml-header">
-          <div class="eml-header-left">
-            <div class="eml-header-icon">✉️</div>
-            <div>
-              <div class="eml-header-title" id="emlFileName">Email Analysis</div>
-              <div class="eml-header-sub" id="emlFileSub">Parsing message…</div>
-            </div>
-          </div>
-          <div class="eml-header-actions">
-            
-            <button class="btn btn-secondary btn-sm" onclick="emlExportCSV()">⬇ CSV</button>
-            <button class="btn btn-success btn-sm" onclick="emlExportExcel()">⬇ Excel</button>
-            <button class="btn btn-primary btn-sm" onclick="emlSaveToSupabase()">☁ Save to DB</button>
-            <button class="btn btn-success btn-sm" onclick="emlSendToCRM()">💾 Push to CRM</button>
-            <button class="btn btn-secondary btn-sm" onclick="exitEmlDashboard()">✕ Close</button>
-          </div>
-        </div>
-        <div class="eml-kpi-strip" id="emlKpiStrip">
-          <div class="eml-kpi eml-kpi-contacts"><div class="eml-kpi-icon">👤</div><div class="eml-kpi-val" id="emlKpiContacts">—</div><div class="eml-kpi-label">Contacts Found</div></div>
-          <div class="eml-kpi eml-kpi-emails"><div class="eml-kpi-icon">📧</div><div class="eml-kpi-val" id="emlKpiEmails">—</div><div class="eml-kpi-label">Email Addresses</div></div>
-          <div class="eml-kpi eml-kpi-domains"><div class="eml-kpi-icon">🌐</div><div class="eml-kpi-val" id="emlKpiDomains">—</div><div class="eml-kpi-label">Unique Domains</div></div>
-          <div class="eml-kpi eml-kpi-attach"><div class="eml-kpi-icon">📎</div><div class="eml-kpi-val" id="emlKpiAttach">—</div><div class="eml-kpi-label">Attachments</div></div>
-          <div class="eml-kpi eml-kpi-phones"><div class="eml-kpi-icon">📞</div><div class="eml-kpi-val" id="emlKpiPhones">—</div><div class="eml-kpi-label">Phone Numbers</div></div>
-          <div class="eml-kpi eml-kpi-urls"><div class="eml-kpi-icon">🔗</div><div class="eml-kpi-val" id="emlKpiUrls">—</div><div class="eml-kpi-label">Links Found</div></div>
-        </div>
-        <div class="eml-body">
-          <div class="eml-panel eml-email-panel">
-            <div class="eml-panel-title">📨 Message Preview <span class="eml-body-meta" id="emlBodyMeta"></span></div>
-            <div class="eml-meta" id="emlMeta"></div>
-            <div class="eml-subject" id="emlSubject"></div>
-            <div class="eml-body-text" id="emlBodyText"></div>
-            <div class="eml-attachments" id="emlAttachments"></div>
-            <div id="emlSigData" style="display:none"></div>
-            <div class="eml-extras" id="emlPhones"></div>
-            <div class="eml-extras" id="emlUrls"></div>
-          </div>
-          <div class="eml-panel eml-contacts-panel">
-            <div class="eml-panel-title">
-              <span>👤 Extracted Contacts</span>
-              <input class="eml-search" id="emlSearch" placeholder="🔍 Search contacts…" oninput="emlFilterContacts()">
-            </div>
-            <div class="eml-contact-list" id="emlContactList"></div>
-          </div>
-        </div>
-        <div class="eml-domains-section">
-          <div class="eml-panel-title">🌐 Domain Intelligence</div>
-          <div class="eml-domain-grid" id="emlDomainGrid"></div>
-        </div>
+    <div class="view" id="view-eml-upload">
+      <div class="sec-hd"><div>
+        <div class="sec-title">EML Upload</div>
+        <div class="sec-sub">Drop .eml files — parsed on the server, AI-extracted, deduped</div>
+      </div></div>
+      <div class="drop-zone" id="emlDropZone" style="margin-top:16px">
+        <div class="drop-circle">📧</div>
+        <div class="drop-title">Drop .eml files here or click to browse</div>
+        <div class="drop-desc">Single or bulk · multi-provider LLM fallback · auto dedup</div>
+        <button class="btn btn-primary" type="button" id="emlPickBtn">Choose Files</button>
+        <input type="file" id="emlFileInput" accept=".eml" multiple style="display:none">
       </div>
+      <div id="emlProgress" style="display:none;margin-top:20px">
+        <div class="progress-track" style="height:10px;border-radius:6px"><div class="progress-fill" id="emlProgressBar" style="width:0%"></div></div>
+        <div id="emlProgressLabel" style="margin-top:8px;font-size:13px;color:var(--text-2)"></div>
+      </div>
+      <div id="emlResults" style="margin-top:20px"></div>
     </div>
 
-    <!-- EML Pipeline — Batch Enterprise Processing -->
-    <div class="view" id="view-eml-pipeline">
-      <div id="emlPipelineUpload">
-        <div class="sec-hd">
-          <div>
-            <div class="sec-title">⚙ EML Pipeline</div>
-            <div class="sec-sub">Batch process hundreds of .eml files with AI-powered extraction</div>
-          </div>
-        </div>
-        <div class="drop-zone" id="emlPipelineDropZone" onclick="document.getElementById('emlPipelineInput').click()" style="margin-top:16px"
-             ondragover="emlPipelineDragOver(event)" ondragleave="emlPipelineDragLeave(event)" ondrop="emlPipelineDrop(event)">
-          <div class="drop-circle">📧</div>
-          <div class="drop-title">Drop .eml files here, or click to browse</div>
-          <div class="drop-desc">Supports 100+ files at once. Each file is parsed and enriched via AI.</div>
-          <button class="btn btn-primary" onclick="event.stopPropagation();document.getElementById('emlPipelineInput').click()">Choose Files</button>
-          <input type="file" id="emlPipelineInput" accept=".eml" multiple style="display:none" onchange="emlPipelineFilesSelected(this.files)">
-          <div class="ft-chips">
-            <span class="ft-chip eml-chip">📧 .eml</span>
-          </div>
-        </div>
-        <div id="emlPipelineFileList" style="display:none;margin-top:16px"></div>
-        <div id="emlPipelineActions" style="display:none;margin-top:16px;text-align:center">
-          <button class="btn btn-primary btn-lg" onclick="emlPipelineStartUpload()">🚀 Start Processing</button>
-        </div>
+    <div class="view" id="view-eml-contacts">
+      <div class="sec-hd"><div>
+        <div class="sec-title">EML Contacts</div>
+        <div class="sec-sub">Extracted contacts — search, filter, export, push</div>
       </div>
-
-      <div id="emlPipelineProgress" style="display:none">
-        <div class="sec-hd">
-          <div>
-            <div class="sec-title" id="emlPipelineProgressTitle">Processing...</div>
-            <div class="sec-sub">Your files are being parsed and enriched</div>
-          </div>
-          <button class="btn btn-danger btn-sm" onclick="emlPipelineCancel()">✕ Cancel</button>
-        </div>
-        <div style="margin:24px 0">
-          <div class="progress-track" style="height:12px;border-radius:6px">
-            <div class="progress-fill" id="emlPipelineProgressBar" style="width:0%;border-radius:6px;transition:width 0.5s"></div>
-          </div>
-        </div>
-        <div class="kpi-grid">
-          <div class="kpi-card"><div class="kpi-value" id="emlPipeSucceeded">0</div><div class="kpi-label">Succeeded</div></div>
-          <div class="kpi-card"><div class="kpi-value" id="emlPipeFailed">0</div><div class="kpi-label">Failed</div></div>
-          <div class="kpi-card"><div class="kpi-value" id="emlPipeAi">0</div><div class="kpi-label">AI Enriched</div></div>
-          <div class="kpi-card"><div class="kpi-value" id="emlPipeTotal">0</div><div class="kpi-label">Total Files</div></div>
-        </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input id="emlCSearch" class="tbl-select" placeholder="Search name/email/phone…" style="min-width:200px">
+        <select id="emlCStatus" class="tbl-select"><option value="">All status</option><option>NEW</option><option>DUPLICATE</option></select>
+        <select id="emlCPushed" class="tbl-select"><option value="">Pushed: all</option><option value="false">Not pushed</option><option value="true">Pushed</option></select>
+        <button class="btn btn-secondary btn-sm" onclick="EmlUI.loadContacts()">↻ Refresh</button>
+        <button class="btn btn-success btn-sm" onclick="EmlUI.exportExcel()">⬇ Excel</button>
+        <button class="btn btn-secondary btn-sm" onclick="EmlUI.exportCsv()">⬇ CSV</button>
+        <button class="btn btn-primary btn-sm" onclick="EmlUI.pushSelected()">💾 Push selected</button>
+      </div></div>
+      <div style="overflow:auto;margin-top:12px;border:1px solid var(--border);border-radius:10px">
+        <table class="data-table" id="emlContactsTable"><thead></thead><tbody></tbody></table>
       </div>
+      <div id="emlContactsPager" style="margin-top:10px;display:flex;gap:8px;align-items:center"></div>
+    </div>
 
-      <div id="emlPipelineResults" style="display:none">
-        <div class="sec-hd">
-          <div>
-            <div class="sec-title">Processing Complete</div>
-            <div class="sec-sub">Results from your EML pipeline run</div>
-          </div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-secondary btn-sm" onclick="emlPipelineReset()">↩ New Batch</button>
-          </div>
-        </div>
-        <div class="kpi-grid" style="margin:16px 0">
-          <div class="kpi-card"><div class="kpi-value" id="emlResTotal">0</div><div class="kpi-label">Contacts Extracted</div></div>
-          <div class="kpi-card"><div class="kpi-value" id="emlResAi">0</div><div class="kpi-label">AI Enriched</div></div>
-        </div>
-        <div style="display:flex;gap:12px;margin:24px 0">
-          <button class="btn btn-success btn-sm" onclick="emlPipelineExportExcel()">⬇ Export Excel</button>
-          <button class="btn btn-secondary btn-sm" onclick="emlPipelineExportCSV()">⬇ Export CSV</button>
-          <button class="btn btn-primary btn-sm" onclick="emlPipelinePushCRM()">💾 Push to CRM</button>
-        </div>
-        <div id="emlPipelineTableArea"></div>
+    <div class="view" id="view-eml-emails">
+      <div class="sec-hd"><div>
+        <div class="sec-title">EML Emails</div>
+        <div class="sec-sub">Inbox-style list of processed emails</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="EmlUI.loadEmails()">↻ Refresh</button></div>
+      <div id="emlEmailsList" style="margin-top:12px;display:flex;flex-direction:column;gap:8px"></div>
+      <div id="emlEmailsPager" style="margin-top:10px;display:flex;gap:8px;align-items:center"></div>
+    </div>
+
+    <div class="view" id="view-eml-settings">
+      <div class="sec-hd"><div>
+        <div class="sec-title">LLM Settings</div>
+        <div class="sec-sub">Ordered fallback chain — Google, OpenRouter, Groq, OpenAI, DeepSeek, Anthropic</div>
+      </div></div>
+      <p style="font-size:13px;color:var(--text-2)">Keys stay in this browser (localStorage). First working provider wins; failures fall through the chain.</p>
+      <div id="emlChainList" style="display:flex;flex-direction:column;gap:12px;margin-top:12px"></div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="btn btn-secondary btn-sm" onclick="EmlUI.addChainItem()">+ Add provider</button>
+        <button class="btn btn-primary" onclick="EmlUI.saveChain()">Save settings</button>
       </div>
     </div>
 
@@ -416,6 +362,7 @@
 </div>
 
 <script src="app.js"></script>
+<script src="eml.js"></script>
 
 <!-- Edit Modal -->
 <div class="modal-overlay" id="editModal">

@@ -17,10 +17,7 @@ from api.parse import router as parse_router
 from api.export_pdf import router as pdf_router
 from api.contacts import router as contacts_router
 from api.calls import router as calls_router
-from api.eml_pipeline import router as eml_router
-from api.eml_monitor import router as eml_monitor_router
-from api.eml_export import router as eml_export_router
-from api.eml_sse import router as sse_router
+from api.eml import router as eml_new_router
 from db.database import init_db
 
 
@@ -109,10 +106,7 @@ app.include_router(calls_router, prefix="/api")
 app.include_router(auth_router,    prefix="/api")
 app.include_router(history_router, prefix="/api")
 app.include_router(sig_router, prefix="/api")
-app.include_router(eml_router, prefix="/api")
-app.include_router(eml_monitor_router, prefix="/api")
-app.include_router(eml_export_router, prefix="/api")
-app.include_router(sse_router, prefix="/api")
+app.include_router(eml_new_router, prefix="/api")
 
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
 
