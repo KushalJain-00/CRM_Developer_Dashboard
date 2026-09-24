@@ -17,3 +17,7 @@ services:
         sync: false
       - key: GROQ_API_KEY
         sync: false
+      - key: EML_SUPABASE_URL
+        sync: false
+      - key: EML_SUPABASE_ANON_KEY
+        sync: false
