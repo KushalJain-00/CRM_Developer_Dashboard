@@ -26,7 +26,7 @@ PROVIDERS = {
     "openai": "https://api.openai.com/v1/chat/completions",
     "deepseek": "https://api.deepseek.com/beta/chat/completions",
     "anthropic": "https://api.anthropic.com/v1/messages",
-    "gemini": None,  # URL built per-call with model+key
+    "gemini": None,  # URL built per-call with model (key sent via header)
 }
 
 class LRUCache:
@@ -81,7 +81,8 @@ async def _call_provider(provider: str, model: str, api_key: str, system: str, u
         payload = {"model": model, "max_tokens": 2048, "temperature": 0.1,
                    "system": system, "messages": [{"role": "user", "content": user}]}
     elif provider == "gemini":
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+        headers["x-goog-api-key"] = api_key
         payload = {"system_instruction": {"parts": [{"text": system}]},
                    "contents": [{"parts": [{"text": user}]}],
                    "generationConfig": {"temperature": 0.1, "maxOutputTokens": 2048}}
@@ -129,8 +130,8 @@ async def extract_json(chain: list[ChainEntry], user_prompt: str) -> dict | None
                     return parsed
                 last_err = "invalid JSON"
             except Exception as e:
-                last_err = str(e)
-                logger.debug("llm fail %s attempt %s: %s", entry.provider, i, e)
+                last_err = str(e).replace(entry.api_key, "***") if entry.api_key else str(e)
+                logger.debug("llm fail %s attempt %s: %s", entry.provider, i, last_err)
             if i < len(RETRY_BACKOFF):
                 await asyncio.sleep(RETRY_BACKOFF[i])
     logger.warning("llm_router exhausted chain: %s", last_err)

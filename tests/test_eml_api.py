@@ -1,8 +1,10 @@
 # tests/test_eml_api.py
 import pytest
 from unittest.mock import AsyncMock, patch
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from main import app
+from api.eml import eml_push_contact, eml_push_bulk, PushBulkBody
 
 client = TestClient(app)
 
@@ -79,3 +81,28 @@ def test_emails_list_shape():
         ms.list_emails = AsyncMock(return_value={"items": [], "total": 0})
         r = client.get("/api/eml/emails")
         assert r.status_code == 200
+
+@pytest.mark.asyncio
+async def test_push_already_pushed_409():
+    with patch("api.eml.eml_store") as ms:
+        ms.get_contact = AsyncMock(return_value={"id": "c1", "email": "a@b.com",
+                                                 "phone_primary": "9876543210",
+                                                 "pushed_to_crm": True})
+        with pytest.raises(HTTPException) as ei:
+            await eml_push_contact("c1", db=AsyncMock(), _user=None)
+    assert ei.value.status_code == 409
+    assert ei.value.detail == "Already pushed"
+
+@pytest.mark.asyncio
+async def test_bulk_push_already_pushed_fails_without_mark():
+    with patch("api.eml.eml_store") as ms:
+        ms.get_contact = AsyncMock(return_value={"id": "c1", "email": "a@b.com",
+                                                 "phone_primary": "9876543210",
+                                                 "pushed_to_crm": True})
+        ms.mark_pushed = AsyncMock()
+        db = AsyncMock()
+        out = await eml_push_bulk(PushBulkBody(ids=["c1"]), db=db, _user=None)
+    assert out["pushed"] == 0
+    assert out["failed"] == [{"id": "c1", "error": "already pushed"}]
+    ms.mark_pushed.assert_not_called()
+    db.add.assert_not_called()

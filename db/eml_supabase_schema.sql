@@ -35,3 +35,15 @@ create table if not exists eml_contacts (
 create index if not exists idx_eml_contacts_email on eml_contacts (email);
 create index if not exists idx_eml_contacts_phone on eml_contacts (phone_primary);
 create index if not exists idx_eml_contacts_source on eml_contacts (source_email_id);
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- RLS DECISION (ruling): Row Level Security remains DISABLED intentionally.
+--
+-- EML_SUPABASE_ANON_KEY is a SERVER-SIDE ONLY secret (Render env var) and is
+-- never shipped to the browser, so anonymous browser clients cannot reach
+-- these tables at all. Least-privilege is enforced by keeping the key out of
+-- the frontend — not by RLS policies.
+--
+-- Do NOT enable RLS / add policies here: policies would block the backend's
+-- anon-role inserts and break /api/eml/* entirely.
+-- ─────────────────────────────────────────────────────────────────────────

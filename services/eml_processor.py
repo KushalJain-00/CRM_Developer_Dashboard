@@ -138,7 +138,8 @@ def extract_local_fields(parsed: ParsedEml) -> dict:
     cm = COMPANY_RE.search(zone)
     if cm:
         fields["company"] = cm.group(0).strip()
-    wm = WEBSITE_RE.search(zone)
+    # ponytail: blank emails first so "john@acme.com" is not accepted as a website
+    wm = WEBSITE_RE.search(EMAIL_RE.sub(" ", zone))
     if wm:
         fields["website"] = wm.group(0).strip()
     pm = PINCODE_RE.search(zone)

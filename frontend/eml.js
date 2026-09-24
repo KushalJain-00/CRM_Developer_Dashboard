@@ -122,14 +122,33 @@
        <button class="btn btn-secondary btn-sm" ${state.contactPage>=pages?'disabled':''} onclick="EmlUI.loadContacts(${state.contactPage+1})">Next →</button>`;
   }
 
-  function exportExcel() {
-    if (!state.contacts.length) return notify('No contacts to export', 'error');
-    const cols = ['name','email','phone_primary','phone_secondary','company','designation','address','city','pincode','website','source_file','dedup_status','pushed_to_crm'];
-    const rows = state.contacts.map(r => cols.map(c => r[c] ?? ''));
-    const ws = XLSX.utils.aoa_to_sheet([cols, ...rows]);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'EML Contacts');
-    XLSX.writeFile(wb, `eml_contacts_${Date.now()}.xlsx`);
+  async function exportExcel() {
+    const search = document.getElementById('emlCSearch')?.value || '';
+    const status = document.getElementById('emlCStatus')?.value || '';
+    const pushed = document.getElementById('emlCPushed')?.value || '';
+    try {
+      let all = [], page = 1, total = Infinity;
+      while (all.length < total) {
+        const qs = new URLSearchParams({ page, page_size: 500 });
+        if (search) qs.set('search', search);
+        if (status) qs.set('status', status);
+        if (pushed) qs.set('pushed', pushed);
+        const res = await fetch(`${API}/api/eml/contacts?${qs}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || res.statusText);
+        total = data.total;
+        if (!data.items.length) break;
+        all = all.concat(data.items);
+        page++;
+      }
+      if (!all.length) return notify('No contacts to export', 'error');
+      const cols = ['name','email','phone_primary','phone_secondary','company','designation','address','city','pincode','website','source_file','dedup_status','pushed_to_crm'];
+      const rows = all.map(r => cols.map(c => r[c] ?? ''));
+      const ws = XLSX.utils.aoa_to_sheet([cols, ...rows]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'EML Contacts');
+      XLSX.writeFile(wb, `eml_contacts_${Date.now()}.xlsx`);
+    } catch (err) { notify('Export failed: ' + err.message, 'error'); }
   }
 
   function exportCsv() {

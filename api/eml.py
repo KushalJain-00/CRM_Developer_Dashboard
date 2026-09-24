@@ -149,13 +149,21 @@ async def eml_export_csv(
     status: str = "",
     pushed: Optional[bool] = None,
 ):
-    data = await eml_store.list_contacts(_sanitize_search(search), status, pushed, page=1, page_size=500)
+    items: list = []
+    page = 1
+    while True:
+        data = await eml_store.list_contacts(_sanitize_search(search), status, pushed,
+                                              page=page, page_size=500)
+        items.extend(data["items"])
+        if len(items) >= data["total"] or not data["items"]:
+            break
+        page += 1
     cols = ["name", "email", "phone_primary", "phone_secondary", "company", "designation",
             "address", "city", "pincode", "website", "source_file", "dedup_status", "pushed_to_crm"]
     buf = io.StringIO()
     w = csv.writer(buf)
     w.writerow(cols)
-    for row in data["items"]:
+    for row in items:
         w.writerow([row.get(c, "") for c in cols])
     buf.seek(0)
     return StreamingResponse(
@@ -218,6 +226,8 @@ async def eml_push_contact(
     contact = await eml_store.get_contact(contact_id)
     if not contact:
         raise HTTPException(404, "Contact not found")
+    if contact.get("pushed_to_crm"):
+        raise HTTPException(409, "Already pushed")
     crm_id = await _push_one(db, contact)
     await db.commit()
     await eml_store.mark_pushed(contact_id)
@@ -229,17 +239,30 @@ async def eml_push_bulk(
     db: AsyncSession = Depends(get_db),
     _user=Depends(verify_token),
 ):
-    pushed, failed = 0, []
+    pushed, failed, ok_ids = 0, [], []
     for cid in body.ids:
         contact = await eml_store.get_contact(cid)
         if not contact:
             failed.append({"id": cid, "error": "not found"})
             continue
+        if contact.get("pushed_to_crm"):
+            failed.append({"id": cid, "error": "already pushed"})
+            continue
         try:
             await _push_one(db, contact)
+            ok_ids.append(cid)
+        except Exception as e:
+            logger.exception("push failed for %s", cid)
+            failed.append({"id": cid, "error": getattr(e, "detail", str(e))})
+    if ok_ids:
+        try:
+            await db.commit()
+        except Exception:
+            logger.exception("bulk push commit failed")
+            await db.rollback()
+            raise HTTPException(500, "CRM commit failed")
+        # only after commit: mark rows as pushed
+        for cid in ok_ids:
             await eml_store.mark_pushed(cid)
             pushed += 1
-        except HTTPException as e:
-            failed.append({"id": cid, "error": e.detail})
-    await db.commit()
     return {"ok": True, "pushed": pushed, "failed": failed}

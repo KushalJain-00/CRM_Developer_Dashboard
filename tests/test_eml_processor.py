@@ -80,3 +80,11 @@ def test_prompt_includes_signature_and_subject():
     prompt = build_llm_prompt(p)
     assert "Water Audit Report" in prompt
     assert "John Doe" in prompt
+
+def test_website_not_matched_from_email_only_body():
+    raw = (b"From: John Doe <john@acme.com>\r\nTo: a@b.com\r\nSubject: hi\r\n\r\n"
+           b"Reach me at john@acme.com for details.\r\n")
+    p = parse_eml_bytes(raw, "w.eml")
+    f = extract_local_fields(p)
+    assert f["email"] == "john@acme.com"
+    assert f["website"] is None
