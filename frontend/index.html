@@ -65,6 +65,18 @@
     <div class="nav-item" data-view="history" title="History" onclick="showView('history'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">🕐</span> <span class="ni-label">History</span>
     </div>
+    <div class="nav-item" data-view="eml-upload" title="EML Upload" onclick="showView('eml-upload'); if(window.innerWidth<=768)toggleSidebar()">
+      <span class="ni-icon">✉</span> <span class="ni-label">EML Upload</span>
+    </div>
+    <div class="nav-item" data-view="eml-contacts" title="EML Contacts" onclick="showView('eml-contacts'); if(window.innerWidth<=768)toggleSidebar()">
+      <span class="ni-icon">👥</span> <span class="ni-label">EML Contacts</span>
+    </div>
+    <div class="nav-item" data-view="eml-emails" title="EML Emails" onclick="showView('eml-emails'); if(window.innerWidth<=768)toggleSidebar()">
+      <span class="ni-icon">📨</span> <span class="ni-label">EML Emails</span>
+    </div>
+    <div class="nav-item" data-view="eml-settings" title="LLM Settings" onclick="showView('eml-settings'); if(window.innerWidth<=768)toggleSidebar()">
+      <span class="ni-icon">⚙</span> <span class="ni-label">LLM Settings</span>
+    </div>
     <div class="sb-section">Export</div>
     <div class="nav-item" title="Save to CRM" onclick="saveToCRM(); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">💾</span> <span class="ni-label">Save to CRM</span>
@@ -279,6 +291,68 @@
     </div>
 
 
+    <div class="view" id="view-eml-upload">
+      <div class="sec-hd"><div>
+        <div class="sec-title">EML Upload</div>
+        <div class="sec-sub">Drop .eml files — parsed on the server, AI-extracted, deduped</div>
+      </div></div>
+      <div class="drop-zone" id="emlDropZone" style="margin-top:16px">
+        <div class="drop-circle">📧</div>
+        <div class="drop-title">Drop .eml files here or click to browse</div>
+        <div class="drop-desc">Single or bulk · multi-provider LLM fallback · auto dedup</div>
+        <button class="btn btn-primary" type="button" id="emlPickBtn">Choose Files</button>
+        <input type="file" id="emlFileInput" accept=".eml" multiple style="display:none">
+      </div>
+      <div id="emlProgress" style="display:none;margin-top:20px">
+        <div class="progress-track" style="height:10px;border-radius:6px"><div class="progress-fill" id="emlProgressBar" style="width:0%"></div></div>
+        <div id="emlProgressLabel" style="margin-top:8px;font-size:13px;color:var(--text-2)"></div>
+      </div>
+      <div id="emlResults" style="margin-top:20px"></div>
+    </div>
+
+    <div class="view" id="view-eml-contacts">
+      <div class="sec-hd"><div>
+        <div class="sec-title">EML Contacts</div>
+        <div class="sec-sub">Extracted contacts — search, filter, export, push</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input id="emlCSearch" class="tbl-select" placeholder="Search name/email/phone…" style="min-width:200px">
+        <select id="emlCStatus" class="tbl-select"><option value="">All status</option><option>NEW</option><option>DUPLICATE</option></select>
+        <select id="emlCPushed" class="tbl-select"><option value="">Pushed: all</option><option value="false">Not pushed</option><option value="true">Pushed</option></select>
+        <button class="btn btn-secondary btn-sm" onclick="EmlUI.loadContacts()">↻ Refresh</button>
+        <button class="btn btn-success btn-sm" onclick="EmlUI.exportExcel()">⬇ Excel</button>
+        <button class="btn btn-secondary btn-sm" onclick="EmlUI.exportCsv()">⬇ CSV</button>
+        <button class="btn btn-primary btn-sm" onclick="EmlUI.pushSelected()">💾 Push selected</button>
+      </div></div>
+      <div style="overflow:auto;margin-top:12px;border:1px solid var(--border);border-radius:10px">
+        <table class="data-table" id="emlContactsTable"><thead></thead><tbody></tbody></table>
+      </div>
+      <div id="emlContactsPager" style="margin-top:10px;display:flex;gap:8px;align-items:center"></div>
+    </div>
+
+    <div class="view" id="view-eml-emails">
+      <div class="sec-hd"><div>
+        <div class="sec-title">EML Emails</div>
+        <div class="sec-sub">Inbox-style list of processed emails</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="EmlUI.loadEmails()">↻ Refresh</button></div>
+      <div id="emlEmailsList" style="margin-top:12px;display:flex;flex-direction:column;gap:8px"></div>
+      <div id="emlEmailsPager" style="margin-top:10px;display:flex;gap:8px;align-items:center"></div>
+    </div>
+
+    <div class="view" id="view-eml-settings">
+      <div class="sec-hd"><div>
+        <div class="sec-title">LLM Settings</div>
+        <div class="sec-sub">Ordered fallback chain — Google, OpenRouter, Groq, OpenAI, DeepSeek, Anthropic</div>
+      </div></div>
+      <p style="font-size:13px;color:var(--text-2)">Keys stay in this browser (localStorage). First working provider wins; failures fall through the chain.</p>
+      <div id="emlChainList" style="display:flex;flex-direction:column;gap:12px;margin-top:12px"></div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="btn btn-secondary btn-sm" onclick="EmlUI.addChainItem()">+ Add provider</button>
+        <button class="btn btn-primary" onclick="EmlUI.saveChain()">Save settings</button>
+      </div>
+    </div>
+
     <div class="view" id="view-history">
       <div class="sec-hd"><div class="sec-title">Upload History</div></div>
       <div id="historyContent"><div class="empty-state">Loading history…</div></div>
@@ -288,6 +362,7 @@
 </div>
 
 <script src="app.js"></script>
+<script src="eml.js"></script>
 
 <!-- Edit Modal -->
 <div class="modal-overlay" id="editModal">

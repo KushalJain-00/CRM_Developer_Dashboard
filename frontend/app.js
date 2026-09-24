@@ -1575,14 +1575,19 @@ function showView(id) {
   const nav=document.querySelector(`.nav-item[data-view="${id}"]`);
   if (nav) nav.classList.add('active');
   S.currentView=id;
-  const titles={upload:'Import File',mapping:'Field Mapping',processing:'Processing',dashboard:'Dashboard',analytics:'Analytics',table:'Data Table',quality:'Data Quality',dedup:'Deduplication',history:'Upload History'};
+  const titles={upload:'Import File',mapping:'Field Mapping',processing:'Processing',dashboard:'Dashboard',analytics:'Analytics',table:'Data Table',quality:'Data Quality',dedup:'Deduplication',history:'Upload History','eml-upload':'EML Upload','eml-contacts':'EML Contacts','eml-emails':'EML Emails','eml-settings':'LLM Settings'};
   document.getElementById('topTitle').textContent=titles[id]||id;
-  if (!['upload','mapping','processing'].includes(id))
+  if (!['upload','mapping','processing','eml-upload','eml-contacts','eml-emails','eml-settings'].includes(id))
     document.getElementById('topSub').textContent=`${S.fileName} · ${S.clean.length.toLocaleString()} records`;
   else
     document.getElementById('topSub').textContent='Supports .xlsx · .xls · .csv · .txt · .pdf — any column structure';
   if (id==='table') renderTable();
   if (id==='history') loadHistory();
+  if (window.EmlUI) {
+    if (id==='eml-contacts') EmlUI.loadContacts();
+    if (id==='eml-emails') EmlUI.loadEmails();
+    if (id==='eml-settings') EmlUI.renderChain();
+  }
 }
 
 function resetApp() {
