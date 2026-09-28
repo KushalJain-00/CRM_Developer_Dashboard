@@ -69,6 +69,30 @@ def test_process_empty_chain_uses_fallback(mock_llm, mock_store):
     assert res["extraction"] == "fallback"
     assert res["contact"]["email"] == "alice@z.com"
 
+@patch("api.eml.eml_store")
+def test_process_expired_budget_skips_llm(mock_store, monkeypatch):
+    from services import llm_router
+    monkeypatch.setenv("EML_PROCESS_BUDGET", "0")
+    calls = []
+    async def fake_call(provider, model, key, system, user):
+        calls.append(provider)
+        return '{"name": "Late"}'
+    monkeypatch.setattr(llm_router, "_call_provider", fake_call)
+    monkeypatch.setattr(llm_router, "RETRY_BACKOFF", [0, 0, 0])
+    llm_router._cache.cache.clear()
+    mock_store.fetch_dedup_keys = AsyncMock(return_value=(set(), set()))
+    mock_store.insert_email = AsyncMock(return_value="eml-4")
+    mock_store.insert_contact = AsyncMock(return_value="ct-4")
+    raw = b"From: L <late@x.com>\r\nTo: b@c.com\r\nSubject: s\r\n\r\nbody\r\n"
+    r = client.post(
+        "/api/eml/process",
+        data={"chain": '[{"provider":"groq","model":"m","api_key":"k"}]'},
+        files=[("files", ("late.eml", raw, "message/rfc822"))],
+    )
+    assert r.status_code == 200
+    assert r.json()["results"][0]["extraction"] == "fallback"
+    assert calls == []
+
 def test_contacts_list_shape():
     with patch("api.eml.eml_store") as ms:
         ms.list_contacts = AsyncMock(return_value={"items": [], "total": 0})

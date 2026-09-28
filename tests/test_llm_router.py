@@ -39,6 +39,37 @@ async def test_failover_to_second_provider(monkeypatch):
 async def test_empty_chain_returns_none():
     assert await extract_json([], "p") is None
 
+def test_llm_call_timeout_is_10s():
+    assert llm_router._http().timeout.read == 10.0
+
+@pytest.mark.asyncio
+async def test_failing_provider_called_exactly_once(monkeypatch):
+    calls = []
+    async def fake_call(provider, model, key, system, user):
+        calls.append(provider)
+        raise Exception("boom")
+    monkeypatch.setattr(llm_router, "_call_provider", fake_call)
+    monkeypatch.setattr(llm_router, "RETRY_BACKOFF", [0, 0, 0])
+    llm_router._cache.cache.clear()
+    chain = [ChainEntry(provider="groq", model="m", api_key="k")]
+    out = await extract_json(chain, "p")
+    assert out is None
+    assert len(calls) == 1
+
+@pytest.mark.asyncio
+async def test_expired_deadline_skips_all_providers(monkeypatch):
+    calls = []
+    async def fake_call(provider, model, key, system, user):
+        calls.append(provider)
+        return '{"name": "X"}'
+    monkeypatch.setattr(llm_router, "_call_provider", fake_call)
+    monkeypatch.setattr(llm_router, "RETRY_BACKOFF", [0, 0, 0])
+    llm_router._cache.cache.clear()
+    chain = [ChainEntry(provider="groq", model="m", api_key="k")]
+    out = await extract_json(chain, "deadline-prompt", deadline=0)
+    assert out is None
+    assert calls == []
+
 @pytest.mark.asyncio
 async def test_cache_hit(monkeypatch):
     calls = []

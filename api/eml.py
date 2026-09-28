@@ -1,6 +1,6 @@
 # api/eml.py
 """Fresh EML contact intelligence API — process, browse, export, push."""
-import csv, io, json, logging, re
+import csv, io, json, logging, os, re, time
 from fastapi import APIRouter, File, Form, UploadFile, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
@@ -62,6 +62,8 @@ async def eml_process(
 
     results = []
     counts = {"new": 0, "duplicate": 0, "error": 0}
+    # ponytail: total LLM budget — keeps the request under the Cloudflare ~100s proxy timeout
+    deadline = time.monotonic() + float(os.getenv("EML_PROCESS_BUDGET", "45"))
 
     for uf in files:
         name = uf.filename or "unnamed.eml"
@@ -71,7 +73,7 @@ async def eml_process(
                 raise ValueError("file too large (max 10MB)")
             parsed = parse_eml_bytes(raw, name)
             local = extract_local_fields(parsed)
-            ai = await extract_json(chain_list, build_llm_prompt(parsed)) if chain_list else None
+            ai = await extract_json(chain_list, build_llm_prompt(parsed), deadline) if chain_list else None
             extraction = "llm" if ai else "fallback"
             contact = _pick_contact(merge_fields(local, ai), parsed)
 

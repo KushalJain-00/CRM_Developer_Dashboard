@@ -1,6 +1,6 @@
 # services/llm_router.py
 """Multi-provider LLM chain: ordered failover, retries, JSON-only extraction."""
-import hashlib, json, re, asyncio, logging
+import hashlib, json, re, asyncio, logging, time
 from collections import OrderedDict
 from typing import Optional
 from pydantic import BaseModel
@@ -50,7 +50,7 @@ _client: Optional[httpx.AsyncClient] = None
 def _http() -> httpx.AsyncClient:
     global _client
     if _client is None or _client.is_closed:
-        _client = httpx.AsyncClient(timeout=30.0)
+        _client = httpx.AsyncClient(timeout=10.0)
     return _client
 
 def parse_llm_json(raw: str) -> dict | None:
@@ -107,7 +107,7 @@ async def _call_provider(provider: str, model: str, api_key: str, system: str, u
         return data["candidates"][0]["content"]["parts"][0]["text"].strip()
     return data["choices"][0]["message"]["content"].strip()
 
-async def extract_json(chain: list[ChainEntry], user_prompt: str) -> dict | None:
+async def extract_json(chain: list[ChainEntry], user_prompt: str, deadline: Optional[float] = None) -> dict | None:
     if not chain:
         return None
     first = chain[0]
@@ -118,9 +118,12 @@ async def extract_json(chain: list[ChainEntry], user_prompt: str) -> dict | None
 
     last_err = None
     for entry in chain:
+        # ponytail: wall-clock cap so /eml/process stays under the Cloudflare ~100s proxy timeout
+        if deadline is not None and time.monotonic() >= deadline:
+            break
         if not entry.api_key:
             continue
-        for i in range(3):
+        for i in range(1):
             try:
                 raw = await _call_provider(entry.provider, entry.model, entry.api_key,
                                            EXTRACTION_SYSTEM_PROMPT, user_prompt)
