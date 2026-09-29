@@ -6,14 +6,32 @@
   const notify = (m, t) => { if (window.showNotification) showNotification(m, t || 'info'); };
 
   const CHAIN_KEY = 'EML_LLM_CHAIN';
+  // Static lists sourced from models.dev (Sep 2026) — retired IDs removed.
+  // OpenRouter is fetched live below; its static list is only a fallback.
   const PROVIDERS = [
-    { id: 'gemini', label: 'Google Gemini', models: ['gemini-2.0-flash', 'gemini-2.5-flash-preview-05-20', 'gemini-1.5-flash'] },
-    { id: 'openrouter', label: 'OpenRouter', models: ['openai/gpt-4o-mini', 'anthropic/claude-3.5-haiku', 'google/gemini-2.0-flash-001'] },
-    { id: 'groq', label: 'Groq', models: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'gemma2-9b-it'] },
-    { id: 'openai', label: 'OpenAI', models: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini'] },
-    { id: 'deepseek', label: 'DeepSeek', models: ['deepseek-chat', 'deepseek-reasoner'] },
-    { id: 'anthropic', label: 'Anthropic', models: ['claude-3-5-haiku-20241022', 'claude-3-5-sonnet-20241022'] },
+    { id: 'gemini', label: 'Google Gemini', models: ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.1-pro-preview', 'gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemma-4-31b-it', 'gemma-4-26b-a4b-it'] },
+    { id: 'openrouter', label: 'OpenRouter', models: ['openai/gpt-4o-mini', 'anthropic/claude-sonnet-4-6', 'google/gemini-2.5-flash'] },
+    { id: 'groq', label: 'Groq', models: ['qwen/qwen3.8-27b', 'qwen/qwen3.6-27b', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'allam-2-7b'] },
+    { id: 'openai', label: 'OpenAI', models: ['gpt-5.6-sol', 'gpt-5.6-luna', 'gpt-5.6-terra', 'gpt-5.6', 'gpt-5.5-pro', 'gpt-5.5', 'gpt-5.4-mini', 'gpt-5.4-nano', 'gpt-5.4', 'gpt-4o-mini', 'gpt-4o'] },
+    { id: 'deepseek', label: 'DeepSeek', models: ['deepseek-v4-flash', 'deepseek-v4-pro', 'deepseek-flash', 'deepseek-v4-flash-vision-exp'] },
+    { id: 'anthropic', label: 'Anthropic', models: ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-fable-5-1', 'claude-opus-5', 'claude-sonnet-5', 'claude-opus-4-8', 'claude-sonnet-4-6', 'claude-haiku-4-5', 'claude-opus-4-6'] },
   ];
+
+  let orModels = null; // { free: [...], paid: [...] } — live from openrouter.ai, cached per session
+  async function ensureOrModels() {
+    if (orModels) return orModels;
+    try {
+      const res = await fetch('https://openrouter.ai/api/v1/models');
+      const data = await res.json();
+      const isFree = m => parseFloat(m.pricing?.prompt) <= 0 && parseFloat(m.pricing?.completion) <= 0;
+      const text = (data.data || []).filter(m => (m.architecture?.output_modalities || ['text']).includes('text'));
+      orModels = {
+        free: text.filter(isFree).map(m => m.id).sort(),
+        paid: text.filter(m => !isFree(m)).map(m => m.id).sort(),
+      };
+    } catch { orModels = { free: [], paid: [] }; }
+    return orModels;
+  }
 
   function getChain() {
     try { return JSON.parse(localStorage.getItem(CHAIN_KEY) || '[]'); } catch { return []; }
@@ -225,7 +243,7 @@
   }
 
   // ── LLM chain settings ─────────────────────────────────
-  function renderChain() {
+  async function renderChain() {
     const chain = getChain();
     const box = document.getElementById('emlChainList');
     if (!chain.length) {
@@ -233,16 +251,27 @@
         No providers yet — extraction will use local regex fallback only. Add at least one provider.</div>`;
       return;
     }
-    box.innerHTML = chain.map((c, i) => {
+    const or = chain.some(c => c.provider === 'openrouter') ? await ensureOrModels() : null;
+    const opt = (m, sel) => `<option ${m === sel ? 'selected' : ''}>${e(m)}</option>`;
+    const modelOptions = (c) => {
       const p = PROVIDERS.find(x => x.id === c.provider) || PROVIDERS[0];
+      if (c.provider === 'openrouter' && or && (or.free.length || or.paid.length)) {
+        const all = [...or.free, ...or.paid];
+        return `<optgroup label="Free (no cost)">${or.free.map(m => opt(m, c.model)).join('')}</optgroup>`
+          + `<optgroup label="Paid">${or.paid.map(m => opt(m, c.model)).join('')}</optgroup>`
+          + (c.model && !all.includes(c.model) ? opt(c.model, c.model) : '');
+      }
+      return p.models.map(m => opt(m, c.model)).join('')
+        + (c.model && !p.models.includes(c.model) ? opt(c.model, c.model) : '');
+    };
+    box.innerHTML = chain.map((c, i) => {
       return `<div style="border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:var(--bg-1)">
         <span style="font-weight:600;font-size:12px;color:var(--text-2);min-width:24px">#${i + 1}</span>
         <select class="tbl-select eml-p" data-i="${i}" onchange="EmlUI.onProviderChange(${i})">
           ${PROVIDERS.map(x => `<option value="${x.id}" ${x.id===c.provider?'selected':''}>${x.label}</option>`).join('')}
         </select>
         <select class="tbl-select eml-m" data-i="${i}">
-          ${p.models.map(m => `<option ${m===c.model?'selected':''}>${e(m)}</option>`).join('')}
-          ${c.model && !p.models.includes(c.model) ? `<option selected>${e(c.model)}</option>` : ''}
+          ${modelOptions(c)}
         </select>
         <input type="password" class="tbl-select eml-k" data-i="${i}" placeholder="API key" value="${e(c.api_key || '')}" style="flex:1;min-width:160px">
         <button class="btn btn-secondary btn-sm" onclick="EmlUI.moveChain(${i},${i-1})" ${i===0?'disabled':''}>↑</button>
@@ -271,7 +300,7 @@
 
   function addChainItem() {
     const chain = syncChainFromDom();
-    chain.push({ provider: 'gemini', model: 'gemini-2.0-flash', api_key: '' });
+    chain.push({ provider: 'gemini', model: 'gemini-3.8-flash', api_key: '' });
     saveChainLocal(chain);
     renderChain();
   }
@@ -289,10 +318,17 @@
     saveChainLocal(chain);
     renderChain();
   }
-  function onProviderChange(i) {
+  async function onProviderChange(i) {
     const chain = syncChainFromDom();
     const p = PROVIDERS.find(x => x.id === chain[i].provider);
-    if (p) chain[i].model = p.models[0];
+    if (p) {
+      if (p.id === 'openrouter') {
+        const or = await ensureOrModels();
+        chain[i].model = or.free[0] || p.models[0];
+      } else {
+        chain[i].model = p.models[0];
+      }
+    }
     saveChainLocal(chain);
     renderChain();
   }

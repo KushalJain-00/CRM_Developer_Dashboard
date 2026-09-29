@@ -50,7 +50,9 @@ _client: Optional[httpx.AsyncClient] = None
 def _http() -> httpx.AsyncClient:
     global _client
     if _client is None or _client.is_closed:
-        _client = httpx.AsyncClient(timeout=10.0)
+        # 30s: free-tier models are slow; paired with the 45s process budget
+        # so worst-case /eml/process ≈ 75s < Cloudflare ~100s proxy timeout
+        _client = httpx.AsyncClient(timeout=30.0)
     return _client
 
 def parse_llm_json(raw: str) -> dict | None:

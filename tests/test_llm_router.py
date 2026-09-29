@@ -39,8 +39,10 @@ async def test_failover_to_second_provider(monkeypatch):
 async def test_empty_chain_returns_none():
     assert await extract_json([], "p") is None
 
-def test_llm_call_timeout_is_10s():
-    assert llm_router._http().timeout.read == 10.0
+def test_llm_call_timeout_is_30s():
+    # free-tier models routinely take >10s; bound is 30s so worst-case
+    # /eml/process = budget(45) + 30 = 75s < Cloudflare ~100s
+    assert llm_router._http().timeout.read == 30.0
 
 @pytest.mark.asyncio
 async def test_failing_provider_called_exactly_once(monkeypatch):
