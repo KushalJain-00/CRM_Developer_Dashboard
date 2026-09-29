@@ -49,9 +49,10 @@
   const state = { contacts: [], contactPage: 1, contactTotal: 0, emails: [], emailPage: 1, emailTotal: 0, selected: new Set() };
 
   // Ride out Render cold-starts/deploys: gateway 502/503/504 (or a dropped
-  // connection) while the instance boots → retry with backoff (~50s budget).
+  // connection) while the instance boots → retry with backoff (~110s budget,
+  // enough for a full Render deploy window or a cold start).
   async function fetchRetry(url, opts, onRetry) {
-    const delays = [5000, 15000, 30000];
+    const delays = [5000, 15000, 30000, 60000];
     for (let i = 0; ; i++) {
       try {
         const res = await fetch(url, opts);
