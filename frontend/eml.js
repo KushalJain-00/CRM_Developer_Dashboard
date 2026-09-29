@@ -48,6 +48,27 @@
 
   const state = { contacts: [], contactPage: 1, contactTotal: 0, emails: [], emailPage: 1, emailTotal: 0, selected: new Set() };
 
+  // Ride out Render cold-starts/deploys: gateway 502/503/504 (or a dropped
+  // connection) while the instance boots → retry with backoff (~50s budget).
+  async function fetchRetry(url, opts, onRetry) {
+    const delays = [5000, 15000, 30000];
+    for (let i = 0; ; i++) {
+      try {
+        const res = await fetch(url, opts);
+        if ([502, 503, 504].includes(res.status) && i < delays.length) {
+          if (onRetry) onRetry(i + 1, delays.length + 1);
+          await new Promise(r => setTimeout(r, delays[i]));
+          continue;
+        }
+        return res;
+      } catch (err) {
+        if (i >= delays.length) throw err;
+        if (onRetry) onRetry(i + 1, delays.length + 1);
+        await new Promise(r => setTimeout(r, delays[i]));
+      }
+    }
+  }
+
   // ── Upload ──────────────────────────────────────────────
   async function processFiles(fileList) {
     const files = Array.from(fileList).filter(f => /\.eml$/i.test(f.name));
@@ -63,7 +84,8 @@
     bar.style.width = '10%';
     label.textContent = `Uploading ${files.length} file(s)…`;
     try {
-      const res = await fetch(`${API}/api/eml/process`, { method: 'POST', body: fd });
+      const res = await fetchRetry(`${API}/api/eml/process`, { method: 'POST', body: fd },
+        (n, total) => { label.textContent = `Server waking up — retry ${n}/${total}…`; });
       bar.style.width = '100%';
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || res.statusText);
@@ -107,7 +129,7 @@
     if (status) qs.set('status', status);
     if (pushed) qs.set('pushed', pushed);
     try {
-      const res = await fetch(`${API}/api/eml/contacts?${qs}`);
+      const res = await fetchRetry(`${API}/api/eml/contacts?${qs}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || res.statusText);
       state.contacts = data.items; state.contactTotal = data.total;
@@ -151,7 +173,7 @@
         if (search) qs.set('search', search);
         if (status) qs.set('status', status);
         if (pushed) qs.set('pushed', pushed);
-        const res = await fetch(`${API}/api/eml/contacts?${qs}`);
+        const res = await fetchRetry(`${API}/api/eml/contacts?${qs}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || res.statusText);
         total = data.total;
@@ -185,7 +207,7 @@
     if (!ids.length) return notify('Select contacts first', 'error');
     try {
       const headers = Object.assign({ 'Content-Type': 'application/json' }, await authHeaders());
-      const res = await fetch(`${API}/api/eml/contacts/push-bulk`, {
+      const res = await fetchRetry(`${API}/api/eml/contacts/push-bulk`, {
         method: 'POST', headers, body: JSON.stringify({ ids }),
       });
       const data = await res.json();
@@ -199,7 +221,7 @@
   async function loadEmails(page) {
     state.emailPage = page || 1;
     try {
-      const res = await fetch(`${API}/api/eml/emails?page=${state.emailPage}&page_size=50`);
+      const res = await fetchRetry(`${API}/api/eml/emails?page=${state.emailPage}&page_size=50`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || res.statusText);
       state.emails = data.items; state.emailTotal = data.total;
@@ -230,7 +252,7 @@
 
   async function openEmail(id) {
     try {
-      const res = await fetch(`${API}/api/eml/emails/${id}`);
+      const res = await fetchRetry(`${API}/api/eml/emails/${id}`);
       const m = await res.json();
       if (!res.ok) throw new Error(m.detail || 'Not found');
       const body = (m.body_text || '').slice(0, 4000);
