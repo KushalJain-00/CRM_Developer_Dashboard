@@ -59,7 +59,17 @@ from core.rate_limit import limiter
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-ALLOWED_ORIGINS = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "https://crmdevloper.vercel.app,http://localhost:8000,http://localhost:3000,http://localhost:5500").split(",") if o.strip()]
+# ponytail: env ALLOWED_ORIGINS can only ADD origins — defaults below are always
+# allowed, so a missing/stale env var (Render dashboard vs render.yaml) can't
+# silently break CORS for the live frontend.
+DEFAULT_ORIGINS = (
+    "https://crmdeveloper.vercel.app,"
+    "https://crmdevloper.vercel.app,"
+    "http://localhost:3000,http://localhost:5173,"
+    "http://localhost:5500,http://127.0.0.1:5500,http://localhost:8000"
+)
+ALLOWED_ORIGINS = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+ALLOWED_ORIGINS += [o for o in DEFAULT_ORIGINS.split(",") if o not in ALLOWED_ORIGINS]
 if not ALLOWED_ORIGINS:
     ALLOWED_ORIGINS = ["*"]
 

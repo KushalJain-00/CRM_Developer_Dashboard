@@ -88,8 +88,9 @@
       const res = await fetchRetry(`${API}/api/eml/process`, { method: 'POST', body: fd },
         (n, total) => { label.textContent = `Server waking up — retry ${n}/${total}…`; });
       bar.style.width = '100%';
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || res.statusText);
+      // gateway error pages are HTML — don't let json() throw a cryptic parse error
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || res.statusText || `HTTP ${res.status}`);
       label.textContent = `Done — ${data.counts.new} new · ${data.counts.duplicate} dupes · ${data.counts.error} errors`;
       renderResults(data.results);
       notify(`Processed ${files.length} file(s)`, 'success');
