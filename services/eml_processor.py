@@ -17,7 +17,7 @@ PHONE_RE = re.compile(r"(?:\+91[\s\-]?)?[6-9]\d{9}|\+\d{1,3}[\s\-]?\d{5,14}")
 WEBSITE_RE = re.compile(r"(?:https?://)?(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?)")
 PINCODE_RE = re.compile(r"\b\d{6}\b")
 COMPANY_RE = re.compile(
-    r"([A-Z][A-Za-z0-9&.\- ]+(?:\s+[A-Z][A-Za-z0-9&.\- ]+){0,6}\s+"
+    r"([A-Z][A-Za-z0-9&.\-]+(?:\s+[A-Za-z0-9&.\-]+){0,6}\s+"
     r"(?:Pvt\.?\s+Ltd\.?|Limited|Ltd\.?|Inc\.?|LLP|Corporation|Co\.))",
     re.I,
 )
