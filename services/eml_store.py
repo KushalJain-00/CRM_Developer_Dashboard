@@ -10,10 +10,10 @@ def get_eml_client() -> Client:
     global _client
     if _client is not None:
         return _client
-    url = os.getenv("EML_SUPABASE_URL", "")
-    key = os.getenv("EML_SUPABASE_ANON_KEY", "")
+    url = os.getenv("EML_SUPABASE_URL") or os.getenv("SUPABASE_URL", "")
+    key = os.getenv("EML_SUPABASE_ANON_KEY") or os.getenv("SUPABASE_ANON_KEY", "")
     if not url or not key:
-        raise RuntimeError("EML Supabase not configured (EML_SUPABASE_URL / EML_SUPABASE_ANON_KEY)")
+        raise RuntimeError("EML Supabase not configured (missing SUPABASE_URL / SUPABASE_ANON_KEY)")
     _client = create_client(url, key)
     return _client
 
