@@ -48,11 +48,35 @@
 
   const state = { contacts: [], contactPage: 1, contactTotal: 0, emails: [], emailPage: 1, emailTotal: 0, selected: new Set() };
 
+  // ── Pre-warm: ping /health on page load so the Render cold start begins
+  // immediately, not when the user first clicks "process". ─────────────
+  let _backendReady = false;
+  async function prewarmBackend() {
+    if (_backendReady) return;
+    const badge = document.getElementById('emlWarmBadge');
+    try {
+      const r = await fetch(`${API}/health`, { method: 'GET', mode: 'cors' });
+      if (r.ok) { _backendReady = true; if (badge) badge.style.display = 'none'; return; }
+    } catch { /* expected during cold start */ }
+    // Show warming indicator and keep pinging every 5s until ready
+    if (badge) { badge.style.display = ''; badge.textContent = '⏳ Waking backend…'; }
+    const iv = setInterval(async () => {
+      try {
+        const r = await fetch(`${API}/health`, { method: 'GET', mode: 'cors' });
+        if (r.ok) {
+          _backendReady = true;
+          clearInterval(iv);
+          if (badge) { badge.textContent = '✓ Backend ready'; setTimeout(() => badge.style.display = 'none', 2000); }
+        }
+      } catch { /* still waking */ }
+    }, 5000);
+  }
+
   // Ride out Render cold-starts/deploys: gateway 502/503/504 (or a dropped
-  // connection) while the instance boots → retry with backoff (~110s budget,
-  // enough for a full Render deploy window or a cold start).
+  // connection) while the instance boots → retry with backoff (~280s budget,
+  // enough for worst-case Render free-tier cold starts + deploys).
   async function fetchRetry(url, opts, onRetry) {
-    const delays = [5000, 15000, 30000, 60000];
+    const delays = [3000, 8000, 15000, 30000, 45000, 60000, 90000];
     for (let i = 0; ; i++) {
       try {
         const res = await fetch(url, opts);
@@ -368,6 +392,15 @@
     const input = document.getElementById('emlFileInput');
     const zone = document.getElementById('emlDropZone');
     if (!input || !zone) return;
+    // Inject a warm-up badge into the drop zone
+    if (!document.getElementById('emlWarmBadge')) {
+      const b = document.createElement('div');
+      b.id = 'emlWarmBadge';
+      b.style.cssText = 'display:none;font-size:12px;color:var(--text-2);margin-top:8px;padding:4px 12px;border-radius:6px;background:rgba(255,255,255,0.08)';
+      zone.appendChild(b);
+    }
+    // Start warming the backend immediately
+    prewarmBackend();
     document.getElementById('emlPickBtn')?.addEventListener('click', ev => { ev.stopPropagation(); input.click(); });
     zone.addEventListener('click', () => input.click());
     input.addEventListener('change', () => { if (input.files.length) processFiles(input.files); input.value = ''; });
