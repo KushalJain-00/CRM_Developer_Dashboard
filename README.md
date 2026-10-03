@@ -1,122 +1,62 @@
-# CRM Intelligence & EML Parsing Documentation
+# CRM Intelligence
 
-Welcome to the **CRM Intelligence** platform. This project provides a powerful CRM backend built with FastAPI, specifically featuring an intelligent **EML Processing Engine**. It automatically parses `.eml` (email) files, extracts contact intelligence (names, companies, phone numbers, designations) using AI (LLMs), deduplicates the contacts, and pushes them seamlessly into the CRM database.
+## What it is
+CRM Intelligence is a smart contact management platform designed for sales and outreach teams. It automatically reads your email files (`.eml`), extracts the sender's details and signature using AI, and converts them into organized CRM contacts. It cleans the data, catches exact duplicates, and pushes the final contacts into your database.
 
----
+## Live App
+**URL:** [https://crmdevloper.vercel.app](https://crmdevloper.vercel.app)
 
-## 🚀 Intelligent EML Parsing Overview
+**First Steps:**
+1. Open the URL above.
+2. Sign up or log in using your email and password.
+3. Once logged in, click **EML Extraction** in the sidebar to start processing emails.
 
-The EML parsing engine uses a multi-provider **LLM Failover Chain**. Since extracting structured JSON from raw email text can sometimes fail or timeout, the CRM allows you to configure a "chain" of LLMs. If the first provider fails, it automatically falls back to the next one.
+## How to use it, step by step
+1. **Upload Files:** Drag and drop your `.eml` files into the upload zone, or click to select them from your computer. You can upload multiple files at once (up to 10MB each).
+2. **AI Extraction:** The system reads the email and uses AI to read the signature block and email body.
+3. **Extracted Fields:** The AI finds and fills in: Name, Email, Primary Phone, Secondary Phone, Company, Designation, Address, City, Pincode, and Website.
+4. **Deduplication:** Before saving, the system checks if the email or phone number already exists in your database. If it does, it marks the new contact as a "DUPLICATE".
+5. **Review and Edit:** After processing, you'll see a table of results. Click "View all contacts" to see the full list. You can select contacts using the checkboxes and push them to your main CRM.
+6. **Failures:** If a file fails to process (e.g., file too large, AI timeout), it will be marked as "ERROR" in the results table, and the system will skip it.
 
-The system relies on LLMs to extract a precise JSON structure from email signatures and bodies.
+## LLM Setup (AI Providers)
+To extract signatures, the CRM uses AI models. You must provide your own API key to use them. The system uses a "failover chain" — meaning you can set up multiple AI providers. If the first one fails or is too busy, it automatically tries the second one.
 
----
+**How to add an AI provider:**
+1. Open the AI Settings (the gear icon) in the top menu.
+2. Select a **Provider** (e.g., Groq, OpenRouter, Gemini).
+3. Select a **Model**.
+4. Paste your **API Key**.
+5. Click **Save**.
 
-## 🤖 How to Set Up LLMs
+**Recommended Free Setup:**
+* **Provider:** Groq
+* **Model:** Select any current Llama-class model from the dropdown.
+* **API Key:** Get a free key from console.groq.com.
 
-The CRM doesn't hardcode a single AI provider. Instead, it supports a wide variety of models and providers. The frontend allows you to pass an ordered list (a chain) of providers, models, and API keys.
+*(If you need a backup, you can add Google Gemini or OpenRouter and select any current Flash or Haiku-class model as your #2 option).*
 
-Supported Providers:
-* `openrouter`
-* `groq`
-* `openai`
-* `anthropic`
-* `deepseek`
-* `gemini`
+## Privacy & API Keys
+Your API keys are stored securely in your browser's local storage (`localStorage`). They are never saved to the CRM database. When you process an email, the keys are sent temporarily to the backend to make the AI request, and then immediately discarded.
 
-### Setting up your LLM Chain in the CRM:
-1. Go to your CRM frontend EML parsing section.
-2. In the AI settings, you will define your chain.
-3. For each step in the chain, select the **Provider**, enter the **Model Name**, and provide your **API Key**.
-4. The system will try Provider 1 first. If it fails or times out, it moves to Provider 2, and so on.
+## Troubleshooting
 
----
+| Problem | Cause | Solution |
+|---------|-------|----------|
+| **"Invalid JSON" / Empty extraction** | The AI model failed to format the contact properly. | Try switching to a smarter model (like a Haiku or Llama-70b class) in the AI Settings. |
+| **"Server waking up — retry"** | The backend server was asleep. | Wait a few moments; the system automatically retries until the server wakes up. |
+| **"RateLimitExceeded" / "HTTP 429"** | You are processing too many emails too quickly for your free API key. | Add a fallback provider in the AI Settings, or wait a minute before uploading more files. |
+| **Timeout / "process failed"** | The AI took too long to read the email (over 45 seconds). | Use a faster provider like Groq, or process fewer emails at a time. |
 
-## 🆓 Best Free LLM API Options
+## Screens
+![Dashboard](docs/img/dashboard.png)
+<!-- TODO: Add a screenshot of the main dashboard -->
 
-If you are looking to process emails without incurring costs, here are the best free options supported by the CRM:
+![Upload Zone](docs/img/upload.png)
+<!-- TODO: Add a screenshot of the EML drop zone -->
 
-1. **Groq (Highly Recommended for Speed)**
-   * **Provider:** `groq`
-   * **Model:** `llama3-8b-8192` or `llama3-70b-8192`
-   * **Pros:** Blazingly fast inference, perfect for processing bulk `.eml` files quickly. Generous free tier.
-   * **Setup:** Get a free API key at [console.groq.com](https://console.groq.com/).
-
-2. **Google Gemini (Free Tier)**
-   * **Provider:** `gemini`
-   * **Model:** `gemini-1.5-flash`
-   * **Pros:** Very high rate limits on the free tier, massive context window (good for huge email threads).
-   * **Setup:** Get a free API key at [Google AI Studio](https://aistudio.google.com/).
-
-3. **OpenRouter (Free Models)**
-   * **Provider:** `openrouter`
-   * **Model:** `meta-llama/llama-3-8b-instruct:free` or `google/gemma-7b-it:free`
-   * **Pros:** One API key gives you access to dozens of free models. Rate limits apply.
-   * **Setup:** Get a key at [OpenRouter](https://openrouter.ai/).
-
----
-
-## 💰 Most Cost-Efficient Paid APIs (via OpenRouter)
-
-OpenRouter is the best platform for cost-efficient AI because it aggregates all models into a single API endpoint. If you exceed free limits, these are the best budget-friendly models for reliable JSON extraction:
-
-1. **Anthropic Claude 3 Haiku**
-   * **Model:** `anthropic/claude-3-haiku`
-   * **Cost:** ~$0.25 per 1M input tokens.
-   * **Why:** Extremely fast and arguably the smartest model in its price class. Exceptional at following the strict JSON format required by the CRM.
-
-2. **Google Gemini 1.5 Flash**
-   * **Model:** `google/gemini-1.5-flash`
-   * **Cost:** ~$0.35 per 1M input tokens (often free depending on tier).
-   * **Why:** Blazing fast, huge context window, highly reliable JSON parsing.
-
-3. **Meta Llama 3 8B / 70B Instruct**
-   * **Model:** `meta-llama/llama-3-70b-instruct`
-   * **Cost:** ~$0.40 - $0.90 per 1M tokens depending on the host.
-   * **Why:** Great open-source models. The 70B parameter model is very smart and affordable.
-
-4. **DeepSeek Chat**
-   * **Model:** `deepseek/deepseek-chat`
-   * **Cost:** ~$0.14 per 1M input tokens.
-   * **Why:** One of the absolute cheapest models available that still maintains high intelligence and instruction-following capabilities.
+![AI Settings](docs/img/ai_settings.png)
+<!-- TODO: Add a screenshot of the AI provider chain configuration -->
 
 ---
-
-## 🛠️ Step-by-Step API Setup
-
-### Setting up OpenRouter (Best Overall)
-1. Go to [OpenRouter.ai](https://openrouter.ai/) and create an account.
-2. Navigate to **Keys** and click **Create Key**.
-3. Copy the generated API Key (it starts with `sk-or-v1-`).
-4. In the CRM EML processing UI, add a new LLM provider:
-   * **Provider:** `openrouter`
-   * **Model:** e.g., `anthropic/claude-3-haiku`
-   * **API Key:** Paste your OpenRouter key.
-
-### Setting up Groq
-1. Go to the [Groq Console](https://console.groq.com/).
-2. Navigate to **API Keys** and generate a new key.
-3. In the CRM EML processing UI:
-   * **Provider:** `groq`
-   * **Model:** `llama3-70b-8192`
-   * **API Key:** Paste your Groq key.
-
-### Setting up Google Gemini
-1. Go to [Google AI Studio](https://aistudio.google.com/).
-2. Click **Get API key** and create a new key in a Google Cloud project.
-3. In the CRM EML processing UI:
-   * **Provider:** `gemini`
-   * **Model:** `gemini-1.5-flash`
-   * **API Key:** Paste your Gemini key.
-
----
-
-## 🔄 Recommended LLM Failover Chain
-
-For production, we recommend configuring your chain in the CRM UI as follows to balance cost, speed, and reliability:
-
-1. **Primary (Fast & Free):** `groq` with `llama3-70b-8192`
-2. **Fallback 1 (Cheap & Smart):** `openrouter` with `anthropic/claude-3-haiku`
-3. **Fallback 2 (High Context):** `gemini` with `gemini-1.5-flash`
-
-If Groq hits a rate limit, the CRM will instantly failover to Claude 3 Haiku via OpenRouter, ensuring no emails fail to process.
+*Are you a developer? Read the [Developer Guide](docs/DEVELOPER.md) for local setup, architecture, and deployment instructions.*
