@@ -13,7 +13,10 @@ SIG_DELIM = re.compile(
     re.I,
 )
 EMAIL_RE = re.compile(r"[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}")
-PHONE_RE = re.compile(r"(?:\+91[\s\-]?)?[6-9]\d{9}|\+\d{1,3}[\s\-]?\d{5,14}")
+PHONE_RE = re.compile(
+    r"(?:\+91[\s\-]?)?[6-9]\d{4}[\s\-]?\d{5}"    # Indian mobile: 10 digits, optional mid-split
+    r"|\+\d{1,3}[\s\-]?\d{7,14}"                  # international: min 7 digits after code
+)
 WEBSITE_RE = re.compile(r"(?:https?://)?(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?)")
 PINCODE_RE = re.compile(r"\b\d{6}\b")
 COMPANY_RE = re.compile(
@@ -24,6 +27,13 @@ COMPANY_RE = re.compile(
 CITY_HINTS = re.compile(
     r"\b(Mumbai|Delhi|Bangalore|Bengaluru|Chennai|Kolkata|Pune|Hyderabad|Ahmedabad|"
     r"Jaipur|Surat|Lucknow|Indore|Nagpur|Thane|Navi Mumbai)\b", re.I,
+)
+# Reject lines that look like greetings/salutations/departments — not real person names
+NAME_REJECT = re.compile(
+    r"^(?:dear\b|hi\b|hello\b|thank|please|regards|sir|madam|to whom"
+    r"|purchase\s+dep|ehs\s|new\s+corporate|image\d|\*+$)"
+    r"|@|\bsent\s+from\b",
+    re.I,
 )
 
 @dataclass
@@ -156,8 +166,25 @@ def extract_local_fields(parsed: ParsedEml) -> dict:
                 continue
             if COMPANY_RE.search(s) or WEBSITE_RE.search(s):
                 continue
-            if len(s.split()) >= 2 and len(s) <= 60:
-                fields["name"] = s
+            if NAME_REJECT.search(s):
+                continue
+            # Strip markdown bold markers and pipe-delimited suffixes
+            cleaned = re.sub(r"^\*+|\*+$", "", s).strip()
+            inline_desig = None
+            if "|" in cleaned:
+                parts = cleaned.split("|", 1)
+                cleaned = parts[0].strip()
+                inline_desig = parts[1].strip() if len(parts) > 1 else None
+            # Extract designation from parenthesized suffix: "Name (Title)"
+            paren_m = re.match(r"^(.+?)\s*\(([^)]+)\)\s*$", cleaned)
+            if paren_m:
+                cleaned = paren_m.group(1).strip()
+                if not inline_desig:
+                    inline_desig = paren_m.group(2).strip()
+            if len(cleaned.split()) >= 2 and len(cleaned) <= 50:
+                fields["name"] = cleaned
+                if inline_desig and not fields.get("designation"):
+                    fields["designation"] = inline_desig
                 # designation often next line "Role, Company" or "Role"
                 break
         # designation: line after name containing role keywords
@@ -169,8 +196,8 @@ def extract_local_fields(parsed: ParsedEml) -> dict:
                     if re.search(r"manager|director|engineer|executive|president|head|associate|founder|sales|ceo|cto|coordinator|officer|analyst|consultant|lead|supervisor|owner|proprietor", nxt, re.I):
                         fields["designation"] = nxt.split(",")[0].strip()
                         break
-    elif parsed.sender_name:
-        fields["name"] = parsed.sender_name
+    elif parsed.sender_name and not NAME_REJECT.search(parsed.sender_name):
+        fields["name"] = re.sub(r"^\*+|\*+$", "", parsed.sender_name).strip()
     if not fields["email"] and parsed.sender_email:
         fields["email"] = parsed.sender_email.split(",")[0].strip().lower()
     return fields
