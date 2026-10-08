@@ -129,7 +129,7 @@
     const el = document.getElementById('emlResults');
     el.innerHTML = `<div style="border:1px solid var(--border);border-radius:10px;overflow:auto">
       <table class="data-table"><thead><tr>
-        <th>File</th><th>Status</th><th>Extraction</th><th>Name</th><th>Email</th><th>Phone</th><th>Company</th><th>Designation</th>
+        <th>File</th><th>Status</th><th>Extraction</th><th>Name</th><th>Email</th><th>To</th><th>CC</th><th>Bcc</th><th>Phone</th><th>Company</th><th>Designation</th>
       </tr></thead><tbody>
       ${results.map(r => {
         const c = r.contact || {};
@@ -137,7 +137,7 @@
         return `<tr><td>${e(r.file)}</td>
           <td style="color:${color};font-weight:600">${e(r.status)}</td>
           <td>${e(r.extraction)}</td>
-          <td>${e(c.name)}</td><td>${e(c.email)}</td><td>${e(c.phone_primary)}</td>
+          <td>${e(c.name)}</td><td>${e(c.email)}</td><td>${e(c.to_emails)}</td><td>${e(c.cc_emails)}</td><td>${e(c.bcc_emails)}</td><td>${e(c.phone_primary)}</td>
           <td>${e(c.company)}</td><td>${e(c.designation)}</td></tr>`;
       }).join('')}
       </tbody></table></div>
@@ -166,7 +166,7 @@
 
   function renderContacts() {
     const table = document.getElementById('emlContactsTable');
-    const cols = ['name','email','phone_primary','phone_secondary','company','designation','city','source_file','dedup_status','pushed_to_crm'];
+    const cols = ['name','company','email','phone_primary','phone_secondary','website','to_emails','cc_emails','bcc_emails','designation','city','source_file','dedup_status','pushed_to_crm'];
     table.querySelector('thead').innerHTML = `<tr><th><input type="checkbox" id="emlSelAll"></th>${cols.map(c => `<th>${c}</th>`).join('')}</tr>`;
     table.querySelector('tbody').innerHTML = state.contacts.map(r => `<tr>
       <td><input type="checkbox" class="eml-row-sel" value="${e(r.id)}" ${state.selected.has(r.id)?'checked':''}></td>
@@ -208,7 +208,7 @@
         page++;
       }
       if (!all.length) return notify('No contacts to export', 'error');
-      const cols = ['name','email','phone_primary','phone_secondary','company','designation','address','city','pincode','website','source_file','dedup_status','pushed_to_crm'];
+      const cols = ['name','company','email','phone_primary','phone_secondary','website','to_emails','cc_emails','bcc_emails','designation','address','city','pincode','source_file','dedup_status','pushed_to_crm'];
       const rows = all.map(r => cols.map(c => r[c] ?? ''));
       const ws = XLSX.utils.aoa_to_sheet([cols, ...rows]);
       const wb = XLSX.utils.book_new();

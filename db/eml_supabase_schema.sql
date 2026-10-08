@@ -8,6 +8,9 @@ create table if not exists eml_emails (
   sender_email text,
   receiver_name text,
   receiver_email text,
+  to_emails text,
+  cc_emails text,
+  bcc_emails text,
   body_text text,
   has_signature boolean default false,
   created_at timestamptz default now()
@@ -27,6 +30,9 @@ create table if not exists eml_contacts (
   website text,
   source_email_id uuid references eml_emails(id) on delete set null,
   source_file text,
+  to_emails text,
+  cc_emails text,
+  bcc_emails text,
   dedup_status text default 'NEW',
   pushed_to_crm boolean default false,
   created_at timestamptz default now()

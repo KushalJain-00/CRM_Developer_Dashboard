@@ -85,6 +85,9 @@ async def eml_process(
                 "sender_email": parsed.sender_email,
                 "receiver_name": parsed.receiver_name,
                 "receiver_email": parsed.receiver_email,
+                "to_emails": parsed.to_emails,
+                "cc_emails": parsed.cc_emails,
+                "bcc_emails": parsed.bcc_emails,
                 "body_text": parsed.body_text,
                 "has_signature": parsed.has_signature,
             })
@@ -104,6 +107,9 @@ async def eml_process(
                 **contact,
                 "source_email_id": email_id,
                 "source_file": name,
+                "to_emails": parsed.to_emails,
+                "cc_emails": parsed.cc_emails,
+                "bcc_emails": parsed.bcc_emails,
                 "dedup_status": status,
                 "pushed_to_crm": False,
             })
@@ -160,8 +166,8 @@ async def eml_export_csv(
         if len(items) >= data["total"] or not data["items"]:
             break
         page += 1
-    cols = ["name", "email", "phone_primary", "phone_secondary", "company", "designation",
-            "address", "city", "pincode", "website", "source_file", "dedup_status", "pushed_to_crm"]
+    cols = ["name", "company", "email", "phone_primary", "phone_secondary", "website", "to_emails", "cc_emails", "bcc_emails", "designation",
+            "address", "city", "pincode", "source_file", "dedup_status", "pushed_to_crm"]
     buf = io.StringIO()
     w = csv.writer(buf)
     w.writerow(cols)

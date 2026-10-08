@@ -45,6 +45,9 @@ class ParsedEml:
     sender_email: str = ""
     receiver_name: str = ""
     receiver_email: str = ""
+    to_emails: str = ""
+    cc_emails: str = ""
+    bcc_emails: str = ""
     body_text: str = ""
     has_signature: bool = False
     signature_block: str = ""
@@ -94,10 +97,20 @@ def parse_eml_bytes(raw: bytes, file_name: str) -> ParsedEml:
     sender_name, sender_email = _addr(msg, "From")
     receiver_name, receiver_email = _addr(msg, "To")
     cc_name, cc_email = _addr(msg, "Cc")
+    bcc_name, bcc_email = _addr(msg, "Bcc")
+    
+    to_emails_str = receiver_email
+    cc_emails_str = cc_email  # preserve raw CC list
+    bcc_emails_str = bcc_email # preserve raw Bcc list
+    
     if cc_email:
         receiver_email = (receiver_email + ", " + cc_email).strip(", ")
         if cc_name:
             receiver_name = (receiver_name + ", " + cc_name).strip(", ")
+    if bcc_email:
+        receiver_email = (receiver_email + ", " + bcc_email).strip(", ")
+        if bcc_name:
+            receiver_name = (receiver_name + ", " + bcc_name).strip(", ")
 
     body_parts: list[str] = []
     if msg.is_multipart():
@@ -129,6 +142,9 @@ def parse_eml_bytes(raw: bytes, file_name: str) -> ParsedEml:
         sender_email=sender_email,
         receiver_name=receiver_name,
         receiver_email=receiver_email,
+        to_emails=to_emails_str,
+        cc_emails=cc_emails_str,
+        bcc_emails=bcc_emails_str,
         body_text=body[:8000],
         has_signature=has_sig,
         signature_block=sig,
