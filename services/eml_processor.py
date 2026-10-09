@@ -69,8 +69,8 @@ def _html_to_text(raw: str) -> str:
     return html_mod.unescape(text)
 
 def _addr(msg, header: str) -> tuple[str, str]:
-    raw = msg.get(header, "") or ""
-    pairs = email.utils.getaddresses([raw])
+    raw_list = msg.get_all(header, [])
+    pairs = email.utils.getaddresses(raw_list)
     if not pairs:
         return "", ""
     names = ", ".join(n for n, a in pairs if n)

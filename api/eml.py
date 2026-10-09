@@ -76,6 +76,9 @@ async def eml_process(
             ai = await extract_json(chain_list, build_llm_prompt(parsed), deadline) if chain_list else None
             extraction = "llm" if ai else "fallback"
             contact = _pick_contact(merge_fields(local, ai), parsed)
+            contact["to_emails"] = parsed.to_emails
+            contact["cc_emails"] = parsed.cc_emails
+            contact["bcc_emails"] = parsed.bcc_emails
 
             email_id = await eml_store.insert_email({
                 "file_name": name,
