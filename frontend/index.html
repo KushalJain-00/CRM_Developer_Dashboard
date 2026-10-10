@@ -68,8 +68,11 @@
     <div class="nav-item" data-view="eml-upload" title="EML Upload" onclick="showView('eml-upload'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">✉</span> <span class="ni-label">EML Upload</span>
     </div>
-    <div class="nav-item" data-view="eml-contacts" title="EML Contacts" onclick="showView('eml-contacts'); if(window.innerWidth<=768)toggleSidebar()">
-      <span class="ni-icon">👥</span> <span class="ni-label">EML Contacts</span>
+    <div class="nav-item" data-view="customer-profiles" title="Customer Profiles" onclick="showView('customer-profiles'); if(window.innerWidth<=768)toggleSidebar()">
+      <span class="ni-icon">👤</span> <span class="ni-label">Customer Profiles</span>
+    </div>
+    <div class="nav-item" data-view="eml-contacts" title="Staged Contacts" onclick="showView('eml-contacts'); if(window.innerWidth<=768)toggleSidebar()">
+      <span class="ni-icon">👥</span> <span class="ni-label">Staged Contacts</span>
     </div>
     <div class="nav-item" data-view="eml-emails" title="EML Emails" onclick="showView('eml-emails'); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">📨</span> <span class="ni-label">EML Emails</span>
@@ -307,6 +310,19 @@
         <div id="emlProgressLabel" style="margin-top:8px;font-size:13px;color:var(--text-2)"></div>
       </div>
       <div id="emlResults" style="margin-top:20px"></div>
+    </div>
+
+    <div class="view" id="view-customer-profiles">
+      <div class="sec-hd"><div>
+        <div class="sec-title">Customer Profiles</div>
+        <div class="sec-sub">Unified directory of all contacts and their roles</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input id="cpSearch" class="tbl-select" placeholder="Search profiles..." style="min-width:200px">
+        <button class="btn btn-primary btn-sm" onclick="AppUI.loadCustomerProfiles(1)">Search</button>
+      </div></div>
+      <div id="cpGrid" class="profile-cards-grid"></div>
+      <div id="cpPager" style="margin-top:16px;text-align:right"></div>
     </div>
 
     <div class="view" id="view-eml-contacts">

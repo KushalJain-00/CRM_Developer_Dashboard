@@ -1,0 +1,408 @@
+Delivered-To: mitul@excelenviro.com
+Received-SPF: pass (zohomail.in: domain of mail11.sender.zcmpin.net designates 103.103.198.67 as permitted sender) client-ip=103.103.198.67; envelope-from=bounce_60032974495+a.12ef5b372a9768a2_vw6@mail11.sender.zcmpin.net; helo=sender67.psin1.zcsend.in;
+Authentication-Results: mx.zohomail.in;
+	dkim=pass;
+	spf=pass (zohomail.in: domain of mail11.sender.zcmpin.net designates 103.103.198.67 as permitted sender)  smtp.mailfrom=bounce_60032974495+a.12ef5b372a9768a2_vw6@mail11.sender.zcmpin.net;
+	dmarc=pass(p=none dis=none)  header.from=smarterdharma.com
+ARC-Seal: i=1; a=rsa-sha256; t=1780284713; cv=none; 
+	d=zohomail.in; s=zohoarc; 
+	b=DL2lZysxXIe0iAtf8mwGlR7ahQlQLDHCzMx/ezQl9Rd8fIL3h8JykCvl1R/0p76SAlXVB+n3l6bBs2uAGRVij/goAfmq6JN/3k97jd1WY7uMHq8gmh1hmBK71Lho9jNN3sFPxOjpLotPDX9dXLT6P56YS4Z1fmJ4/zMXJ19+Ers=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.in; s=zohoarc; 
+	t=1780284713; h=Content-Type:Date:Date:From:From:List-Unsubscribe:MIME-Version:Message-ID:Reply-To:Reply-To:Subject:Subject:To:To:Message-Id:Cc; 
+	bh=tiwJ1mj64Xk2QVHtohiNr/s2xLUwr4bfkD70czth6ro=; 
+	b=L8nsl95z4DM3cT7mHCco9rOoPPED2w3IAcLqY26ZW/GhBRjBh07eQPB3A7+4nizjHjDxC/Gh3mYAmy/sQSHcA4P/jym8rgrR3CVNK9zGMy4HxwaTAj+rWHCvcKqBsNFObFNGPCX/8zFCm3Yu6W7fMSc2dFa4CHnrDghbhsT1+R8=
+ARC-Authentication-Results: i=1; mx.zohomail.in;
+	dkim=pass;
+	spf=pass (zohomail.in: domain of mail11.sender.zcmpin.net designates 103.103.198.67 as permitted sender)  smtp.mailfrom=bounce_60032974495+a.12ef5b372a9768a2_vw6@mail11.sender.zcmpin.net;
+	dmarc=pass header.from=<sharathd@smarterdharma.com> (p=none dis=none)
+Return-Path: <bounce_60032974495+a.12ef5b372a9768a2_vw6@mail11.sender.zcmpin.net>
+Received: from sender67.psin1.zcsend.in (sender67.psin1.zcsend.in [103.103.198.67]) by mx.zoho.in
+	with SMTPS id 1780284713104624.7225637570577; Mon, 1 Jun 2026 09:01:53 +0530 (IST)
+Received: from 10.213.14.227 by sender67.psin1.zcsend.in
+	with SMTP id 178028471194102154; Mon, 01 Jun 2026 09:01:51 +0530
+DKIM-Signature: a=rsa-sha256; q=dns/txt; b=fV2Q2KymREL8w3c4nLtfmo1MMLIrjjmd74Gkuf4aUbzz16qvWH1xKbWtpMDQi/3UgI+APrWBxpOUilKMJsZZFXI3GQxKYKhIcmMNolTo/AquyQwqdLRD6G+iqEPrq+CisMBYfPfOYseJXXOq1AR108BOy5b5639Cfn8doYi51h4=; c=simple/simple; s=151130; d=smarterdharma.com; v=1; bh=mtxBuxZ+xiPq5vO1rsolyvJpzrSFYGv5pxFp2ym94qY=; h=date:date:from:from:to:to:message-id:subject:subject:mime-version:content-type:list-unsubscribe:list-unsubscribe:list-unsubscribe-post:x-csa-complaints;
+DKIM-Signature: a=rsa-sha256; q=dns/txt; b=sLxtE2FBDajbe7wIoYoZ/n+L/8PHGItGynQ0OdH0Bw+hDSoa7jfigTKEoaMpKSDweThkhpnvjfZxKOeClyfAJsvDa8Q98hRa2BNcfQ532Dfnj//BPMv+YZShutfS7Zu8IGHwHR8XJiLEdCbIwYc1j6V/u0x7LvD8flkUGgF1iVg=; c=simple/simple; s=k1; d=mail12.sender.zcmpin.net; v=1; bh=mtxBuxZ+xiPq5vO1rsolyvJpzrSFYGv5pxFp2ym94qY=; h=date:date:from:from:to:to:message-id:subject:subject:mime-version:content-type:list-unsubscribe:list-unsubscribe:list-unsubscribe-post:x-csa-complaints;
+Date: Mon, 1 Jun 2026 09:01:51 +0530 (IST)
+From: "Sharath Devineni" <sharathd@smarterdharma.com>
+To: mitul@excelenviro.com
+Message-ID: <zcb.3z122b92353fda0a785b0f8562cb4e992602dc53e5c76b41ced4f1244f05a52516.12ef5b372a9768a2.1780284711937@mail11.sender.zcmpin.net>
+Subject: Beat the IGBC learning curve with SD+ Certify
+MIME-Version: 1.0
+Content-Type: multipart/alternative; 
+	boundary="----=_Part_27450_581040478.1780284711936"
+List-Unsubscribe: <https://fhsm-zgph.maillist-manage.in/ua/optout?od=3z122b92353fda0a785b0f8562cb4e992602dc53e5c76b41ced4f1244f05a52516&rd=12ef5b372a9768a2&sd=12ef5b372a91e35e&n=11699e4befae1b4>,<mailto:leave_60032974495+12ef5b372a9768a2_12ef5b372a91e35e@zcsend.in>
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+X-CSA-Complaints: csa-complaints@eco.de
+Reply-To: sharathd@smarterdharma.com
+X-JID: 3z122b92353fda0a785b0f8562cb4e992602dc53e5c76b41ced4f1244f05a52516.12ef5b372a9164c8
+X-campaignid: zohocampaigns.3z122b92353fda0a785b0f8562cb4e992602dc53e5c76b41ced4f1244f05a52516.zcb.12ef5b372a9768a2.11699e4befae1b4
+X-Zoho-RID: zohocampaigns.3z122b92353fda0a785b0f8562cb4e992602dc53e5c76b41ced4f1244f05a52516.zcb.12ef5b372a9768a2.11699e4befae1b4
+X-Mailer: Zoho Marketing Automation
+X-Report-Abuse: <Please send a copy of this message along with header to abuse+3z122b92353fda0a785b0f8562cb4e992602dc53e5c76b41ced4f1244f05a52516_zcb_12ef5b372a9768a2@zohocampaigns.in>, <https://fhsm-zgph.maillist-manage.in/campaigns/ReportAbuse.zc?od=3z122b92353fda0a785b0f8562cb4e992602dc53e5c76b41ced4f1244f05a52516&rd=12ef5b372a9768a2&sd=12ef5b372a91e35e&n=11699e4befae1b4>
+X-ZohoMail-DKIM: pass (identity @smarterdharma.com)
+X-ZohoMail-Owner: <zcb.3z122b92353fda0a785b0f8562cb4e992602dc53e5c76b41ced4f1244f05a52516.12ef5b372a9768a2.1780284711937@mail11.sender.zcmpin.net>+zmo_0_bounce_60032974495@mail11.sender.zcmpin.net
+
+------=_Part_27450_581040478.1780284711936
+Content-Type: text/plain;charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+
+
+Hi  Mitul Vinod Jain ,
+
+How many IGBC opportunities did the learning curve cost you this year?
+
+Every project that takes longer than it should is a project that delays the=
+ next one.
+
+SD+ Certify keeps you moving.
+*
+Inputs extracted automatically so reviews start faster
+*
+Points calculated without manual effort
+*
+Scenarios built and compared before decisions are locked
+*
+Documentation and narratives organised and ready for submission
+Spend less time on the process. Take on more projects.
+Start free. Grow fast.
+
+https://smarterdharma.com/sdplus-certify-trial1?utm_source=3Demail&utm_camp=
+aign=3DNew+AP+email Start Free Trial
+Regards,
+Sharath Devineni
+Head of Sales, Smarter Dharma
+Phone : tel:+919901170812 +91 99011 70812
+Email : sharathd@smarterdharma.com
+
+Email sent to mitul@excelenviro.com on behalf of Smarter Dharma
+Update https://fhsm-zgph.maillist-manage.in/ua/commpref?od=3D3z122b92353fda=
+0a785b0f8562cb4e992602dc53e5c76b41ced4f1244f05a52516&rd=3D12ef5b372a9768a2&=
+sd=3D12ef5b372a91e35e&n=3D11699e4befae1b4 preferences or https://fhsm-zgph.=
+maillist-manage.in/ua/optout?od=3D3z122b92353fda0a785b0f8562cb4e992602dc53e=
+5c76b41ced4f1244f05a52516&rd=3D12ef5b372a9768a2&sd=3D12ef5b372a91e35e&n=3D1=
+1699e4befae1b4 unsubscribe
+
+
+
+
+------=_Part_27450_581040478.1780284711936
+Content-Type: text/html;charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<html xmlns=3D"http://www.w3.org/1999/xhtml" xmlns:o=3D"urn:schemas-microso=
+ft-com:office:office" xmlns:v=3D"urn:schemas-microsoft-com:vml"><head><!--[=
+if gte mso 9]><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>=
+96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]--><!--[if !m=
+so]><!--><link href=3D"https://fonts.googleapis.com/css?family=3DRoboto:400=
+,400i,700,700i" rel=3D"stylesheet"><!--<![endif]-->
+=09<meta content=3D"width=3Ddevice-width" name=3D"viewport">
+=09<style>
+=09/* #### Mobile Phones Portrait #### */
+=09/* #### iPhone 4+ Portrait or Landscape #### */
+=09@media only screen and (max-width: 480px){
+=09=09table[class=3DcontentInner] {width:100% !important;padding:0px;margin=
+:0px;}
+=09=09img[class=3DzpImage]{width:100% !important;max-width: 360px !importan=
+t;text-align:center;margin:0px;padding:0px}=20
+=09=09body, table, td, p, li,div,span, blockquote{-webkit-text-size-adjust:=
+none !important;margin:0px auto;line-height:1.7}
+=09=09table[class=3DzpImageCaption]{text-align:left;}
+=09=09table[class=3Dcols]{width:100% !important;max-width:100% !important;t=
+ext-align:left;}
+=09=09table[class=3Dzpcolumns] {text-align:left;margin:0px;}=20
+=09=09table[class=3Dzpcolumn] {text-align:left;margin:0px;}=20
+=09=09table[class=3DzpAlignPos]{width:100%;text-align:left;margin:0px;}=20
+=09=09td[class=3Dtxtsize]{font-size:18px !important;}
+=09=09td[class=3Dpaddingcomp]{ padding-left: 15px !important; padding-right=
+: 15px !important }
+=09=09td[class=3Dbannerimgpad]{padding:0px !important;}
+=09=09span[class=3Dtxtsize]{font-size:18px !important;}
+=09=09img[size =3D "B"]{width: 100% !important;max-width:100% !important;ma=
+rgin: 0px !important;padding:0px !important;}
+=09=09img[size =3D "F"]{width: 100% !important;max-width:100% !important;ma=
+rgin: 0px !important;padding:0px !important;}
+=09=09img[size =3D "S"]{width:105px !important; height:auto; margin:0px aut=
+o !important;padding:0px !important;}
+=09=09img[size =3D "M"]{width:277.869px !important;height:auto;margin:0px a=
+uto !important;padding:0px !important;}
+=09=09h1{
+=09=09=09font-size:28px !important;
+=09=09=09line-height:100% !important;
+=09=09}
+=09=09h2{
+=09=09=09font-size:24px !important;
+=09=09=09line-height:100% !important;
+=09=09}
+=09=09h3{
+=09=09=09font-size:20px !important;
+=09=09=09line-height:100% !important;
+=09=09}
+=09=09h4{
+=09=09=09font-size:18px !important;
+=09=09=09line-height:100% !important;
+=09=09}
+=09=09}=09=09
+=09=09@media only screen and (max-width: 480px){
+=09=09.zpImage{
+=09=09=09height:auto !important;
+=09=09=09width:100% !important;
+=09=09}}
+=09=09@media only screen and (max-width: 480px){
+=09=09.contentInner,.cols,.zpAlignPos{
+=09=09=09width:100% !important;
+=09=09=09max-width:100% !important;
+=09=09}}
+=09=09@media only screen and (max-width: 480px){
+=09=09.paddingcomp{
+=09=09=09padding-left: 15px !important;
+=09=09=09padding-right: 15px !important;=20
+=09=09}
+=09=09.bannerimgpad{
+=09=09=09padding:0px !important;
+=09=09}
+=09=09.buttonElem a
+=09=09{
+=09=09=09max-width: 320px !important;
+=09=09}
+=09}
+=09=09@media screen and (max-width: 480px)
+        {
+                .tmplheader,.tmplfooter{width:100% !important;max-width:400=
+px !important;margin:0px auto;text-align:center;}
+        }
+=09=09a[x-apple-data-detectors] {
+=09=09    color: inherit !important;
+=09=09    text-decoration: none !important;
+=09=09    font-size: inherit !important;
+=09=09    font-family: inherit !important;
+=09=09    font-weight: inherit !important;
+=09=09    line-height: inherit !important;
+=09=09}
+=09=09
+=09=09</style>
+<meta content=3D"text/html;charset=3DUTF-8" http-equiv=3D"Content-Type"></h=
+ead><body bgcolor=3D"#ffffff" style=3D"margin:0; padding:0;font-family:Aria=
+l, Helvetica, sans-serif; font-size:12px; color:#000000;"><!--[if !mso 9]><=
+!--><span style=3D'font-size:0px;max-width: 0px;max-height: 0px;mso-hide:al=
+l;display:block;'>  </span><!--<![endif]--><center>=20
+<div class=3D"zppage-container">                                           =
+              =20
+=09=09<table bgcolor=3D"#ffffff" border=3D"0" cellpadding=3D"0" cellspacing=
+=3D"0" class=3D"contentOuter" id=3D"contentOuter" style=3D"background-color=
+:#f0f0f0;background-color:#ffffff; mso-table-lspace:0pt; mso-table-rspace:0=
+pt;font-size:12px;text-align:center;border:0px;padding:0px;border-collapse:=
+collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;" width=3D"100%">=20
+=09=09=09<tbody><tr>=20
+=09=09=09=09<td style=3D" mso-table-lspace:0pt; font-size:12px;font-family:=
+Arial, Helvetica, sans-serif; mso-table-rspace:0pt;font-size:12px;border:0p=
+x;padding:0px;border-collapse:collapse; mso-table-lspace:0pt; mso-table-rsp=
+ace:0pt;">&nbsp;</td>
+=09=09=09=09<td align=3D"center" style=3D" mso-table-lspace:0pt; font-size:=
+12px;font-family:Arial, Helvetica, sans-serif; mso-table-rspace:0pt;font-si=
+ze:12px;border:0px;padding:0px;border-collapse:collapse; mso-table-lspace:0=
+pt; mso-table-rspace:0pt;">
+=09=09=09=09=09<table bgcolor=3D"#ffffff" border=3D"0" cellpadding=3D"0" ce=
+llspacing=3D"0" class=3D"contentInner" id=3D"contentInner" style=3D"border-=
+collapse:collapse; border:0px;font-size:12px;border-collapse:collapse; mso-=
+table-lspace:0pt; mso-table-rspace:0pt;background-color:#ffffff;background-=
+color:#ffffff;width:600px;margin:0px auto;border:0px;" width=3D"600">=20
+=09=09=09=09=09<tbody><tr>=20
+=09=09=09=09=09<td height=3D"570" style=3D"border-collapse:collapse; mso-ta=
+ble-lspace:0pt; font-size:12px;font-family:Arial, Helvetica, sans-serif; ms=
+o-table-rspace:0pt;font-size:12px;border:0px;padding:0px;" valign=3D"top">
+=09=09=09=09=09 =09<a name=3D"Top" style=3D"text-decoration:underline;"></a=
+>
+    <div baseposition=3D"pos_YFkUyjFlRUSG17KTGU8Ffg" class=3D"zpcontent-wra=
+pper" id=3D"page-container">
+    <table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" id=3D"page-cont=
+ainer" style=3D" mso-table-lspace:0pt;font-size:12px;border:0px;padding:0px=
+;border-collapse:collapse; mso-table-lspace:0pt;mso-table-rspace:0pt;text-d=
+ecoration:none !important;" width=3D"100%">
+<tbody><tr><td class=3D"txtsize" id=3D"elm_1514453067575" style=3D" mso-tab=
+le-lspace:0pt; font-size:12px;font-family:Arial, Helvetica, sans-serif; mso=
+-table-rspace:0pt;font-size:12px;border:0px;padding:0px 0px;border-collapse=
+:collapse;" valign=3D"top">
+
+          <div class=3D"zpelement-wrapper" id=3D"elm_1514453067575" style=
+=3D";word-wrap:break-word;overflow:hidden;padding-right:0px;background-colo=
+r:;">
+=09    =09<table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" class=3D"=
+zpAlignPos" style=3D" mso-table-lspace:0pt; mso-table-rspace:0pt;font-size:=
+12px;padding:0px;border:0px;border-collapse:collapse; mso-table-lspace:0pt;=
+ mso-table-rspace:0pt;word-break:break-word;-ms-text-size-adjust: 100%;-web=
+kit-text-size-adjust: 100%;" width=3D"100%">
+=09  =09
+            <tbody><tr><td class=3D"paddingcomp" style=3D"border-collapse:c=
+ollapse; mso-table-lspace:0pt; mso-table-rspace:0pt;border:0px;padding:7px =
+15px;font-size:12pt;font-family:Arial,Helvetica;line-height:19pt;border-top=
+:0px none ;   border-bottom:0px none ;padding-top:7px;padding-bottom:7px;pa=
+dding-right:30px;padding-left:30px;">
+             =09    =09=09<div componentpaddingbottom=3D"7px" componentpadd=
+ingleft=3D"30px" componentpaddingright=3D"30px" componentpaddingtop=3D"7px"=
+ style><p align=3D"left" style=3D"line-height:1.7;font-family:Arial,verdana=
+;font-size:12px; color:#000000;padding:0px;margin: 0;text-align: left; line=
+-height: 19pt;"></p><div align=3D"left" style=3D"text-align: left; line-hei=
+ght: 19pt;"><span><p style=3D"font-family:Arial,verdana;font-size:12px; col=
+or:#000000;padding:0px;margin: 0;line-height: 19pt; text-align: left;"><fon=
+t color=3D"#000000" face=3D"Arial, Helvetica" style=3D"font-size: 12pt; col=
+or: rgb(0, 0, 0);">Hi <span> </span><span>Mitul Vinod Jain</span>,<br><br><=
+/font></p><span><p style=3D"font-family:Arial,verdana;font-size:12px; color=
+:#000000;padding:0px;margin: 0;line-height: 19pt; text-align: left;"><font =
+color=3D"#000000" face=3D"Arial, Helvetica" style=3D"font-size: 12pt; color=
+: rgb(0, 0, 0);"></font></p><span><p style=3D"font-family:Arial,verdana;fon=
+t-size:12px; color:#000000;padding:0px;margin: 0;line-height: 19pt; text-al=
+ign: left;"><font color=3D"#000000" face=3D"Arial, Helvetica" style=3D"font=
+-size: 12pt; color: rgb(0, 0, 0);">How many IGBC opportunities did the lear=
+ning curve cost you this year?</font></p><p style=3D"font-family:Arial,verd=
+ana;font-size:12px; color:#000000;padding:0px;margin: 0;line-height: 19pt; =
+text-align: left;"><font color=3D"#000000" face=3D"Arial, Helvetica" style=
+=3D"font-size: 12pt; color: rgb(0, 0, 0);"><br></font></p><p style=3D"font-=
+family:Arial,verdana;font-size:12px; color:#000000;padding:0px;margin: 0;li=
+ne-height: 19pt; text-align: left;"><font color=3D"#000000" face=3D"Arial, =
+Helvetica" style=3D"font-size: 12pt;color:#000000;">Every project that take=
+s longer than it should is a project that delays the next one.</font></p><p=
+ style=3D"font-family:Arial,verdana;font-size:12px; color:#000000;padding:0=
+px;margin: 0;line-height: 19pt; text-align: left;"><font color=3D"#000000" =
+face=3D"Arial, Helvetica" style=3D"font-size: 12pt;color:#000000;"><br></fo=
+nt></p><p style=3D"font-family:Arial,verdana;font-size:12px; color:#000000;=
+padding:0px;margin: 0;line-height: 19pt; text-align: left;"><font color=3D"=
+#000000" face=3D"Arial, Helvetica" style=3D"font-size: 12pt;color:#000000;"=
+>SD+ Certify keeps you moving.</font></p><ul style=3D"font-size: 12pt; font=
+-family: Arial, Helvetica; line-height: 19pt;"><li style=3D"font-size: 12pt=
+; font-family: Arial, Helvetica; line-height: 19pt;"><p style=3D"font-famil=
+y:Arial,verdana;font-size:12px; color:#000000;padding:0px;margin: 0;line-he=
+ight: 19pt; text-align: left;"><font color=3D"#000000" face=3D"Arial, Helve=
+tica" style=3D"font-size: 12pt;color:#000000;">Inputs extracted automatical=
+ly so reviews start faster</font></p><li style=3D"font-size: 12pt; font-fam=
+ily: Arial, Helvetica; line-height: 19pt;"><p style=3D"font-family:Arial,ve=
+rdana;font-size:12px; color:#000000;padding:0px;margin: 0;line-height: 19pt=
+; text-align: left;"><font color=3D"#000000" face=3D"Arial, Helvetica" styl=
+e=3D"font-size: 12pt;color:#000000;">Points calculated without manual effor=
+t</font></p><li style=3D"font-size: 12pt; font-family: Arial, Helvetica; li=
+ne-height: 19pt;"><p style=3D"font-family:Arial,verdana;font-size:12px; col=
+or:#000000;padding:0px;margin: 0;line-height: 19pt; text-align: left;"><fon=
+t color=3D"#000000" face=3D"Arial, Helvetica" style=3D"font-size: 12pt;colo=
+r:#000000;">Scenarios built and compared before decisions are locked</font>=
+</p><li style=3D"font-size: 12pt; font-family: Arial, Helvetica; line-heigh=
+t: 19pt;"><p style=3D"font-family:Arial,verdana;font-size:12px; color:#0000=
+00;padding:0px;margin: 0;line-height: 19pt; text-align: left;"><font color=
+=3D"#000000" face=3D"Arial, Helvetica" style=3D"font-size: 12pt;color:#0000=
+00;">Documentation and narratives organised and ready for submission</font>=
+</p></ul><p style=3D"font-family:Arial,verdana;font-size:12px; color:#00000=
+0;padding:0px;margin: 0;line-height: 19pt; text-align: left;"><font color=
+=3D"#000000" face=3D"Arial, Helvetica" style=3D"font-size: 12pt;color:#0000=
+00;">Spend less time on the process. Take on more projects.</font></p><p st=
+yle=3D"font-family:Arial,verdana;font-size:12px; color:#000000;padding:0px;=
+margin: 0;line-height: 19pt; text-align: left;"><font color=3D"#000000" fac=
+e=3D"Arial, Helvetica" style=3D"font-size: 12pt; color: rgb(0, 0, 0);">Star=
+t free. Grow fast.</font></p></span></span><p style=3D"line-height:1.7;font=
+-size:12px; color:#000000;padding:0px;margin: 0;font-family: &quot;MS Serif=
+&quot;, &quot;New York&quot;, serif; line-height: 19pt; text-align: left;">=
+<font color=3D"#000000" style=3D"font-size: 12pt;color:#000000;"><br></font=
+></p><p style=3D"line-height:1.7;font-size:12px; color:#000000;padding:0px;=
+margin: 0;font-family: &quot;MS Serif&quot;, &quot;New York&quot;, serif; l=
+ine-height: 19pt; text-align: left;"><font color=3D"#000000" style=3D"font-=
+size: 12pt;color:#000000;"><font color=3D"#000000" style=3D"color: rgb(0, 0=
+, 0);"><b><a alt=3D"Start Free Trial" href=3D"https://fhsm-zgph.maillist-ma=
+nage.in/click/12ef5b372a9768a2/12ef5b372a91e265" rel=3D"noopener noreferrer=
+" style=3D"text-decoration:underline;color: rgb(0, 0, 0);" target=3D"_blank=
+" title=3D"Start Free Trial" zcurl_name=3D"l_1"><font color=3D"#000000" sty=
+le=3D"color:#000000;">Start Free Trial</font></a></b></font></font></p><div=
+ align=3D"left" style=3D"font-family: &quot;MS Serif&quot;, &quot;New York&=
+quot;, serif; text-align: left; line-height: 19pt;"><br></div><font face=3D=
+"Arial, Helvetica" style=3D"font-size: 10pt;">Regards, </font></span></div>=
+<div align=3D"left" style=3D"text-align: left; line-height: 19pt;"><span><f=
+ont face=3D"Arial, Helvetica" style=3D"font-size: 10pt;"><b>Sharath Devinen=
+i</b></font></span></div><div align=3D"left" style=3D"text-align: left; lin=
+e-height: 19pt;"><span><font style=3D"font-size: 10pt;"><font face=3D"Arial=
+, Helvetica">Head of Sales, Smarter Dharma</font></font></span></div><div a=
+lign=3D"left" style=3D"text-align: left; line-height: 19pt;"><span><font st=
+yle><font face=3D"Arial, Helvetica" style><p style=3D"font-family:Arial,ver=
+dana;font-size:12px; color:#000000;padding:0px;margin: 0;line-height: 19pt;=
+ text-align: left;"><font color=3D"#000000" face=3D"Arial, Helvetica" style=
+=3D"color: rgb(0, 0, 0); font-size: 10pt;"><font color=3D"#333333">Phone : =
+<a alt=3D"tel:+919901170812" href=3D"tel:+919901170812" style=3D"text-decor=
+ation:underline;color: rgb(51, 51, 51);" target=3D"_self" title=3D"tel:+919=
+901170812" zcurl_name=3D"l_2"><font color=3D"#333333" style=3D"color:#33333=
+3;">+91 99011 70812</font></a></font></font></p><p style=3D"font-family:Ari=
+al,verdana;font-size:12px; color:#000000;padding:0px;margin: 0;line-height:=
+ 19pt; text-align: left;"><font color=3D"#000000" face=3D"Arial, Helvetica"=
+ style=3D"color: rgb(0, 0, 0); font-size: 10pt;">Email : sharathd@smarterdh=
+arma.com</font></p><br></font><br><br></font></span><br></div><p style=3D"f=
+ont-family:Arial,verdana;font-size:12px; color:#000000;padding:0px;margin: =
+0;line-height: 19pt;"></p></div>
+=09=09=09</td></tr>
+=09=09</tbody></table>
+       =09  </div>
+</td></tr>
+<tr><td class=3D"txtsize" id=3D"elm_1593407394601" style=3D" mso-table-lspa=
+ce:0pt; font-size:12px;font-family:Arial, Helvetica, sans-serif; mso-table-=
+rspace:0pt;font-size:12px;border:0px;padding:0px 0px;border-collapse:collap=
+se;" valign=3D"top">
+
+          <div class=3D"zpelement-wrapper" id=3D"elm_1593407394601" style=
+=3D";word-wrap:break-word;overflow:hidden;padding-right:0px;background-colo=
+r:#ffffff;">
+=09    =09<table bgcolor=3D"#ffffff" border=3D"0" cellpadding=3D"0" cellspa=
+cing=3D"0" class=3D"zpAlignPos" style=3D" mso-table-lspace:0pt; mso-table-r=
+space:0pt;font-size:12px;padding:0px;border:0px;border-collapse:collapse; m=
+so-table-lspace:0pt; mso-table-rspace:0pt;word-break:break-word;-ms-text-si=
+ze-adjust: 100%;-webkit-text-size-adjust: 100%;" width=3D"100%">
+=09  =09
+            <tbody><tr><td class=3D"paddingcomp" style=3D"border-collapse:c=
+ollapse; mso-table-lspace:0pt; mso-table-rspace:0pt;border:0px;padding:7px =
+15px;font-size:12pt;font-family:Arial,Helvetica;line-height:17pt;border-top=
+:0px none ;   border-bottom:0px none ;padding-top:0px;padding-bottom:7px;pa=
+dding-right:15px;padding-left:15px;">
+             =09    =09=09<div componentbgcolor=3D"#ffffff" componentlinehe=
+ight=3D"17pt" componentpaddingbottom=3D"7px" componentpaddingleft=3D"15px" =
+componentpaddingright=3D"15px" componentpaddingtop=3D"0px" style=3D"backgro=
+und-color: rgb(255, 255, 255);"><p align=3D"left" style=3D"line-height:1.7;=
+font-family:Arial,verdana;font-size:12px; color:#000000;padding:0px;margin:=
+ 0;text-align: left; line-height: 17pt;"></p><div align=3D"left" style=3D"t=
+ext-align: left;"><font style=3D"font-size: 8pt;"><span style=3D"color: rgb=
+(132, 132, 132);">Email sent to </span><span style=3D"color: rgb(132, 132, =
+132);">mitul@excelenviro.com on behalf of Smarter Dharma</span></font></div=
+><span style=3D"color: rgb(132, 132, 132);"><div align=3D"left" style=3D"te=
+xt-align: left;"><font style=3D"font-size: 8pt;">Update <u><a alt=3D"update=
+ your preferences" href=3D"https://fhsm-zgph.maillist-manage.in/click/12ef5=
+b372a9768a2/12ef5b372a91e266" rel=3D"noopener noreferrer" style=3D"text-dec=
+oration:underline;color: #848484; text-decoration:none;" target=3D"_blank" =
+title=3D"update your preferences" zcurl_name=3D"l_3"><font color=3D"#848484=
+" style=3D"line-height: 17pt;"> preferences</font></a></u> or <u><a alt=3D"=
+unsubscribe from this mailing list" href=3D"https://fhsm-zgph.maillist-mana=
+ge.in/ua/optout?od=3D3z122b92353fda0a785b0f8562cb4e992602dc53e5c76b41ced4f1=
+244f05a52516&rd=3D12ef5b372a9768a2&sd=3D12ef5b372a91e35e&n=3D11699e4befae1b=
+4" rel=3D"noopener noreferrer" style=3D"text-decoration:underline;color: #8=
+48484; text-decoration:none;" target=3D"_blank" title=3D"unsubscribe from t=
+his mailing list" zcurl_name=3D"l_4"><font color=3D"#848484" style=3D"line-=
+height: 17pt;">unsubscribe&nbsp;</font></a></u></font></div></span><p style=
+=3D"margin: 0;padding: 0px;font-family:Arial, Helvetica, sans-serif; color:=
+#000000;line-height:1.7;font-family:Arial,verdana;font-size:12px;padding:0p=
+x;"></p></div>
+=09=09=09</td></tr>
+=09=09</tbody></table>
+       =09  </div>
+</td></tr>
+    </tbody></table>
+</div>
+
+=09=09=09=09=09</td>=20
+=09=09=09=09=09</tr>=20
+=09=09=09=09=09</tbody></table>
+=09=09=09=09</td>=20
+=09=09=09=09<td style=3D" mso-table-lspace:0pt; font-size:12px;font-family:=
+Arial, Helvetica, sans-serif; mso-table-rspace:0pt;font-size:12px;border:0p=
+x;padding:0px;border-collapse:collapse; mso-table-lspace:0pt; mso-table-rsp=
+ace:0pt;">&nbsp;</td>
+=09=09=09</tr>=20
+=09=09</tbody></table>=20
+</div>
+</center>=20
+<img style=3D'visibility:hidden' src=3D"https://fhsm-zgph.maillist-manage.i=
+n/click/12ef5b372a9768a2/open.gif" alt=3D"" height=3D"1" width=3D"1"/><a st=
+yle=3D'visibility:hidden' href=3D"https://fhsm-zgph.maillist-manage.in/clic=
+k/12ef5b372a9768a2/12ef5b372a9164ca" alt=3D"" height=3D"1" width=3D"1"/></b=
+ody></html>
+------=_Part_27450_581040478.1780284711936--

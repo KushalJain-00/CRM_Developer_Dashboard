@@ -1,0 +1,386 @@
+Delivered-To: mitul@excelenviro.com
+Received-SPF: pass (zohomail.in: domain of assocham.co.in designates 139.59.47.233 as permitted sender) client-ip=139.59.47.233; envelope-from=abhay.yadav@assocham.co.in; helo=smtp3.assocham.co.in;
+Authentication-Results: mx.zohomail.in;
+	spf=pass (zohomail.in: domain of assocham.co.in designates 139.59.47.233 as permitted sender)  smtp.mailfrom=abhay.yadav@assocham.co.in;
+	dmarc=pass(p=reject dis=none)  header.from=assocham.co.in
+ARC-Seal: i=1; a=rsa-sha256; t=1781614527; cv=none; 
+	d=zohomail.in; s=zohoarc; 
+	b=WLuecKYmQIFQwaJVo3NeAtRT7Tuhsrw68xpOCjdUimX9167pN31q/g2OkfwYR3cPLATcub0cTpMiKxH8F6johIuxJrOK3c+IpfMP1RQRTi8VouKuBIX0//SKcW+LEhEES2snpWhFjXWguDwYmJi2gyxBBpcErTc235sJzBtF+nM=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.in; s=zohoarc; 
+	t=1781614527; h=Content-Type:Date:Date:From:From:List-Subscribe:List-Owner:List-Help:List-Unsubscribe:MIME-Version:Message-ID:Subject:Subject:To:To:Message-Id:Reply-To:Cc; 
+	bh=e1CQKi/uekiGVL0mJIR/LqFz21OxMn2yBg8ldxSn/XY=; 
+	b=aRb3lxeI8O5mhqO9PkyRaRsmw9eGh7EXTMcu4nZ+7uSzTNQhY0pumDyPVHvbjbTJK64Jh245EaZPEhEprmRNTnSgo8b5z/tuQS6YmL1Pu8rAj4rol+uyoYjoeXWUxyLN4G/q2Y/Gp4pyeVSsnrvvIHqCITuQIxaotQdDa9++Eac=
+ARC-Authentication-Results: i=1; mx.zohomail.in;
+	spf=pass (zohomail.in: domain of assocham.co.in designates 139.59.47.233 as permitted sender)  smtp.mailfrom=abhay.yadav@assocham.co.in;
+	dmarc=pass header.from=<abhay.yadav@assocham.co.in> (p=reject dis=none)
+Return-Path: <abhay.yadav@assocham.co.in>
+Received: from smtp3.assocham.co.in (smtp3.assocham.co.in [139.59.47.233]) by mx.zoho.in
+	with SMTPS id 1781614527566914.400380388333; Tue, 16 Jun 2026 18:25:27 +0530 (IST)
+Received: from loadbalancer.assocham.co.in (live.assocham.co.in [206.1.15.35])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(Client CN "loadbalancer.assocham.co.in", Issuer "loadbalancer.assocham.co.in" (not verified))
+	by smtp3.assocham.co.in (PowerMail) with ESMTPS id 63C48615D1
+	for <mitul@excelenviro.com>; Tue, 16 Jun 2026 18:25:26 +0530 (IST)
+Received: from live.assocham.co.in (live.assocham.co.in [192.168.40.35])
+	by loadbalancer.assocham.co.in (PowerMail) with ESMTP id 4gfn5p1TqdzNHShw
+	for <mitul@excelenviro.com>; Tue, 16 Jun 2026 18:25:26 +0530 (IST)
+Date: Tue, 16 Jun 2026 18:25:26 +0530
+To: mitul@excelenviro.com
+From: "abhay.yadav" <abhay.yadav@assocham.co.in>
+Subject: Last 4 Days Left to Register - 2nd ASSOCHAM National Water Awards 2026
+Message-ID: <5oIN8HX5Wlihnh7BqXsM6pgq5vWsKlZ14zfxaZfc@live.assocham.co.in>
+X-phpList-version: 3.6.12
+X-MessageID: 13364
+X-ListMember: mitul@excelenviro.com
+Precedence: bulk
+List-Help: <https://live.assocham.co.in/mail/?p=preferences&uid=57b3e09551647ba7b385ec7b8cd85946>
+List-Unsubscribe: <https://live.assocham.co.in/mail/?p=unsubscribe&uid=57b3e09551647ba7b385ec7b8cd85946&jo=1>
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+List-Subscribe: <https://live.assocham.co.in/mail/?p=subscribe>
+List-Owner: <mailto:assocham@assocham.co.in>
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+ boundary="b1_5oIN8HX5Wlihnh7BqXsM6pgq5vWsKlZ14zfxaZfc"
+
+This is a multi-part message in MIME format.
+
+--b1_5oIN8HX5Wlihnh7BqXsM6pgq5vWsKlZ14zfxaZfc
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+*2nd Edition of *
+
+*ASSOCHAM *
+
+*NATIONAL WATER AWARDS 2026*
+
+=E2=80=9CRecognising Best Water Practices=E2=80=9D
+
+Register Here :
+https://live.assocham.co.in/mail/lt.php?tid=3DZ7GK0r4DvO+6W/i5NdZSmEgcG+T66=
+AGSvZ8cTXZn4srgq1Hp/IxlXJ7EOeXbCQpy
+
+Greetings from ASSOCHAM!
+
+Last 4 Days Left to Register=20
+
+ASSOCHAM Water Council proudly announces its =E2=80=9C2nd Edition of ASSOCH=
+AM -
+National Water Awards 2026=E2=80=9D, which recognises public and private
+industries, institutions, organisations, startups, smart cities, townships,
+and utilities for their exceptional achievements in water resource
+management be it they're through operations, innovations, or CSR
+activities.=20
+
+As a key outcome of the *1st Edition of ASSOCHAM National Water Awards*,
+*case studies of 19 Industry Participants *were selected by the Bureau of
+Water Use Efficiency*, Ministry of Jal Shakti*, and *featured in a national
+compendium *released on World Water Day 2025 by the Hon'ble Minister of Jal
+Shakti, Shri C. R. Patil, reflecting the credibility and impact of the
+platform. (*For your reference, the Compendium on Best Practices on Water
+Use Efficiency by Industries can be accessed here:
+*https://live.assocham.co.in/mail/lt.php?tid=3DVfpnYm0A1N+/L9+u4+XgvkgcG+T6=
+6LGSvZ8cTXZn4srgq1Hp/IwVXJ7EOeXbCQpy
+).=20
+
+Why to Apply :=20
+
+ Get recognised and awarded for your exceptional achievements in water
+resource management.
+
+ Promote awareness of sustainable achievements
+
+ Enable the exchange of best practices among water-efficient organisations.
+
+ Foster a =E2=80=9Cspirit of competition=E2=80=9D to inspire and motivate w=
+ater users
+toward excellence in water management.
+
+Award Categories:
+
+ Water Management - Within Plant Premises=20
+
+ Water for Community - CSR Initiatives by Industry
+
+ Innovative Water Technology/Product
+
+ Excellence in Rainwater Harvesting
+
+ Excellence in Urban Water Management
+
+The Awards adhere to a transparent and rigorous assessment process that
+includes 4 stages of scrutiny and verification. The results of each
+assessment are reviewed by a pre-eminent Jury, comprising former
+bureaucrats, representatives of government, industry, and academia at two
+stages before arriving at the final decision.=20
+
+Click Here to visit the Official Website & Register: 2nd Edition - ASSOCHAM
+Water Summit & Awards 2026 - Registration
+<https://live.assocham.co.in/mail/lt.php?tid=3DZ7GK0r4DvO+6W/i5NdZSmEgcG+T6=
+6AGSvZ8cTXZn4srgq1Hp/IxlXJ7EOeXbCQpy>
+
+After submitting the application form, you will receive a confirmation from
+the ASSOCHAM Water Awards team. We deeply appreciate an early registration
+towards the 2nd Edition of ASSOCHAM National Water Awards 2026.=20
+
+Best Regards
+
+ Abhay Kumar Yadav
+
+ Additional Director, ASSOCHAM
+
+ phone: 011 46550531
+
+ mobile: +91 9990905508
+
+ email: abhay.yadav@assocham.com <mailto:abhay.yadav@assocham.com>
+
+
+
+--
+
+ To forward this message, please do not use the forward button of your
+email application, because this message was made specifically for you only.
+Instead use the forward page
+<https://live.assocham.co.in/mail/lt.php?tid=3Dh0UnY+c4bcazPTfpPoCBkUgcG+T6=
+6DGSvZ8cTXZn4srgq1Hp/IxFXJ7EOeXbCQpy
+>
+in our newsletter system.
+
+ Or you can opt-out completely
+<https://live.assocham.co.in/mail/lt.php?tid=3D5swHBCzfJjil2012UFI0/0gcG+T6=
+6GGSvZ8cTXZn4srgq1Hp/IxlXJ7EOeXbCQpy>
+from all future mailings.
+
+=20
+
+
+-- powered by phpList, www.phplist.com --
+
+
+--b1_5oIN8HX5Wlihnh7BqXsM6pgq5vWsKlZ14zfxaZfc
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<html><head>=0A        <meta content=3D"text/html;charset=3DUTF-8" http-equ=
+iv=3D"Content-Type">=0A        <meta content=3D"width=3Ddevice-width"/>=0A =
+       <title></title></head><body><p align=3D"center" style=3D"text-align:=
+center"><big><span style=3D"font-size:14px;"><span style=3D"font-family:Apt=
+os,sans-serif"><b><span lang=3D"EN-US"><span style=3D"background:white"><sp=
+an style=3D"font-family:&quot;Calibri&quot;,sans-serif"><span style=3D"colo=
+r:#c00000">2<sup>nd</sup> Edition of&nbsp;</span></span></span></span></b><=
+/span></span><br />
+<span style=3D"font-size:12pt"><span style=3D"font-family:Aptos,sans-serif"=
+><span style=3D"font-size:20px;"><b><span lang=3D"EN-US"><span style=3D"bac=
+kground:white"><span style=3D"font-family:&quot;Calibri&quot;,sans-serif"><=
+span style=3D"color:#c00000">ASSOCHAM </span></span></span></span></b></spa=
+n><br />
+<u><b><span lang=3D"EN-US" style=3D"font-size:13.5pt"><span style=3D"backgr=
+ound:white"><span style=3D"font-family:&quot;Calibri&quot;,sans-serif"><spa=
+n style=3D"color:#002060">NATIONAL WATER AWARDS 2026</span></span></span></=
+span></b></u></span></span><br />
+<span style=3D"font-size:12pt"><span style=3D"font-family:Aptos,sans-serif"=
+><span lang=3D"EN-US" style=3D"font-size:10.5pt"><span style=3D"background:=
+white"><span style=3D"font-family:&quot;Calibri&quot;,sans-serif"><span sty=
+le=3D"color:#3b7d23">&ldquo;Recognising Best Water Practices&rdquo;</span><=
+/span></span></span></span></span><br />
+<span style=3D"font-size:12pt"><span style=3D"font-family:Aptos,sans-serif"=
+><span lang=3D"EN-US" style=3D"font-size:11.0pt"><span style=3D"background:=
+white"><span style=3D"font-family:&quot;Calibri&quot;,sans-serif"><span sty=
+le=3D"color:black">Register Here :&nbsp;&nbsp;<a href=3D"https://www.watera=
+wards.assocham.org/nomination-form.php" style=3D"color:blue; text-decoratio=
+n:underline"><span style=3D"color:#467886">https://www.waterawards.assocham=
+.org/nomination-form.php</span></a></span></span></span></span>&nbsp;</span=
+></span></big></p>
+
+<p class=3D"xxx" style=3D"text-align: justify;"><span class=3D"xxx" style=
+=3D"text-align:justify;"><span style=3D"font-size:12px;"><big>Greetings fro=
+m ASSOCHAM!</big></span></span></p>
+
+<p class=3D"xxx" style=3D"text-align: justify;"><span style=3D"font-size:11=
+px;"><strong><big><span lang=3D"EN-US"><span style=3D"background:white"><sp=
+an style=3D"color:black"><span style=3D"background-color:#f1c40f;">Last 4 D=
+ays Left to Register&nbsp;</span></span></span></span></big></strong></span=
+></p>
+
+<p class=3D"xxx" style=3D"text-align: justify;"><span style=3D"font-size:12=
+px;"><span class=3D"xxx" style=3D"text-align:justify;"><big>ASSOCHAM Water =
+Council proudly announces&nbsp;its<b style=3D""> &ldquo;2nd&nbsp;Edition of=
+ ASSOCHAM - National Water Awards 2026</b>&rdquo;, which recognises public =
+and private industries, institutions, organisations, startups, smart cities=
+, townships, and utilities for their exceptional achievements in water reso=
+urce management be it they&rsquo;re through operations, innovations, or CSR=
+ activities.</big></span></span><em><big><span lang=3D"EN-US"><span style=
+=3D"background: white;"><span style=3D"color: black;"><b style=3D"font-size=
+: 11pt;">&nbsp;&nbsp;</b></span></span></span></big></em></p>
+
+<p class=3D"xxx" style=3D"text-align: justify;"><span style=3D"font-size:14=
+px;">As a key outcome of the <b>1<sup>st</sup> Edition of ASSOCHAM National=
+ Water Awards</b>, <b>case studies of <span style=3D"background-color:#f1c4=
+0f;">19 Industry Participants</span>&nbsp;</b>were selected by the Bureau o=
+f Water Use Efficiency<b>, Ministry of Jal Shakti</b>, and <b>featured in a=
+ national compendium </b>released on World Water Day 2025 by the <strong>Ho=
+n&rsquo;ble Minister of Jal Shakti, Shri C. R. Patil,&nbsp;</strong>reflect=
+ing the credibility and impact of the platform. (<b>For your reference, the=
+ Compendium on Best Practices on Water Use Efficiency by Industries can be =
+accessed here: </b><a href=3D"https://www.jalshakti-dowr.gov.in/static/uplo=
+ads/2026/03/72b50991b85b9ad9b52412e48b9672d4.pdf" style=3D"color:blue; text=
+-decoration:underline">https://www.jalshakti-dowr.gov.in/static/uploads/202=
+6/03/72b50991b85b9ad9b52412e48b9672d4.pdf</a>).&nbsp; &nbsp;</span></p>
+
+<p class=3D"xxx" style=3D"text-align: justify;"><strong><span class=3D"xxx"=
+ style=3D"text-align:justify;"><span style=3D"font-size:12px;"><big>Why to =
+Apply : </big></span></span></strong></p>
+
+<ul>
+=09<li class=3D"xxx" style=3D"text-align:justify">
+=09<p><span class=3D"xxx" style=3D"text-align:justify;"><span style=3D"font=
+-size:12px;"><big>Get recognised and awarded for your exceptional achieveme=
+nts in water resource management.</big></span></span></p>
+=09</li>
+=09<li class=3D"xxx" style=3D"text-align:justify">
+=09<p><span class=3D"xxx" style=3D"text-align:justify;"><span style=3D"font=
+-size:12px;"><big>Promote awareness of sustainable achievements</big></span=
+></span></p>
+=09</li>
+=09<li class=3D"xxx" style=3D"text-align:justify">
+=09<p><span class=3D"xxx" style=3D"text-align:justify;"><span style=3D"font=
+-size:12px;"><big>Enable the exchange of best practices among water-efficie=
+nt organisations.</big></span></span></p>
+=09</li>
+=09<li class=3D"xxx" style=3D"text-align:justify">
+=09<p><span class=3D"xxx" style=3D"text-align:justify;"><span style=3D"font=
+-size:12px;"><big>Foster a &ldquo;spirit of competition&rdquo; to inspire a=
+nd motivate water users toward excellence in water management.</big></span>=
+</span></p>
+=09</li>
+</ul>
+
+<p class=3D"xxx" style=3D"text-align: justify;"><strong><span class=3D"xxx"=
+ style=3D"text-align:justify;"><span style=3D"font-size:12px;"><big>Award C=
+ategories:</big></span></span></strong></p>
+
+<ul>
+=09<li class=3D"xxx" style=3D"text-align:justify;">
+=09<p><span class=3D"xxx" style=3D"text-align:justify;"><span style=3D"font=
+-size:12px;"><big>Water Management &ndash; Within Plant Premises </big></sp=
+an></span></p>
+=09</li>
+=09<li class=3D"xxx" style=3D"text-align:justify;">
+=09<p><span class=3D"xxx" style=3D"text-align:justify;"><span style=3D"font=
+-size:12px;"><big>Water for Community &ndash; CSR Initiatives by Industry</=
+big></span></span></p>
+=09</li>
+=09<li class=3D"xxx" style=3D"text-align:justify;">
+=09<p><span class=3D"xxx" style=3D"text-align:justify;"><span style=3D"font=
+-size:12px;"><big>Innovative Water Technology/Product</big></span></span></=
+p>
+=09</li>
+=09<li class=3D"xxx" style=3D"text-align:justify;">
+=09<p><span class=3D"xxx" style=3D"text-align:justify;"><span style=3D"font=
+-size:12px;"><big>Excellence in Rainwater Harvesting</big></span></span></p=
+>
+=09</li>
+=09<li class=3D"xxx" style=3D"text-align:justify;">
+=09<p><span class=3D"xxx" style=3D"text-align:justify;"><span style=3D"font=
+-size:12px;"><big>Excellence in Urban Water Management</big></span></span><=
+/p>
+=09</li>
+</ul>
+
+<p style=3D"text-align: justify;"><span class=3D"xxx" style=3D"text-align:j=
+ustify;"><span style=3D"font-size:12px;"><big>The Awards adhere to a transp=
+arent and rigorous assessment process that includes 4 stages of scrutiny an=
+d verification. The results of each assessment are reviewed by a pre-eminen=
+t Jury, comprising former bureaucrats, representatives of government, indus=
+try, and academia at two stages before arriving at the final decision. </bi=
+g></span></span></p>
+
+<p style=3D"text-align: justify;"><span style=3D"text-align:justify;"><span=
+ class=3D"xxx"><span style=3D"font-size:12px;"><big>Click Here to visit the=
+ Official Website &amp; Register:&nbsp;&nbsp;<a href=3D"https://live.assoch=
+am.co.in/mail/lt.php?tid=3DfktQAlIHAVRQBx4HVwIKHQJQAF9IA1UBBxsCXVNYAlNSAVMH=
+CQ5FAQwEUFRQVw0dUFIAAUhVBQ1XGwYBCAccV1UDAgIGAA5QBlZSGVcCWFIDAgAASAdXDAYbUFA=
+EAhxfU1RSGAMPXABQVwNcAlMOAg" >2nd Edition &ndash; ASSOCHAM Water Summit &am=
+p; Awards 2026 &ndash; Registration</a></big></span></span></span></p>
+
+<p><span style=3D"text-align:justify;"><span class=3D"xxx"><span style=3D"f=
+ont-size:12px;"><big>After submitting the application form, you will receiv=
+e a confirmation from the ASSOCHAM Water Awards team. We deeply appreciate =
+an early registration towards the 2<sup>nd</sup> Edition of ASSOCHAM Nation=
+al Water Awards 2026.&nbsp;</big></span></span></span></p>
+
+<p style=3D"text-align: justify;"><span style=3D"font-size:14px;"><span sty=
+le=3D"text-align:justify;"><span class=3D"xxx">Best Regards</span></span></=
+span></p>
+
+<table>
+=09<tbody>
+=09=09<tr>
+=09=09=09<td valign=3D"top">
+=09=09=09<table align=3D"left" width=3D"246">
+=09=09=09=09<tbody>
+=09=09=09=09=09<tr>
+=09=09=09=09=09=09<td valign=3D"top">
+=09=09=09=09=09=09<p><span style=3D"font-size:12px;"><span style=3D"font-fa=
+mily:Arial,Helvetica,sans-serif;"><strong>Abhay Kumar Yadav</strong><br />
+=09=09=09=09=09=09Additional Director, ASSOCHAM</span></span></p>
+=09=09=09=09=09=09</td>
+=09=09=09=09=09</tr>
+=09=09=09=09=09<tr>
+=09=09=09=09=09=09<td valign=3D"top">
+=09=09=09=09=09=09<p style=3D"text-align: justify;"><span style=3D"font-siz=
+e:12px;"><span style=3D"font-family:Arial,Helvetica,sans-serif;">phone: 011=
+ 46550531<br />
+=09=09=09=09=09=09mobile: +91 9990905508</span></span></p>
+
+=09=09=09=09=09=09<p style=3D"text-align: justify;"><span style=3D"font-siz=
+e:12px;"><span style=3D"font-family:Arial,Helvetica,sans-serif;">email: <a =
+href=3D"mailto:abhay.yadav@assocham.com">abhay.yadav@assocham.com</a></span=
+></span></p>
+=09=09=09=09=09=09</td>
+=09=09=09=09=09</tr>
+=09=09=09=09</tbody>
+=09=09=09</table>
+=09=09=09</td>
+=09=09=09<td valign=3D"top">
+=09=09=09<table width=3D"480">
+=09=09=09=09<tbody>
+=09=09=09=09=09<tr>
+=09=09=09=09=09=09<td style=3D"text-align: justify;"><span style=3D"font-si=
+ze:12px;"><span style=3D"font-family:Arial,Helvetica,sans-serif;"><img src=
+=3D"https://live.assocham.co.in/mailuploadimages/image/LOGO%20Color%20Tagli=
+ne.png" style=3D"height: 109px; width: 250px;" /></span></span></td>
+=09=09=09=09=09</tr>
+=09=09=09=09=09<tr>
+=09=09=09=09=09=09<td valign=3D"top">
+=09=09=09=09=09=09<p style=3D"text-align: justify;">&nbsp;</p>
+=09=09=09=09=09=09</td>
+=09=09=09=09=09</tr>
+=09=09=09=09</tbody>
+=09=09=09</table>
+=09=09=09</td>
+=09=09</tr>
+=09</tbody>
+</table>
+<br />--
+
+    <div class=3D"footer" style=3D"text-align:left; font-size: 75%;">
+      <p>To forward this message, please do not use the forward button of y=
+our email application, because this message was made specifically for you o=
+nly. Instead use the <a href=3D"https://live.assocham.co.in/mail/lt.php?tid=
+=3DfkteAgQDCwICBh4ABQEBHQJXBg9IAwcHARtXUlRYAgMOB14ECQdFAQwEUFRQVw0dUFIAAUhV=
+BQ1XGwYBCAccV1UDAgIGAA5QBlZSGVcCWFIDAgAASAdXDAYbUFAEAhxfU1RSGAMPXABQVwNcAlM=
+OAg" >forward page</a> in our newsletter system.<br/>
+      Or you can <a href=3D"https://live.assocham.co.in/mail/lt.php?tid=3Df=
+ksDA1NVCQIEAR5XUVZfHQIFVgFIAAFQBxtQAQZXBFYDBVUBVlBFAQwEUFRQVw0dUFIAAUhVBQ1X=
+GwYBCAccV1UDAgIGAA5QBlZSGVcCWFIDAgAASAdXDAYbUFAEAhxfU1RSGAMPXABQVwNcAlMOAg"=
+ >opt-out completely</a> from all future mailings.</p>
+    </div>
+
+  =0A<img src=3D"https://live.assocham.co.in/mail/ut.php?u=3D57b3e09551647b=
+a7b385ec7b8cd85946&amp;m=3D13364" width=3D"1" height=3D"1" border=3D"0" alt=
+=3D"" /></body></html>
+
+--b1_5oIN8HX5Wlihnh7BqXsM6pgq5vWsKlZ14zfxaZfc--
+

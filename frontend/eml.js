@@ -115,9 +115,9 @@
       // gateway error pages are HTML — don't let json() throw a cryptic parse error
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) throw new Error(data.error || res.statusText || `HTTP ${res.status}`);
-      label.textContent = `Done — ${data.counts.new} new · ${data.counts.duplicate} dupes · ${data.counts.error} errors`;
+      label.textContent = `Done — ${data.counts.new} new · ${data.counts.merged} merged · ${data.counts.duplicate} dupes · ${data.counts.error} errors`;
       renderResults(data.results);
-      notify(`Processed ${files.length} file(s)`, 'success');
+      notify(`Processed ${files.length} file(s) and auto-saved to CRM`, 'success');
     } catch (err) {
       label.textContent = 'Failed';
       notify('Process failed: ' + err.message, 'error');
@@ -258,16 +258,23 @@
   function renderEmails() {
     const list = document.getElementById('emlEmailsList');
     list.innerHTML = state.emails.map(m => `
-      <div class="eml-mail-row" style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;background:var(--bg-1)"
+      <div class="eml-mail-row" style="border:1px solid var(--border);border-radius:var(--r);padding:16px;cursor:pointer;background:var(--bg-1);margin-bottom:12px;display:flex;flex-direction:column;gap:8px"
            onclick="EmlUI.openEmail('${e(m.id)}')">
-        <div style="display:flex;justify-content:space-between;gap:12px">
-          <strong style="font-size:14px">${e(m.subject || '(no subject)')}</strong>
-          <span style="font-size:12px;color:var(--text-2);white-space:nowrap">${e(m.date)}</span>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+          <div style="font-family:var(--font-d);font-weight:700;font-size:15px;color:var(--text)">${e(m.subject || '(no subject)')}</div>
+          <div style="font-size:12px;color:var(--text-3);white-space:nowrap;background:var(--bg-2);padding:4px 8px;border-radius:6px">${new Date(m.date).toLocaleString()}</div>
         </div>
-        <div style="font-size:12px;color:var(--text-2);margin-top:4px">
-          From: ${e(m.sender_name)} &lt;${e(m.sender_email)}&gt; → ${e(m.receiver_email)}
-          ${m.has_signature ? ' · ✍ signature' : ''}
+        <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--text-2)">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="color:var(--text-3);width:40px;font-weight:600;font-size:11px;text-transform:uppercase">From</span>
+            <span><strong style="color:var(--text)">${e(m.sender_name)}</strong> &lt;${e(m.sender_email)}&gt;</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="color:var(--text-3);width:40px;font-weight:600;font-size:11px;text-transform:uppercase">To</span>
+            <span>${e(m.receiver_email)}</span>
+          </div>
         </div>
+        ${m.has_signature ? `<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);display:flex;align-items:center;gap:6px"><span class="profile-badge profile-badge-blue" style="display:inline-block">✍ Signature Detected</span></div>` : ''}
       </div>`).join('') || `<div class="empty-state">No emails processed yet</div>`;
     const pages = Math.max(1, Math.ceil(state.emailTotal / 50));
     document.getElementById('emlEmailsPager').innerHTML =

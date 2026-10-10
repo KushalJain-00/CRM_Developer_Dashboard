@@ -1,0 +1,942 @@
+Delivered-To: mitul@excelenviro.com
+Authentication-Results: mx.zohomail.in;
+	dkim=pass;
+	spf=pass (zohomail.in: domain of siloxindia.com designates 52.101.227.85 as permitted sender)  smtp.mailfrom=anand.dubey@siloxindia.com;
+	arc=pass (i=2 dmarc=pass fromdomain=siloxindia.com);
+	dmarc=pass(p=quarantine dis=none)  header.from=siloxindia.com
+ARC-Seal: i=3; a=rsa-sha256; t=1781514956; cv=pass; 
+	d=zohomail.in; s=zohoarc; 
+	b=CNWjU9CXi7yzKF5UUmXmvPl/bHQ30NDUfHi4jOnA8EUBvHUklvWFQADAtiWeJUIDiAMmmGhdHK37RrbNsHR10RiAuCKy2mJJgQ8ThM2lVGj8lAw96RP4W2gCp+RcyNoEBm69g8He9Wle22+cVDfq6dWVdeC6NMCg89iOD4noTwg=
+ARC-Message-Signature: i=3; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.in; s=zohoarc; 
+	t=1781514956; h=Content-Type:Cc:Cc:Date:Date:From:From:MIME-Version:Message-ID:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=jJuZxKDhFV4MuV66ybMPMNSBs0zjG0CVVLnkzqRUsDY=; 
+	b=IUZSu3QNYecdxCv6lalAFqRmE6klcGzIFe/Jzkf4THn+Go0KubF/K5/VzXCzb2/uCTRs6GDESndeWqk8STEGs6lKzWJ3iWDSPpO64UplGfDP+Hm6N4OJPFvKwnPHeZtuVnMnYI0fFX+5KxGDmqLO3wvJnhuwgXwlP3aTWiE/gYg=
+ARC-Authentication-Results: i=3; mx.zohomail.in;
+	dkim=pass;
+	spf=pass (zohomail.in: domain of siloxindia.com designates 52.101.227.85 as permitted sender)  smtp.mailfrom=anand.dubey@siloxindia.com;
+	arc=pass (i=2 dmarc=pass fromdomain=siloxindia.com);
+	dmarc=pass header.from=<anand.dubey@siloxindia.com> (p=quarantine dis=none)
+Received: from MA0PR01CU009.outbound.protection.outlook.com (mail-southindiaazon11020085.outbound.protection.outlook.com [52.101.227.85]) by mx.zoho.in
+	with SMTPS id 1781514956445943.7119593147996; Mon, 15 Jun 2026 14:45:56 +0530 (IST)
+Received: from MA5PR01CA0113.INDPRD01.PROD.OUTLOOK.COM (2603:1096:a01:1a7::6)
+ by PNYPR01MB10935.INDPRD01.PROD.OUTLOOK.COM (2603:1096:c01:296::6) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.113.18; Mon, 15 Jun
+ 2026 09:15:53 +0000
+Received: from MA1PEPF000072B2.INDPRD01.PROD.OUTLOOK.COM
+ (2603:1096:a01:1a7:cafe::47) by MA5PR01CA0113.outlook.office365.com
+ (2603:1096:a01:1a7::6) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.21.113.18 via Frontend Transport; Mon,
+ 15 Jun 2026 09:15:53 +0000
+Received: from mfod-aps1.eml100bom.ctr.sophos.com (159.112.232.224) by
+ MA1PEPF000072B2.mail.protection.outlook.com (10.167.242.22) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.21.139.8 via Frontend Transport; Mon, 15 Jun 2026 09:15:52 +0000
+Received: from localhost (ip-172-28-97-217.ap-south-1.compute.internal [127.0.0.1])
+	by mfod-aps1.eml100bom.ctr.sophos.com (Postfix) with ESMTP id 4gf4Gw3HbKzPjmx
+	for <mitul@excelenviro.com>; Mon, 15 Jun 2026 09:15:52 +0000 (UTC)
+Received: from MA0PR01CU009.outbound.protection.outlook.com (mail-southindiaazon11020073.outbound.protection.outlook.com [52.101.227.73])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mf-outbound-submit.eml100bom.ctr.sophos.com (Postfix) with ESMTPS id 4gf4Gt5TtHz7t89;
+	Mon, 15 Jun 2026 09:15:50 +0000 (UTC)
+Received: from BMXPR01MB3671.INDPRD01.PROD.OUTLOOK.COM (2603:1096:b00:5a::15)
+ by MA5PR01MB11871.INDPRD01.PROD.OUTLOOK.COM (2603:1096:a01:18b::17) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.113.18; Mon, 15 Jun
+ 2026 09:15:48 +0000
+Received: from BMXPR01MB3671.INDPRD01.PROD.OUTLOOK.COM
+ ([fe80::93b9:9a6f:2680:c6c]) by BMXPR01MB3671.INDPRD01.PROD.OUTLOOK.COM
+ ([fe80::93b9:9a6f:2680:c6c%5]) with mapi id 15.21.0113.015; Mon, 15 Jun 2026
+ 09:15:48 +0000
+Return-Path: <anand.dubey@siloxindia.com>
+Return-Path: anand.dubey@siloxindia.com
+ARC-Seal: i=2; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=pass;
+ b=fl/s04A/epYPMepz0czDv5q5R8h9jNA0KFp/rAx+KTO/iAcKiw02aFKo73EUD4D/0fM5ifdqfVR9l/aaenkhsW1mtqAdJ9zEiqoc4EPaHwi+bOvz/pjQgmn24ciBttZSXeSh0G32Gi6HYKXVuJ9cPYn27IuMASZvrXtyZWi67R/ndlDQJZD1wLzTEakTwS44z6mxg9LuuTf0R4LlqUWoNFGyPNZz3NNskj8ClGeQfs+VTeoXrH169W9DiUdmhzYaEsxX0uloHUN74rPKDq9GMQ5vL5dbc0KbDYOYNaVPYYP2bIYEyiicruD2Zv7iuyeTOE7rCQ/eOZMoC/+I9layOQ==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=jJuZxKDhFV4MuV66ybMPMNSBs0zjG0CVVLnkzqRUsDY=;
+ b=coaaGFRCpdILAYFbqg5003shWVsNRLqUs0ETqDtxubc4taX/Yq1QwOh1jZVI3rps5qpNoc1kN4tq3eqDn7QoOjCfanwfd2ucs97l+Q/rOfqn34Nd+BNew3ZnMLVH+cnH/mRptBES4JG4eWTiJ3Xym5WeO5jjzSPRikfk33He9nBH2KVHQqtxeGCPfkdvJKDUNOMjNRIcYbd/+XNVTBIzqpOtCbS2mdpIbzTDftzazo9KQ1K9c+DpZSu5gdTEJYlt52G8sDkugsKoxXN4fF+1nyaAQBPKtFtTVqqUwSMHKPrzrM9tQzRuL4GYSKpf4y8c4SlrhmEBVFntJQ9NHpwQlw==
+ARC-Authentication-Results: i=2; mx.microsoft.com 1; spf=softfail (sender ip
+ is 159.112.232.224) smtp.rcpttodomain=excelenviro.com
+ smtp.mailfrom=siloxindia.com; dmarc=pass (p=quarantine sp=none pct=100)
+ action=none header.from=siloxindia.com; dkim=pass (signature was verified)
+ header.d=siloxindia.com; arc=pass (0 oda=1 ltdi=1
+ spf=[1,1,smtp.mailfrom=siloxindia.com] dkim=[1,1,header.d=siloxindia.com]
+ dmarc=[1,1,header.from=siloxindia.com])
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=siloxindia.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=jJuZxKDhFV4MuV66ybMPMNSBs0zjG0CVVLnkzqRUsDY=;
+ b=B/avMvUil0pfcZntLScKzVJg/ODz2/BsOIQkSDGYuIHX3vSyWuxsOQ1Rv6SSVeOpKuGOqCdK+ovQ2szgOQNRArDEJtcvahTWKnMqrlPeEn2cCTS05YJCMMH3QgbhMq6f1gH5jPrNHK/AUfr1bYu5SIy7DArc0PEwmkmx7MU1POgqe14Zw50PZolzVFsML1CIVUZEWZLN5917S9hTX+hfREAL90BKneSm4gv96du/4I2ZL2QBNo+tS/23yCvWpU9uMlbUdyOC3yuE8yRVKkm21uOjrz8O1Irp0RgDOKF6vNtjMP5fe3ncOFmoskUz6CZwzhVbf/mX4dl5WkO5Ib/RNA==
+X-MS-Exchange-Authentication-Results: spf=softfail (sender IP is
+ 159.112.232.224) smtp.mailfrom=siloxindia.com; dkim=pass (signature was
+ verified) header.d=siloxindia.com;dmarc=pass action=none
+ header.from=siloxindia.com;
+Received-SPF: pass (zohomail.in: domain of siloxindia.com designates 52.101.227.85 as permitted sender) client-ip=52.101.227.85; envelope-from=anand.dubey@siloxindia.com; helo=MA0PR01CU009.outbound.protection.outlook.com;
+Received-SPF: SoftFail (protection.outlook.com: domain of transitioning
+ siloxindia.com discourages use of 159.112.232.224 as permitted sender)
+X-Sophos-Product-Type: Mailflow
+X-Sophos-Email-ID: cdb5177bdfed4d7380bcab0bd1f12cb5
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=KVtqRSk9HOegM98mktvA6gTVO2PEp5QcYCa26WsOUz4ONXKNinfL/ha3QrX9qFw/Jzu7Uoqw1H8BA5mcKJ35zn3tnnjYhctAEJ25wY7ssjN9RMVHdzszfgWwPy1g2U3ed3maO/sQKCJLLRqaBJhCs/xLw6MCq4j98ZmuMw/umk2Tc1g65OLMr5r+O5HVRZ7EVD/voQFmlqiFXt9/nr2OcytTjl5CqArgwBj9vDgGVDe6tbaOSbX8PbmDeHOCuWSrxb6ErahOciNk0chdPRuLrz6+UwMU+s6JhANLhrGRLeYsle8X+H5CXxRrfc74TRWT6vke65p8IF2JNZJOBPCbyw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=+O+bNEddcTy5juNHp2g+SKsO9rzWdZrBisuxDhSZyJU=;
+ b=fqjTv2c0mtlopWFCFnow2zKbRoAu4vnHjdeeIvjP9iDzEjRqF53BVC26iDKgr3YovURMzl3ccLA2E25n9P/yChU2Z1TuRW996EClnmaPW9fxhACLwSjbNv/FTvqeYPVoWKED7aHJflnN68A3AmyS0hKSt8/GnghIGhvKgL5F3RL1xCnAKq64yIbT8kOZaaWmBURij1qWiTxXnuVQ1wYzKrS+cC+L8fPBLv8T5wLjYbbAP1sRycciaLcKLhBkdi1LqVOhuM8CtGFgBLyEJP31zpLXaBMLYSciAaxIMGAa5lbK4/BcJcJpFVm5QCXUFunLcVIDvUXglT878n1SXjYtEw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=siloxindia.com; dmarc=pass action=none
+ header.from=siloxindia.com; dkim=pass header.d=siloxindia.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=siloxindia.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=+O+bNEddcTy5juNHp2g+SKsO9rzWdZrBisuxDhSZyJU=;
+ b=heoq3kOHOQLC3tsfRABTiCrlN+mvx7Gjjeb579gog/lZT8vgVpMTBPl21IRGQgxBgZWQeFJidPmDCGZ+lfVa5zNm9/ptimPh2uLhe2xRK2bIcBCebENLNhb/6GqL/bZEk9/kx7FwmmLGvnUeSLupcrLSzNFgs6Vk45/+O5gqoJ3WsqvV/sDDtjF2uAMr+5uqszwnp/xbtQej8JuQuRxsI1vHRlWg7xbj8tWKtEnFdkfnZ/waXYEfdBNCoU9kyVxz9azgZElNO79YqgPFKRQb0504EZILDJ8lqqPAI2b4YmZu27/Y8GkZYqDDd5yS14aZAKTJPl+F6gSmfbriq35kqw==
+From: Anandkumar Dubey <anand.dubey@siloxindia.com>
+To: Mitul Jain <mitul@excelenviro.com>
+CC: Darshan Trivedi <darshan.trivedi@siloxindia.com>, "Satyananda  Patra"
+	<satyananda.patra@siloxindia.com>, Nitin Dwivedi
+	<nitindwivedi4all@gmail.com>, Bharat Bhujal <info@bharatbhujal.com>
+Subject: RC observation points
+Thread-Topic: RC observation points
+Thread-Index: Adz8p33xrHlUnggvQ6esrF4vyVqPcg==
+Date: Mon, 15 Jun 2026 09:15:48 +0000
+Message-ID: <BMXPR01MB36712EE898C80575244E265F9AE62@BMXPR01MB3671.INDPRD01.PROD.OUTLOOK.COM>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: yes
+X-MS-TNEF-Correlator: 
+Authentication-Results-Original: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=siloxindia.com;
+x-ms-traffictypediagnostic: BMXPR01MB3671:EE_|MA5PR01MB11871:EE_|MA1PEPF000072B2:EE_|PNYPR01MB10935:EE_
+X-MS-Office365-Filtering-Correlation-Id: 06058b5d-d461-404a-2381-08decabeb321
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam-Untrusted: BCL:0;ARA:13230040|23010399003|376014|6049299003|366016|1800799024|8096899003|56012099006|3023799007|13003099007|38070700021|4013099003|4053099003|18002099003;
+X-Microsoft-Antispam-Message-Info-Original: GPKzENeuzrLRbXznT+yrdh+5/jUDELnl5RnVgcRAgiVGX5D3HkLzACq4rqExn9uOBbQ7C6L1H8x2P7G8dqBDAFXDRvl2srUHEO9PrjXTgyuRAUi70SAdaajL20gB6hv6rYi+p4u9kVfCI9I0X/I6Fi5ZFLTUw32gj6y1CYCj1WLrRbpV/8+AR7laB6Au1l6ntsxrrCqfQAmcTu8lA+8+ABGZ4Jpbz14YwbnQSlRRHqeeDV0vUoR6HwnOFyz8lS99kFwr/IUbYgKjDBo/E8dZgsuzUGC4444v8EpsYiUdTtb2zf2vOy/qNxZBS+nrthtCukCKmvgu03wzqZfTN48yikblR6tbT5Wgkdnkqvc7sVaAWW6LbyE3nmlJOc36yORygKnHC+LXiCpOb4dLhlqJCkh7+LY39GddGl03O1PIJiawhMJGmIhW+DA5sH+KT2Tm0t/vkd3vIEltkcs2F+6nV74TwdZOU1Z1f26IuBA/Wxj0fAi4Tihu8hCfvzyzo/iXLJXFKqq3IhMUsa8GYdyW5galMP2xeT4XDEe/4+aXg1e3JVuNcKpDUQ64J8SKyZyk5Gm3emkcpODrjd4Pp3wBJ6yEG2brDn/rXE61C2YDtFq8FVQ9GSTRmwA2an3wJUyRYzfnv39pmSAASUb8APlg0CbJExejexbsX/pFq1gZESo1UvIBTb6FKIOAreNmbwiDQpCw6ryJBLn6DIA2gzk54g==
+X-Forefront-Antispam-Report-Untrusted: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BMXPR01MB3671.INDPRD01.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(23010399003)(376014)(6049299003)(366016)(1800799024)(8096899003)(56012099006)(3023799007)(13003099007)(38070700021)(4013099003)(4053099003)(18002099003);DIR:OUT;SFP:1102;
+Content-Type: multipart/related;
+	boundary="_004_BMXPR01MB36712EE898C80575244E265F9AE62BMXPR01MB3671INDP_";
+	type="multipart/alternative"
+MIME-Version: 1.0
+X-Exchange-RoutingPolicyChecked: c6C51MucjDngggYnDkadxeDORug4qJueyEivlXlKbtRNkAUGrcoeA+Xz0KYNTf3omwfXFWnHNZc0Vi8uy22QfZmUYFpwDndZQ0jumM3OYsFCbUdkgOH1Uo/f97a81hnInCdEI4PS3IjWVLO7smdcRx34nfRgKhJA+WmJJQYlqjK/Hv0wkiQ78uLNEdg8LrlZ+0NRbXNcKicY8JqA3zEVEgNdoRhWJyx0iR9eFIQth/y2DUiiZWKbWggBVaRRx319E403c4J7HhLHIu7XtOWti7ubaa7vv/KGQHLIUQR1jWbIk0KIWfsm7a8e1NkWSr5GTaVESjE3PQ9Cry7iN+fEKA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MA5PR01MB11871
+X-Lased-Spamprobability: 0.085099
+X-Lased-Impersonation: False
+X-Lased-Hits: ARCAUTH_PASSED 0.000000, BODYTEXTH_SIZE_3000_MORE 0.000000,
+ BODYTEXTP_SIZE_3000_LESS 0.000000, BODY_SIZE_10000_PLUS 0.000000,
+ BODY_SIZE_25K_PLUS 0.000000, DKIM_ALIGNS 0.000000, DKIM_SIGNATURE 0.000000,
+ HTML_90_100 0.100000, LEGITIMATE_SIGNS 0.000000, MSG_THREAD_SOLO 0.000000,
+ MULTIPLE_RCPTS 0.100000, MULTIPLE_REAL_RCPTS 0.000000, NO_FUR_HEADER
+ 0.000000, NO_URI_HTTPS 0.000000, OUTBOUND 0.000000, OUTBOUND_SOPHOS
+ 0.000000, PNG_PIXPERBYTE_LOW 0.000000, SINGLE_IMG_ATTACH 0.000000,
+ SUPERLONG_LINE 0.050000, SUSP_DH_NEG 0.000000, __ANY_URI 0.000000,
+ __ARCAUTH_DKIM_PASSED 0.000000, __ARCAUTH_DMARC_PASSED 0.000000,
+ __ARCAUTH_PASSED 0.000000, __ARC_SEAL_MICROSOFT 0.000000,
+ __ARC_SIGNATURE_MICROSOFT 0.000000, __ATTACH_CTE_BASE64 0.000000,
+ __ATTACH_CTE_QUOTED_PRINTABLE 0.000000, __BODY_TEXT_X4 0.000000,
+ __BULK_NEGATE 0.000000, __CC_NAME 0.000000, __CC_NAME_DIFF_FROM_ACC
+ 0.000000, __CC_REAL_NAMES 0.000000, __CID_8_DOT_8 0.000000,
+ __CP_URI_IN_BODY 0.000000, __CT 0.000000, __CTYPE_HAS_BOUNDARY 0.000000,
+ __CTYPE_MULTIPART 0.000000, __CTYPE_MULTIPART_ALT 0.000000, __DKIM_ALIGNS_1
+ 0.000000, __DKIM_ALIGNS_2 0.000000, __DQ_NEG_DOMAIN 0.000000, __DQ_NEG_HEUR
+ 0.000000, __DQ_NEG_IP 0.000000, __EXTRA_MPART_TYPE_1 0.000000,
+ __EXTRA_MPART_TYPE_N1 0.000000, __FRAUD_BODY_WEBMAIL 0.000000,
+ __FRAUD_INTRO 0.000000, __FRAUD_WEBMAIL 0.000000, __FUR_RDNS_SOPHOS
+ 0.000000, __HAS_ATTACHMENT 0.000000, __HAS_ATTACHMENT1 0.000000,
+ __HAS_ATTACHMENT2 0.000000, __HAS_CC_HDR 0.000000, __HAS_FROM 0.000000,
+ __HAS_HTML 0.000000, __HAS_MSGID 0.000000, __HAS_X_FF_ASR 0.000000,
+ __HAS_X_FF_ASR_CAT 0.000000, __HAS_X_FF_ASR_SFV 0.000000, __HTML_BAD_END
+ 0.000000, __HTML_ENTITIES_X4 0.000000, __HTML_TAG_DIV 0.000000,
+ __IMG_ATTACHED 0.000000, __IMG_SIZE_1K_10K 0.000000, __IMP_FROM_MY_ORG
+ 0.000000, __JSON_HAS_SCHEMA_VERSION 0.000000, __JSON_HAS_TENANT_DOMAINS
+ 0.000000, __JSON_HAS_TENANT_ID 0.000000, __JSON_HAS_TENANT_SCHEMA_VERSION
+ 0.000000, __JSON_HAS_TRACKING_ID 0.000000, __MAIL_CHAIN 0.000000,
+ __MIME_ATTACHMENT_1_N 0.000000, __MIME_ATTACHMENT_N_2 0.000000, __MIME_HTML
+ 0.000000, __MIME_TEXT_H 0.000000, __MIME_TEXT_H1 0.000000, __MIME_TEXT_H2
+ 0.000000, __MIME_TEXT_P 0.000000, __MIME_TEXT_P1 0.000000, __MIME_TEXT_P2
+ 0.000000, __MIME_VERSION 0.000000, __MSGID_32_64_CAPS 0.000000,
+ __MULTIPLE_RCPTS_CC_X2 0.000000, __MULTIPLE_URI_TEXT 0.000000,
+ __OUTBOUND_SOPHOS_FUR 0.000000, __OUTBOUND_SOPHOS_FUR_IP 0.000000,
+ __OUTBOUND_SOPHOS_FUR_RDNS 0.000000, __PHISH_SPEAR_GREETING 0.000000,
+ __PRODUCT_TYPE_MAILFLOW 0.000000, __SANE_MSGID 0.000000, __SCAN_D_NEG2
+ 0.000000, __SCAN_D_NEG_HEUR2 0.000000, __SL_HEAVY 0.000000,
+ __STYLE_RATWARE_NEG 0.000000, __STYLE_TAG 0.000000, __SUBJ_ALPHA_END
+ 0.000000, __SUBJ_ALPHA_NEGATE 0.000000, __TAG_EXISTS_BODY 0.000000,
+ __TAG_EXISTS_HEAD 0.000000, __TAG_EXISTS_HTML 0.000000, __TAG_EXISTS_META
+ 0.000000, __TO_MALFORMED_2 0.000000, __TO_NAME 0.000000,
+ __TO_NAME_DIFF_FROM_ACC 0.000000, __TO_REAL_NAMES 0.000000,
+ __URI_ENDS_IN_SLASH 0.000000, __URI_HAS_HYPHEN_USC 0.000000, __URI_IN_BODY
+ 0.000000, __URI_MAILTO 0.000000, __URI_NOT_IMG 0.000000, __URI_NO_PATH
+ 0.000000, __URI_NS 0.000000, __URI_WITHOUT_PATH 0.000000,
+ __X_FF_ASR_SCL_NSP 0.000000, __X_FF_ASR_SFV_NSPM 0.000000
+X-Sophos-Email: [ap-south-1] Antispam-Engine: 6.0.3, AntispamData:
+ 2026.6.15.85719
+X-Lased-Spam: NonSpam
+X-Sophos-Mailflow-Processing-Id: 49ed52fe601b474bb731f7307c0eb1f1
+X-Sophos-MH-Mail-Info-Key: NGdmNEd3M0hiS3pQam14LTE3Mi4yOC45Ny4yMTc=
+X-EOPAttributedMessage: 0
+X-MS-Exchange-Transport-CrossTenantHeadersStripped: MA1PEPF000072B2.INDPRD01.PROD.OUTLOOK.COM
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id-Prvs: c13abb5d-3aab-46b2-634f-08decabeb038
+X-Microsoft-Antispam: BCL:0;ARA:13230040|7149299003|35042699022|14060799003|23010399003|376014|36860700016|6049299003|82310400026|1800799024|8096899003|56012099006|4076899003|6133799003|3023799007|18002099003|13003099007|4053099003|4013099003;
+X-Microsoft-Antispam-Message-Info: VjU/Z4ArsqWaCH624B1ePasSXU7HcN6aPzmqdmH2FTlVJjyJcN6KVzMfvqxDlE67XqpbsFhjrdVMBQWEaLd7lfXFpxztbtYEePelOumP3nkMgePvhbmtmzL6XR7SlZm1MxV4/BNkTOUedJRcm/c295oDg5rut2Fc2uwa52kKs3LvPcZVYkRl5P910pplL8UTEDTDr1gzmBTnrgh5B8F0A5cL/9h7Sh6MnKslGcMhS5n9tFKkcdefwANwIKfNLYNylLwAc44XR2gmnm2SyiFVZ/AXGVBapIO3v+/gDOi28kVOKzT7VCmlR4H4sp2KDCbJLImBV2kKof7Bjwyboy0oW50bFKK4qAjhWrDoE3NUBCYAjnys0juf09J+RJ+ii1yGpc1X0RMerd2u2oF3CmkDAPIqhaTGj87axqecPfCrwkE3bifv48+QRE8n/EBC/3MQ8UxC+akSRQdJpQGZB1z8QSX7V+S+wuCnAQo0tnAlF8N3pV1JJth5mOAwx854sL9YvAA1W0v8VTYpNuQfrQrcEovq58c31e+tb0bJwIBZFjjsiCwRPZIhFLLQ20ancCWqGijdzZVDqFrL9iSxqu+69jQ/XuLW+iAd/+0lgoEAucKipEhIIWe3SuTWJuDBaBgWWaABBZbWNXTWcaJsTQpuig0rbxbwKezWFxSWH5QR3m5TOqw1vTOqztREtwTpQJvp
+X-Forefront-Antispam-Report: CIP:159.112.232.224;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mfod-aps1.eml100bom.ctr.sophos.com;PTR:mfod-aps1.eml100bom.ctr.sophos.com;CAT:NONE;SFS:(13230040)(7149299003)(35042699022)(14060799003)(23010399003)(376014)(36860700016)(6049299003)(82310400026)(1800799024)(8096899003)(56012099006)(4076899003)(6133799003)(3023799007)(18002099003)(13003099007)(4053099003)(4013099003);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: BoOF2Zx4GSpfCQVe9Ke3nL7hSzEgOAZpyA+3PrxakVAydq0Sl85twsIE9u3VcGfXzLm0xhHIKWb76kAGidou04c60fakvUAciDNM5Cvv67hjWbs+K/zPlcm1rCQgFrdRCKJgLL+Y9hw73NR69vY/sY/3bVoCDnc/oo8xASsEYNoahaAWkqZ8Ev5Sco0sDaHK+4DcbYj68af1DZC+GyD58AVNyzQT9MefcbvVWhoIB/VTtfVotNm5cRcRYNDIKClKX6ML1Er2F3Hc3ArzvcwOauE+6uLA4kcC/fHWIWN2HHsiO6+gxC96DCZ3Pa0TsRp7MFk0RbNycs9MLDM5sJVywJbxQz3Y//2nq/9c66YWOPDc0AIkes/3opdYFIZUr+vs8m+ZnL928F1imS+E+xOPg17MlaxGmUQ0TFLYIXn/NxVdH7PKms3WMPeeBkyEzwI2
+X-OriginatorOrg: siloxindia.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 15 Jun 2026 09:15:52.9888
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 06058b5d-d461-404a-2381-08decabeb321
+X-MS-Exchange-CrossTenant-Id: 9f1daa08-5265-4492-a457-721220d3e057
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=9f1daa08-5265-4492-a457-721220d3e057;Ip=[159.112.232.224];Helo=[mfod-aps1.eml100bom.ctr.sophos.com]
+X-MS-Exchange-CrossTenant-AuthSource: MA1PEPF000072B2.INDPRD01.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PNYPR01MB10935
+X-Zoho-Virus-Status: 1
+X-Zoho-AV-Stamp: zmail-av-0.2.11.1.5.2/281.474.11
+X-ZohoMail-DKIM: pass (identity @siloxindia.com)
+
+--_004_BMXPR01MB36712EE898C80575244E265F9AE62BMXPR01MB3671INDP_
+Content-Type: multipart/alternative;
+	boundary="_000_BMXPR01MB36712EE898C80575244E265F9AE62BMXPR01MB3671INDP_"
+
+--_000_BMXPR01MB36712EE898C80575244E265F9AE62BMXPR01MB3671INDP_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+Dear Sir,
+As per our telephonic discussion regarding RC observation points, please fi=
+nd below details and share the offer for the same.
+
+Responsible care audit observations-
+
+
+1.      Identify the potential sources of Ground Water contamination and in=
+stitute measures to mitigate the risks
+
+2.      Include parameters related to products and raw materials for soil t=
+esting to ascertain soil contamination.
+
+3.      Analyse ground water for assessment of contamination. The sampling =
+of ground water to be done from first strata by making micro bores / piezo =
+wells. Sampling points to be decided based on hydrogeological survey to obt=
+ain groundwater flow direction.
+
+4.      Required permission for this purpose may be obtained, if required, =
+from concerned authorities, after explaining the purpose.
+
+
+Thanks
+
+
+Anand Dubey
+Deputy Manager - EHS
+
+[cid:image001.png@01D7FEFC.CCBF9400]
+Silox India Private Limited
+Ekalbara, Padra, Vadodara 391440, Gujarat, India
+E-Mail: anand.dubey@siloxindia.com<mailto:anand.dubey@siloxindia.com>   URL=
+: www.silox-india.com<http://www.silox-india.com/>
+Mobile -6359914916
+
+
+
+
+
+From: Anandkumar Dubey
+Sent: 13 April 2026 16:54
+To: 'Nitin Dwivedi' <nitindwivedi4all@gmail.com>; 'Bharat Bhujal' <info@bha=
+ratbhujal.com>
+Cc: 'Mitul Jain' <mitul@excelenviro.com>; Darshan Trivedi <darshan.trivedi@=
+siloxindia.com>; Satyananda Patra <satyananda.patra@siloxindia.com>; Manoj =
+Patel <mmpatel@siloxindia.com>
+Subject: Minutes of meeting water audit
+
+Dear Nitin Bhai,
+
+As per discussion during meeting of water audit, requesting to share the MO=
+M along with communication mail Formate in CGWA (which we have to communica=
+te).
+
+We have shared the RC observation points as mentioned below regarding groun=
+d water, please share the soil contamination testing facility / offer the r=
+elated points.
+
+Today we have shared the geotagged photographs of Bore bell A B & C along w=
+ith piezometers 1 & 2, please update also the PFD of STP and ETP in water a=
+udit report.
+
+Responsible care audit observations-
+
+
+1.      Identify the potential sources of Ground Water contamination and in=
+stitute measures to mitigate the risks
+
+2.      Include parameters related to products and raw materials for soil t=
+esting to ascertain soil contamination.
+
+3.      Analyse ground water for assessment of contamination. The sampling =
+of ground water to be done from first strata by making micro bores / piezo =
+wells. Sampling points to be decided based on hydrogeological survey to obt=
+ain groundwater flow direction.
+
+4.      Required permission for this purpose may be obtained, if required, =
+from concerned authorities, after explaining the purpose.
+
+
+Thanks
+
+
+Anand Dubey
+Deputy Manager - EHS
+
+[cid:image001.png@01D7FEFC.CCBF9400]
+Silox India Private Limited
+Ekalbara, Padra, Vadodara 391440, Gujarat, India
+E-Mail: anand.dubey@siloxindia.com<mailto:anand.dubey@siloxindia.com>   URL=
+: www.silox-india.com<http://www.silox-india.com/>
+Mobile -6359914916
+
+
+
+
+
+Together, we act for a better world
+
+Disclaimer: The information contained in this communication is intended sol=
+ely for the use of the individual or entity to whom it is addressed, and ot=
+hers authorized to receive it. It may contain confidential or legally privi=
+leged information. If you are not the intended recipient you are hereby not=
+ified that any disclosure, copying, distribution or taking any action in re=
+liance on the contents of this information is strictly prohibited and may b=
+e unlawful. If you have received this communication in error, please notify=
+ us immediately by responding to this email and then delete it from your sy=
+stem. The Company is neither liable for the proper and complete transmissio=
+n of the information contained in this communication nor for any delay in i=
+ts receipt.
+
+--_000_BMXPR01MB36712EE898C80575244E265F9AE62BMXPR01MB3671INDP_
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
+osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
+//www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
+>
+<meta name=3D"Generator" content=3D"Microsoft Word 15 (filtered medium)">
+<!--[if !mso]><style>v\:* {behavior:url(#default#VML);}
+o\:* {behavior:url(#default#VML);}
+w\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style><![endif]--><style><!--
+/* Font Definitions */
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:"Montserrat Medium";
+	panose-1:0 0 0 0 0 0 0 0 0 0;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;
+	mso-fareast-language:EN-US;}
+a:link, span.MsoHyperlink
+	{mso-style-priority:99;
+	color:#0563C1;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-priority:99;
+	color:#954F72;
+	text-decoration:underline;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{mso-style-priority:34;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:36.0pt;
+	margin-bottom:.0001pt;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;
+	mso-fareast-language:EN-US;}
+p.msonormal0, li.msonormal0, div.msonormal0
+	{mso-style-name:msonormal;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Times New Roman",serif;}
+span.EmailStyle19
+	{mso-style-type:personal;
+	font-family:"Calibri",sans-serif;
+	color:windowtext;}
+span.EmailStyle20
+	{mso-style-type:personal-reply;
+	font-family:"Calibri",sans-serif;
+	color:#1F497D;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	font-size:10.0pt;}
+@page WordSection1
+	{size:612.0pt 792.0pt;
+	margin:72.0pt 72.0pt 72.0pt 72.0pt;}
+div.WordSection1
+	{page:WordSection1;}
+/* List Definitions */
+@list l0
+	{mso-list-id:1285427407;
+	mso-list-type:hybrid;
+	mso-list-template-ids:313543674 1074331663 1074331673 1074331675 107433166=
+3 1074331673 1074331675 1074331663 1074331673 1074331675;}
+@list l0:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l0:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l0:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l0:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l1
+	{mso-list-id:1954706768;
+	mso-list-type:hybrid;
+	mso-list-template-ids:313543674 1074331663 1074331673 1074331675 107433166=
+3 1074331673 1074331675 1074331663 1074331673 1074331675;}
+@list l1:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l1:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l1:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+ol
+	{margin-bottom:0cm;}
+ul
+	{margin-bottom:0cm;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext=3D"edit">
+<o:idmap v:ext=3D"edit" data=3D"1" />
+</o:shapelayout></xml><![endif]-->
+</head>
+<body lang=3D"EN-IN" link=3D"#0563C1" vlink=3D"#954F72">
+<div class=3D"WordSection1">
+<p class=3D"MsoNormal" style=3D"text-indent:18.0pt"><span style=3D"font-siz=
+e:12.0pt;font-family:&quot;Times New Roman&quot;,serif">Dear Sir,<o:p></o:p=
+></span></p>
+<p class=3D"MsoNormal" style=3D"text-indent:18.0pt"><span style=3D"font-siz=
+e:12.0pt;font-family:&quot;Times New Roman&quot;,serif">As per our telephon=
+ic discussion regarding RC observation points, please find below details an=
+d share the offer for the same.<o:p></o:p></span></p>
+<p class=3D"MsoNormal" style=3D"text-indent:18.0pt"><span style=3D"font-siz=
+e:12.0pt;font-family:&quot;Times New Roman&quot;,serif"><o:p></o:p></span><=
+/p>
+<p class=3D"MsoNormal" style=3D"text-indent:18.0pt"><span style=3D"font-siz=
+e:12.0pt;font-family:&quot;Times New Roman&quot;,serif;background:yellow;ms=
+o-highlight:yellow"><o:p>&nbsp;</o:p></span></p>
+<p class=3D"MsoNormal" style=3D"text-indent:18.0pt"><span style=3D"font-siz=
+e:12.0pt;font-family:&quot;Times New Roman&quot;,serif;background:yellow;ms=
+o-highlight:yellow">Responsible care audit observations-</span><span style=
+=3D"font-size:12.0pt;font-family:&quot;Times New Roman&quot;,serif"><o:p></=
+o:p></span></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoListParagraph" style=3D"text-indent:-18.0pt;mso-list:l0 leve=
+l1 lfo2"><![if !supportLists]><span style=3D"font-size:12.0pt;font-family:&=
+quot;Times New Roman&quot;,serif"><span style=3D"mso-list:Ignore">1.<span s=
+tyle=3D"font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;
+</span></span></span><![endif]><span style=3D"font-size:12.0pt;font-family:=
+&quot;Times New Roman&quot;,serif">Identify the potential sources of Ground=
+ Water contamination and institute measures to mitigate the risks<o:p></o:p=
+></span></p>
+<p class=3D"MsoListParagraph" style=3D"text-indent:-18.0pt;mso-list:l0 leve=
+l1 lfo2"><![if !supportLists]><span lang=3D"EN-US" style=3D"font-size:12.0p=
+t;font-family:&quot;Times New Roman&quot;,serif"><span style=3D"mso-list:Ig=
+nore">2.<span style=3D"font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;=
+&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=3D"EN-US" style=3D"font-size:12.0=
+pt;font-family:&quot;Times New Roman&quot;,serif">Include parameters relate=
+d to products and raw materials for soil testing to ascertain soil contamin=
+ation.<o:p></o:p></span></p>
+<p class=3D"MsoListParagraph" style=3D"text-indent:-18.0pt;mso-list:l0 leve=
+l1 lfo2"><![if !supportLists]><span style=3D"font-size:12.0pt;font-family:&=
+quot;Times New Roman&quot;,serif;color:black;mso-fareast-language:EN-IN"><s=
+pan style=3D"mso-list:Ignore">3.<span style=3D"font:7.0pt &quot;Times New R=
+oman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:12.0pt;font-family:=
+&quot;Times New Roman&quot;,serif;color:black;mso-fareast-language:EN-IN">A=
+nalyse ground water for assessment of contamination. The sampling of ground=
+ water to be done from first strata by making
+ micro bores / piezo wells. Sampling points to be decided based on hydrogeo=
+logical survey to obtain groundwater flow direction.<o:p></o:p></span></p>
+<p class=3D"MsoListParagraph" style=3D"text-indent:-18.0pt;mso-list:l0 leve=
+l1 lfo2"><![if !supportLists]><span style=3D"font-size:12.0pt;font-family:&=
+quot;Times New Roman&quot;,serif;color:black;mso-fareast-language:EN-IN"><s=
+pan style=3D"mso-list:Ignore">4.<span style=3D"font:7.0pt &quot;Times New R=
+oman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:12.0pt;font-family:=
+&quot;Times New Roman&quot;,serif;color:black;mso-fareast-language:EN-IN">R=
+equired permission for this purpose may be obtained, if required, from conc=
+erned authorities, after explaining the purpose.<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:12.0pt;font-family:&quot;Ti=
+mes New Roman&quot;,serif;color:black;mso-fareast-language:EN-IN"><o:p>&nbs=
+p;</o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:12.0pt;font-family:&quot;Ti=
+mes New Roman&quot;,serif;color:black;mso-fareast-language:EN-IN"><o:p>&nbs=
+p;</o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D">Thanks<o:p></o:p></spa=
+n></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
+n></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D;mso-fareast-language:EN=
+-IN"><o:p>&nbsp;</o:p></span></p>
+<p class=3D"MsoNormal"><b><span lang=3D"EN-US" style=3D"font-size:10.0pt;fo=
+nt-family:&quot;Montserrat Medium&quot;,serif;color:#1F497D;mso-fareast-lan=
+guage:EN-IN">Anand Dubey
+<o:p></o:p></span></b></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US" style=3D"font-size:10.0pt;font-=
+family:&quot;Montserrat Medium&quot;,serif;color:#1F497D;mso-fareast-langua=
+ge:EN-IN">Deputy Manager - EHS
+<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US" style=3D"font-size:8.0pt;font-f=
+amily:&quot;Montserrat Medium&quot;,serif;color:#1F497D;mso-fareast-languag=
+e:EN-IN"><o:p>&nbsp;</o:p></span></p>
+<table class=3D"MsoNormalTable" border=3D"0" cellspacing=3D"0" cellpadding=
+=3D"0" style=3D"border-collapse:collapse">
+<tbody>
+<tr>
+<td width=3D"92" valign=3D"top" style=3D"width:69.3pt;padding:0cm 5.4pt 0cm=
+ 5.4pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Montserrat Medium&q=
+uot;,serif;color:#1F497D;mso-fareast-language:EN-IN"><img width=3D"78" heig=
+ht=3D"69" style=3D"width:.8125in;height:.7187in" id=3D"_x0000_i1026" src=3D=
+"cid:image001.png@01DCCB63.F4CC41E0" alt=3D"cid:image001.png@01D7FEFC.CCBF9=
+400"><o:p></o:p></span></p>
+</td>
+<td width=3D"516" valign=3D"top" style=3D"width:387.25pt;padding:0cm 5.4pt =
+0cm 5.4pt">
+<p class=3D"MsoNormal"><b><span style=3D"font-family:&quot;Montserrat Mediu=
+m&quot;,serif;color:#008674;mso-fareast-language:EN-IN">Silox India Private=
+ Limited<o:p></o:p></span></b></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:8.0pt;font-family:&quot;Mon=
+tserrat Medium&quot;,serif;color:#1F497D;mso-fareast-language:EN-IN">Ekalba=
+ra, Padra, Vadodara 391440, Gujarat, India</span><span lang=3D"EN-US" style=
+=3D"font-size:8.0pt;font-family:&quot;Montserrat Medium&quot;,serif;color:#=
+1F497D;mso-fareast-language:EN-IN"><o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:9.0pt;font-family:&quot;Mon=
+tserrat Medium&quot;,serif;color:#1F497D;mso-fareast-language:EN-IN">E-Mail=
+:
+<a href=3D"mailto:anand.dubey@siloxindia.com">anand.dubey@siloxindia.com</a=
+>&nbsp;&nbsp; URL:
+</span><span style=3D"font-family:&quot;Montserrat Medium&quot;,serif;color=
+:#1F497D;mso-fareast-language:EN-IN"><a href=3D"http://www.silox-india.com/=
+"><span style=3D"font-size:9.0pt">www.silox-india.com</span></a><o:p></o:p>=
+</span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:8.0pt;font-family:&quot;Mon=
+tserrat Medium&quot;,serif;color:#1F497D;mso-fareast-language:EN-IN">Mobile=
+ -6359914916<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US" style=3D"font-family:&quot;Mont=
+serrat Medium&quot;,serif;color:#1F497D;mso-fareast-language:EN-IN"><o:p>&n=
+bsp;</o:p></span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D;mso-fareast-language:EN=
+-IN"><o:p>&nbsp;</o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
+n></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
+n></p>
+<p class=3D"MsoNormal"><span style=3D"color:#1F497D"><o:p>&nbsp;</o:p></spa=
+n></p>
+<div>
+<div style=3D"border:none;border-top:solid #E1E1E1 1.0pt;padding:3.0pt 0cm =
+0cm 0cm">
+<p class=3D"MsoNormal"><b><span lang=3D"EN-US" style=3D"mso-fareast-languag=
+e:EN-IN">From:</span></b><span lang=3D"EN-US" style=3D"mso-fareast-language=
+:EN-IN"> Anandkumar Dubey
+<br>
+<b>Sent:</b> 13 April 2026 16:54<br>
+<b>To:</b> 'Nitin Dwivedi' &lt;nitindwivedi4all@gmail.com&gt;; 'Bharat Bhuj=
+al' &lt;info@bharatbhujal.com&gt;<br>
+<b>Cc:</b> 'Mitul Jain' &lt;mitul@excelenviro.com&gt;; Darshan Trivedi &lt;=
+darshan.trivedi@siloxindia.com&gt;; Satyananda Patra &lt;satyananda.patra@s=
+iloxindia.com&gt;; Manoj Patel &lt;mmpatel@siloxindia.com&gt;<br>
+<b>Subject:</b> Minutes of meeting water audit<o:p></o:p></span></p>
+</div>
+</div>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:12.0pt;font-family:&quot;Ti=
+mes New Roman&quot;,serif">Dear Nitin Bhai,<o:p></o:p></span></p>
+<p class=3D"MsoListParagraph"><span style=3D"font-size:12.0pt;font-family:&=
+quot;Times New Roman&quot;,serif">As per discussion during meeting of water=
+ audit, requesting to share the MOM along with communication mail Formate i=
+n CGWA (which we have to communicate).<o:p></o:p></span></p>
+<p class=3D"MsoListParagraph"><span style=3D"font-size:12.0pt;font-family:&=
+quot;Times New Roman&quot;,serif">We have shared the RC observation points =
+as mentioned below regarding ground water, please share the soil contaminat=
+ion testing facility / offer the related points.
+ &nbsp;&nbsp;<o:p></o:p></span></p>
+<p class=3D"MsoListParagraph"><span style=3D"font-size:12.0pt;font-family:&=
+quot;Times New Roman&quot;,serif">Today we have shared the geotagged photog=
+raphs of Bore bell A B &amp; C along with piezometers 1 &amp; 2, please upd=
+ate also the PFD of STP and ETP in water audit report.
+ &nbsp;&nbsp;<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal" style=3D"text-indent:18.0pt"><span style=3D"font-siz=
+e:12.0pt;font-family:&quot;Times New Roman&quot;,serif;background:yellow;ms=
+o-highlight:yellow">Responsible care audit observations-</span><span style=
+=3D"font-size:12.0pt;font-family:&quot;Times New Roman&quot;,serif"><o:p></=
+o:p></span></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoListParagraph" style=3D"text-indent:-18.0pt;mso-list:l1 leve=
+l1 lfo3"><![if !supportLists]><span style=3D"font-size:12.0pt;font-family:&=
+quot;Times New Roman&quot;,serif"><span style=3D"mso-list:Ignore">1.<span s=
+tyle=3D"font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nb=
+sp;
+</span></span></span><![endif]><span style=3D"font-size:12.0pt;font-family:=
+&quot;Times New Roman&quot;,serif">Identify the potential sources of Ground=
+ Water contamination and institute measures to mitigate the risks<o:p></o:p=
+></span></p>
+<p class=3D"MsoListParagraph" style=3D"text-indent:-18.0pt;mso-list:l1 leve=
+l1 lfo3"><![if !supportLists]><span lang=3D"EN-US" style=3D"font-size:12.0p=
+t;font-family:&quot;Times New Roman&quot;,serif"><span style=3D"mso-list:Ig=
+nore">2.<span style=3D"font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;=
+&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span lang=3D"EN-US" style=3D"font-size:12.0=
+pt;font-family:&quot;Times New Roman&quot;,serif">Include parameters relate=
+d to products and raw materials for soil testing to ascertain soil contamin=
+ation.<o:p></o:p></span></p>
+<p class=3D"MsoListParagraph" style=3D"text-indent:-18.0pt;mso-list:l1 leve=
+l1 lfo3"><![if !supportLists]><span style=3D"font-size:12.0pt;font-family:&=
+quot;Times New Roman&quot;,serif;color:black;mso-fareast-language:EN-IN"><s=
+pan style=3D"mso-list:Ignore">3.<span style=3D"font:7.0pt &quot;Times New R=
+oman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:12.0pt;font-family:=
+&quot;Times New Roman&quot;,serif;color:black;mso-fareast-language:EN-IN">A=
+nalyse ground water for assessment of contamination. The sampling of ground=
+ water to be done from first strata by making
+ micro bores / piezo wells. Sampling points to be decided based on hydrogeo=
+logical survey to obtain groundwater flow direction.<o:p></o:p></span></p>
+<p class=3D"MsoListParagraph" style=3D"text-indent:-18.0pt;mso-list:l1 leve=
+l1 lfo3"><![if !supportLists]><span style=3D"font-size:12.0pt;font-family:&=
+quot;Times New Roman&quot;,serif;color:black;mso-fareast-language:EN-IN"><s=
+pan style=3D"mso-list:Ignore">4.<span style=3D"font:7.0pt &quot;Times New R=
+oman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style=3D"font-size:12.0pt;font-family:=
+&quot;Times New Roman&quot;,serif;color:black;mso-fareast-language:EN-IN">R=
+equired permission for this purpose may be obtained, if required, from conc=
+erned authorities, after explaining the purpose.<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal"><span style=3D"mso-fareast-language:EN-IN"><o:p>&nbs=
+p;</o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:12.0pt;font-family:&quot;Ti=
+mes New Roman&quot;,serif;color:black;mso-fareast-language:EN-IN">Thanks<o:=
+p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"mso-fareast-language:EN-IN"><o:p>&nbs=
+p;</o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"mso-fareast-language:EN-IN"><o:p>&nbs=
+p;</o:p></span></p>
+<p class=3D"MsoNormal"><b><span lang=3D"EN-US" style=3D"font-size:10.0pt;fo=
+nt-family:&quot;Montserrat Medium&quot;,serif;color:#1F497D;mso-fareast-lan=
+guage:EN-IN">Anand Dubey
+<o:p></o:p></span></b></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US" style=3D"font-size:10.0pt;font-=
+family:&quot;Montserrat Medium&quot;,serif;mso-fareast-language:EN-IN">Depu=
+ty Manager - EHS<span style=3D"color:#1F497D">
+<o:p></o:p></span></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US" style=3D"font-size:8.0pt;font-f=
+amily:&quot;Montserrat Medium&quot;,serif;color:#1F497D;mso-fareast-languag=
+e:EN-IN"><o:p>&nbsp;</o:p></span></p>
+<table class=3D"MsoNormalTable" border=3D"0" cellspacing=3D"0" cellpadding=
+=3D"0" style=3D"border-collapse:collapse">
+<tbody>
+<tr>
+<td width=3D"92" valign=3D"top" style=3D"width:69.3pt;padding:0cm 5.4pt 0cm=
+ 5.4pt">
+<p class=3D"MsoNormal"><span style=3D"font-family:&quot;Montserrat Medium&q=
+uot;,serif;color:#1F497D;mso-fareast-language:EN-IN"><img border=3D"0" widt=
+h=3D"78" height=3D"69" style=3D"width:.8125in;height:.7187in" id=3D"Picture=
+_x0020_1" src=3D"cid:image001.png@01DCCB63.F4CC41E0" alt=3D"cid:image001.pn=
+g@01D7FEFC.CCBF9400"><o:p></o:p></span></p>
+</td>
+<td width=3D"516" valign=3D"top" style=3D"width:387.25pt;padding:0cm 5.4pt =
+0cm 5.4pt">
+<p class=3D"MsoNormal"><b><span style=3D"font-family:&quot;Montserrat Mediu=
+m&quot;,serif;color:#008674;mso-fareast-language:EN-IN">Silox India Private=
+ Limited<o:p></o:p></span></b></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:8.0pt;font-family:&quot;Mon=
+tserrat Medium&quot;,serif;color:#1F497D;mso-fareast-language:EN-IN">Ekalba=
+ra, Padra, Vadodara 391440, Gujarat, India</span><span lang=3D"EN-US" style=
+=3D"font-size:8.0pt;font-family:&quot;Montserrat Medium&quot;,serif;color:#=
+1F497D;mso-fareast-language:EN-IN"><o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:9.0pt;font-family:&quot;Mon=
+tserrat Medium&quot;,serif;color:#1F497D;mso-fareast-language:EN-IN">E-Mail=
+:
+<a href=3D"mailto:anand.dubey@siloxindia.com">anand.dubey@siloxindia.com</a=
+>&nbsp;&nbsp; URL:
+</span><span style=3D"font-family:&quot;Montserrat Medium&quot;,serif;color=
+:#1F497D;mso-fareast-language:EN-IN"><a href=3D"http://www.silox-india.com/=
+"><span style=3D"font-size:9.0pt">www.silox-india.com</span></a><o:p></o:p>=
+</span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:8.0pt;font-family:&quot;Mon=
+tserrat Medium&quot;,serif;color:#1F497D;mso-fareast-language:EN-IN">Mobile=
+ -6359914916<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span lang=3D"EN-US" style=3D"font-family:&quot;Mont=
+serrat Medium&quot;,serif;color:#1F497D;mso-fareast-language:EN-IN"><o:p>&n=
+bsp;</o:p></span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class=3D"MsoNormal"><span style=3D"mso-fareast-language:EN-IN"><o:p>&nbs=
+p;</o:p></span></p>
+<p class=3D"MsoNormal"><o:p>&nbsp;</o:p></p>
+</div>
+<p style=3D"margin-top: 0cm; margin-right: 0cm; margin-bottom: 0cm; margin-=
+left: 0cm;=0A=
+        line-height: normal; font-size: 15px; font-family: &quot;Calibri&qu=
+ot;,sans-serif; text-align: justify;">
+<br>
+</p>
+<p style=3D"margin-top: 0cm; margin-right: 0cm; margin-bottom: 0cm; margin-=
+left: 0cm;=0A=
+        line-height: normal; font-size: 15px; font-family: &quot;Calibri&qu=
+ot;,sans-serif; text-align: justify;">
+<span style=3D"font-size: 16px; color: #008674;font-weight:bold">Together, =
+we act for a better world
+</span></p>
+<p style=3D"margin-top: 0cm; margin-right: 0cm; margin-bottom: 0cm; margin-=
+left: 0cm;=0A=
+        line-height: normal; font-size: 15px; font-family: &quot;Calibri&qu=
+ot;,sans-serif; text-align: justify;">
+<span style=3D"font-size: 12px;">Disclaimer: The information contained in t=
+his communication is intended solely for the use of the individual or entit=
+y to whom it is addressed, and others authorized to receive it. It may cont=
+ain confidential or legally privileged
+ information. If you are not the intended recipient you are hereby notified=
+ that any disclosure, copying, distribution or taking any action in relianc=
+e on the contents of this information is strictly prohibited and may be unl=
+awful. If you have received this
+ communication in error, please notify us immediately by responding to this=
+ email and then delete it from your system. The Company is neither liable f=
+or the proper and complete transmission of the information contained in thi=
+s communication nor for any delay
+ in its receipt.</span></p>
+</body>
+</html>
+
+--_000_BMXPR01MB36712EE898C80575244E265F9AE62BMXPR01MB3671INDP_--
+
+--_004_BMXPR01MB36712EE898C80575244E265F9AE62BMXPR01MB3671INDP_
+Content-Type: image/png; name="image001.png"
+Content-Description: image001.png
+Content-Disposition: inline; filename="image001.png"; size=6696;
+	creation-date="Mon, 15 Jun 2026 09:15:47 GMT";
+	modification-date="Mon, 15 Jun 2026 09:15:47 GMT"
+Content-ID: <image001.png@01DCCB63.F4CC41E0>
+Content-Transfer-Encoding: base64
+
+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
+HrivCdz/AAZVhIbHbWLnAAAAAElFTkSuQmCC
+
+--_004_BMXPR01MB36712EE898C80575244E265F9AE62BMXPR01MB3671INDP_--

@@ -1,0 +1,668 @@
+Delivered-To: mitul@excelenviro.com
+Received-SPF: pass (zohomail.in: domain of ZydusLife.com designates 52.101.225.105 as permitted sender) client-ip=52.101.225.105; envelope-from=VIMAL.J.PATEL@ZydusLife.com; helo=PNYPR01CU001.outbound.protection.outlook.com;
+Authentication-Results: mx.zohomail.in;
+	dkim=pass;
+	spf=pass (zohomail.in: domain of ZydusLife.com designates 52.101.225.105 as permitted sender)  smtp.mailfrom=VIMAL.J.PATEL@ZydusLife.com;
+	arc=pass (i=1 dmarc=pass fromdomain=ZydusLife.com);
+	dmarc=pass(p=reject dis=none)  header.from=ZydusLife.com
+ARC-Seal: i=2; a=rsa-sha256; t=1780676531; cv=pass; 
+	d=zohomail.in; s=zohoarc; 
+	b=ZaWsSyMPm+JEpqoWirI0WBoQFT5NeAD4tcJOn1hNnSZQ2fXJuciNEC4IelJUrt1wneaymQFLQOjGsWQlZamW1bXLXGkfthsTEXoBI0UYzT8XspYzsV/Mwh8fzjJIFyhWIXBNNdGfkOttAiEIz8inNKC1Bk+/gixOOTmlWgL3+j4=
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.in; s=zohoarc; 
+	t=1780676531; h=Content-Type:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=jnCeSHnTjJOdVNdl1FGVuMgTqA4GZ6IibI/KdPaSbtw=; 
+	b=PnkFPYejxtedkn01czxteaf6NavBMDZdd6mZFok2ggc3ucJWdjf5KryKjpQKOrLisY7N/ocgSXnuM919s69jwW0Bw/8NomNBoMlsdCGOds1N8we/RN23VfTRz3lcUuxbgNEY0lEomwXZu6VRmGUrCbJHd+7dNg5qi3sH/7YsIeg=
+ARC-Authentication-Results: i=2; mx.zohomail.in;
+	dkim=pass;
+	spf=pass (zohomail.in: domain of ZydusLife.com designates 52.101.225.105 as permitted sender)  smtp.mailfrom=VIMAL.J.PATEL@ZydusLife.com;
+	arc=pass (i=1 dmarc=pass fromdomain=ZydusLife.com);
+	dmarc=pass header.from=<VIMAL.J.PATEL@ZydusLife.com> (p=reject dis=none)
+Return-Path: <VIMAL.J.PATEL@ZydusLife.com>
+Received: from PNYPR01CU001.outbound.protection.outlook.com (mail-centralindiaazon11020105.outbound.protection.outlook.com [52.101.225.105]) by mx.zoho.in
+	with SMTPS id 1780676531057558.9091042486384; Fri, 5 Jun 2026 21:52:11 +0530 (IST)
+Received: from PN4PR01MB11750.INDPRD01.PROD.OUTLOOK.COM
+ (2603:1096:c01:2e9::14) by PN2PR01MB9026.INDPRD01.PROD.OUTLOOK.COM
+ (2603:1096:c01:159::14) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.92.10; Fri, 5 Jun 2026
+ 16:22:07 +0000
+Received: from PN4PR01MB11750.INDPRD01.PROD.OUTLOOK.COM
+ ([fe80::f384:d994:fb53:8c5c]) by PN4PR01MB11750.INDPRD01.PROD.OUTLOOK.COM
+ ([fe80::f384:d994:fb53:8c5c%4]) with mapi id 15.21.0092.007; Fri, 5 Jun 2026
+ 16:22:07 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=WgiAGraCBZqdq8FRlp2OxRekFT/cNtrKCu1Xw9zuUz5gX+hneatFhgGy0oDujIcJfU3o0lRSIHCW1VvyXl0hK5+Z++AL5lhSC3wIWyNel1b+P5sDopTpFuT/Dn7HAyJWEOE7m8oBIjLnqfg1icX/llhLd2a5n6vD9lUUhNvwjY5JPCcBGDBrMB+g6EmgR/SCXu2+NmpyNHGtkLEByHrNKKWJUWLXxW3sbimpgTrVitTulh4gdD+lFhRMalZKa0rbzZuF0H5L2a+OQmJw2V8sfJBfxNuZ+xhPnDxHfAjIEJ2Jj7WudphWqn+kDVAM0qrf2r/5ENFHWli/y7oXyt6xKg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=jnCeSHnTjJOdVNdl1FGVuMgTqA4GZ6IibI/KdPaSbtw=;
+ b=v7bErqBt8PL4bUwPaF1uyK9IfwTuE7qJdWOJxeZU3E1uAFNJSAJLQUVWSVYCkblYDwrRe51OhFly/06PU3lR129UIYJHL/Hba3Ul+7atsewRPT7XvZHg8ydsdmrvvtUytL/DyyB0XPyIleLJt8oHC/1I8e6kPajVVWG6CF4Fawb+XddXHWNx7J0pDjayzdhI6gxuPjM6+t/UArdmbozTEkDnLfjMxfxmNTYSQKINhqXjv/YEC2hWnTSZJYVJ1wSq5KqPvTEng2FyLoAoJUzinIu7YcVfay+LQ5v4fJsSyrZkldJSsW0YU0hoJ7uFSH7IkV7BUITpKq3F2xaslWSllQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=zyduslife.com; dmarc=pass action=none
+ header.from=zyduslife.com; dkim=pass header.d=zyduslife.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ZydusLife.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=jnCeSHnTjJOdVNdl1FGVuMgTqA4GZ6IibI/KdPaSbtw=;
+ b=MltzXeWPl39DdR0XE5Eoqn6FNvyM+d6FG444ZR2FfE1V4+loJZKHxpqI+KmMZ3Sf8vb7uOkJZeLE4IyCNugdrJCNqujOgX1fLUCLF8sxA+pNtzIFmFGHtB9SRVyb44w0ZxoOaB5N49MakkvxTcOmQk6cn3ThaS71zrBcrKJgy2/xbOgWtCiMc9MOuGf+j1rUZnNFiKd51nJFwqxAkBmUku/MpM2/QAVo71jFtQJDmTeu5ZZ6XveYB+a1EE/ymPvmI2oXpkK+WdTRr8Ua4nugJhyfaT+KmIJkrdeyemKaQXuf+VHCWPvM3vSUJHMzYRsN5WyiHgg7EKj+mrgGeGb6Dw==
+From: VIMAL J PATEL <VIMAL.J.PATEL@ZydusLife.com>
+To: Mitul Jain <mitul@excelenviro.com>
+CC: Neel Pandya <Neel.Pandya@zyduslife.com>, "Vishal M. Patel"
+	<VishalMPatel@zyduslife.com>, Parag Shah <Parag.Shah@zyduslife.com>, Praveen
+ Reddy <Praveen.Reddy@zyduslife.com>, Prasanna Hota
+	<Prasanna.Hota@ZydusLife.com>, Patel Ankit <Patel.Ankit@Zyduslife.com>
+Subject: Re: [EXTERNAL] Action Required: Documents Needed for Self Compliance
+ Report - Zydus Lifesciences Limited - VTC Unit
+Thread-Topic: [EXTERNAL] Action Required: Documents Needed for Self Compliance
+ Report - Zydus Lifesciences Limited - VTC Unit
+Thread-Index: AQHc5oM2+XDujHPa2E+WFxmLcEEaf7YTQ+mAgAre0tCABPRn4IAJLphQgAP74dU=
+Date: Fri, 5 Jun 2026 16:22:07 +0000
+Message-ID: <PN4PR01MB117503B33D8076C5A7947F94FAB112@PN4PR01MB11750.INDPRD01.PROD.OUTLOOK.COM>
+References: <19e3974ac3e.fa2a5b5864253785.278318321463822689@zoho.in>
+ <MAUPR01MB11023E9A9470DD7698D16429EFD032@MAUPR01MB11023.INDPRD01.PROD.OUTLOOK.COM>
+ <PN4PR01MB117502B1C53B712B463559F64AB0A2@PN4PR01MB11750.INDPRD01.PROD.OUTLOOK.COM>
+ <PN4PR01MB117508273CAFF4681C6E9D91FAB092@PN4PR01MB11750.INDPRD01.PROD.OUTLOOK.COM>
+ <PN4PR01MB117509AD684850F0E25A3A2BCAB132@PN4PR01MB11750.INDPRD01.PROD.OUTLOOK.COM>
+In-Reply-To: <PN4PR01MB117509AD684850F0E25A3A2BCAB132@PN4PR01MB11750.INDPRD01.PROD.OUTLOOK.COM>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-reactions: allow
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=ZydusLife.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: PN4PR01MB11750:EE_|PN2PR01MB9026:EE_
+x-ms-office365-filtering-correlation-id: ac6eac78-ad7b-498c-c27d-08dec31e9652
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;ARA:13230040|366016|1800799024|376014|38070700021|6133799003|22082099003|18002099003|8096899003|4143699003|56012099006|5023799004;
+x-microsoft-antispam-message-info: LBD9kZzfviLwLfDGfWUiJGT6ukgT3sRcSnwSqx5r8JEtzZ8hnPR38LU87gOrIZNwlaSzXfPpW5zkb6Y8W74qcOrEpwEb92lNEo6yFgs/oGak9JPb/A1QQ3sUFo7BLZUoO5FWoUCr//jAWMp+mkGUe5VIBWb8C7WX9eGd/oZFYsQ4RoFp2Jb2ziwA0mg3iCVDEjCkTloeU8uHjKUbJlhqRDdr5eM5hL4PrC4wnSY/cCkKcTUEPbAeamXfYrVK8auKzPo6Ak298FQVdkJsds0FVsfwdjgJIfduL48FJddPGTYSPLzZl3J03xhxrfGb0rTRW/VVV8Ivlv738Q/8Q3WT79+l8JUcK4wYfOXACu5XW5jkzRyzzW+dSPYEh7WeVjoySFtxa/BYdEW0A3kMvnrhe2Vtr5lvTW7vmRHgTThp70petefkzFyRoqPvxkB1TLNKJMVEJu7MzM476aKHvPQHIUi+Zokjbs+Bg5qgIX8OgAMS0QkTa2IJq06bDpnt3AYkAcfUWoOsifRHag522KPRiI9o5+c4kzSmWTsd7l/4UJYVQ7CSq4klyIcqYLsTtFnQMnC+H/0Kz65ZknSnnk5q2z/1u9dEt6y3DO96AYXbTWpU5ciqnwDCugW7b2DClYliNITzkEWHq1UE06E8+dDvw13oL9KaS+3sTwxRSc04kL4VYol5tX4jSvNhnNKfeQQfU+s2yny6xdqAKFdBaPKuNL0sLcNrcOsA4MCBBt6PD1Wb54tOr1Z7L6X+IZxGywVH
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PN4PR01MB11750.INDPRD01.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(38070700021)(6133799003)(22082099003)(18002099003)(8096899003)(4143699003)(56012099006)(5023799004);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?Windows-1252?Q?4aI8yflORKZ7xUg7JHrB2yatO1TFIQvkBEFqRCaZDU0FD4SzZw1Zqpcp?=
+ =?Windows-1252?Q?rg3GX1ec4uq+lhNyf7eI3x/0Rqf1+w7fFp4RifqSQ+XN+lNg17W/1hJu?=
+ =?Windows-1252?Q?yYSw6Z49bTZUC11NBref8KI1BZ7QEiS9K4F0L3zvUVGBuEKc/+5R8Sgi?=
+ =?Windows-1252?Q?Fljb2J9Cg3XfVX37bq0q3AR9wRkOO7BiFiTTUJ0OULIJGcOsH8zjvUvn?=
+ =?Windows-1252?Q?5Jgn+qfJdiC5SZGzzi4hXBiBU7Eb1vSTy9mslQEs1A8vwWF7CG/4W05h?=
+ =?Windows-1252?Q?8hnZ8PCEBC1Hocw5MJijlKn7kRgijxFM9Zf2H61aRF/1OOq0zkTOMN8x?=
+ =?Windows-1252?Q?8p4TsIEs3xucec3lGISj87NJItVQ5lsT20INAD9uiCdC2rZI+1YIdwWe?=
+ =?Windows-1252?Q?Byr1Le32wFZmpRRhhOFDNt9gYdWT3mLaQyU0cppaaRFPubXbwA8Dn+u+?=
+ =?Windows-1252?Q?LoK7IK7pjwg7CJIj1y1U0CukrkHxNfWmugkVR/R+d9OQvegcw7eLwO2C?=
+ =?Windows-1252?Q?sh79Y/41hDdaxdy9zPLnRAX1jxI/E3if9f4Cyd9QgobfxOcl5U2JMYFv?=
+ =?Windows-1252?Q?vdzhClR0KzqQhARZQzvt3RUjeYy+gKHgmuaaBsDox0Tfl7UvhL9LVJH7?=
+ =?Windows-1252?Q?ZcG9+enORtY/G5BOaE8TPYQM/7kNsU6naJ76HWC0qd2jrT/S+gg9Mk+L?=
+ =?Windows-1252?Q?eNs2652gtialfiFFYPCYRfZN8fxZs8LodlIOWXPdYFJu8hUaaaK0dESk?=
+ =?Windows-1252?Q?waNQGByKzSA1ilg+92w+4bGxnt4O2nuMbkXJJfjxVwi0I/s6eUx/rHd4?=
+ =?Windows-1252?Q?huqUmqWpcaj5fkSU3hrl9WK3FI7edP7EGAEmUAB/Rz7fWS35plylA5Ek?=
+ =?Windows-1252?Q?88dF+QqRYXDrQV7j3QFUrWCXhQbYEP6Rm53RNimPxus+YQFpMsr6nPi0?=
+ =?Windows-1252?Q?+UzOnFoBVUuRUUV0sG8jSntWoQI4L/c1BfLU1goorP9CECtI7uCCHElH?=
+ =?Windows-1252?Q?kDRHUG1L7mSV5NAKb1sw5Pbvwo+UQe2QSOxPGAlhmG+sSL7uTN/RBqip?=
+ =?Windows-1252?Q?S/VQNXI/RIyG8YyY7mCNiZ2GKKgZEzvKNgPTs3ya5BxbajAiDs9S/Q03?=
+ =?Windows-1252?Q?G1qQfJrd3C9bmB8upPt95Nddd5RWfHv3aQROhaW/t9uLJZS+Ohz3BNc4?=
+ =?Windows-1252?Q?4g8ht3r9IRJMwP/jUDJYB9KnT9ZisuREK2dGF3yzOXWlCHjE5kSdX1Ta?=
+ =?Windows-1252?Q?t1nbTehVqDnYkBJVSRgUO9KIYd+URLE1uZifHOy1pPR5SK9LcVpSN29m?=
+ =?Windows-1252?Q?6HGZiFGndhqLVroSTShJypFQEGz0KMeEnYKekJE2lYkgxNGpXZmlhgD8?=
+ =?Windows-1252?Q?jvvf2Ry5LRr/X8OK8mkwSWr8rq2x5hir3q6kEzRZY6xTxnY5kiTcmApa?=
+ =?Windows-1252?Q?8/3qaym+uHxOnuRZi/HGQk9MIfdJ+LhQ5sSADPUMtaPORXt3JMbiTTku?=
+ =?Windows-1252?Q?QMgsd+LbOICmUDID5K0zMTWSgqCvCYOlaZcKyRh1fAXDAInpvKi293Gq?=
+ =?Windows-1252?Q?nd+c/sjkC6eD6dmZsH9YM1X6ZvlsSJ9lNZY05+uKSM0Hg9luGxXMMGxv?=
+ =?Windows-1252?Q?6ZI2gWQMgss22msB7y8hj8uUU98BvnkqBjNTG/afdAI5j3QZJZeeUIOH?=
+ =?Windows-1252?Q?CZlQ3MTiNrQLU+/HqCJW+yz+ZDLytqKJylHRAFFi9BpOulzankeQss9k?=
+ =?Windows-1252?Q?AOvGoZRnXuYqe9JC2zxQyW/EuytjuLLmb+zgKxahRTe0+Z2sEc34PREY?=
+ =?Windows-1252?Q?NSd03iU+tigtjrUEhKL1uCvUMDr/DOiJwZYqGrPaslp6U58S4TbtDrb/?=
+ =?Windows-1252?Q?bsPvIjqs7ObR+klphV//BLv46Q9KlpWMgOUOXfdJGV+nVHQRnThOBzF5?=
+Content-Type: multipart/alternative;
+	boundary="_000_PN4PR01MB117503B33D8076C5A7947F94FAB112PN4PR01MB11750IN_"
+MIME-Version: 1.0
+X-OriginatorOrg: ZydusLife.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: PN4PR01MB11750.INDPRD01.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-Network-Message-Id: ac6eac78-ad7b-498c-c27d-08dec31e9652
+X-MS-Exchange-CrossTenant-originalarrivaltime: 05 Jun 2026 16:22:07.0866
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 231d2249-5edf-4b2b-a2b5-dd142ed02ff3
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: o5OZ8nthuqt1qST3uMa03mhy1xYBOqyn6Or/BMR306uU/eb77T5/NExuF7B8n9fcaavPc2jiETGO02uIu7Jos/rw2DjQuQdrNIH9FVGs0ZY=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PN2PR01MB9026
+X-ZohoMail-DKIM: pass (identity @ZydusLife.com)
+
+--_000_PN4PR01MB117503B33D8076C5A7947F94FAB112PN4PR01MB11750IN_
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+
+Reminder for the self-compliance report of VTC plant as per trailing mail
+
+Thanks & Kind Regards,
+
+Vimal J. Patel
+
+EHS
+
+M - 9925010785
+
+E =96 VIMAL.J.PATEL@zyduslife.com
+
+A =96 Vaccine Technology Center
+
+Opposite Ramdev Masala, Sarkhej Bavla N.H. 8A, Changodar Road,
+
+Ahmedabad-382213, Gujarat, India
+
+________________________________
+From: VIMAL J PATEL <VIMAL.J.PATEL@ZydusLife.com>
+Sent: Wednesday, June 3, 2026 9:03:00 AM
+To: Mitul Jain <mitul@excelenviro.com>
+Cc: Neel Pandya <Neel.Pandya@zyduslife.com>; Patel Ankit <Patel.Ankit@zydus=
+life.com>; Vishal M. Patel <VishalMPatel@zyduslife.com>; Parag Shah <Parag.=
+Shah@zyduslife.com>; Praveen Reddy <Praveen.Reddy@zyduslife.com>; Prasanna =
+Hota <Prasanna.Hota@ZydusLife.com>
+Subject: RE: [EXTERNAL] Action Required: Documents Needed for Self Complian=
+ce Report - Zydus Lifesciences Limited - VTC Unit
+
+Mitul, Bhai,
+As per trailing mail, requesting you to update the status of self-complianc=
+e report of Zydus Lifesciences Limited - VTC Unit.
+
+Thanks & Kind Regards,
+Vimal J. Patel
+EHS
+M - 9925010785
+E =96 VIMAL.J.PATEL@zyduslife.com
+A =96 Vaccine Technology Center
+Opposite Ramdev Masala, Sarkhej Bavla N.H. 8A, Changodar Road,
+Ahmedabad-382213, Gujarat, India
+
+-----Original Message-----
+From: VIMAL J PATEL
+Sent: 28 May 2026 12:51
+To: Mitul Jain <mitul@excelenviro.com>
+Cc: Neel Pandya <Neel.Pandya@zyduslife.com>; Patel Ankit <Patel.Ankit@zydus=
+life.com>; Vishal M. Patel <VishalMPatel@zyduslife.com>; Parag Shah <Parag.=
+Shah@zyduslife.com>; Praveen Reddy <Praveen.Reddy@zyduslife.com>; Prasanna =
+Hota <Prasanna.Hota@ZydusLife.com>
+Subject: RE: [EXTERNAL] Action Required: Documents Needed for Self Complian=
+ce Report - Zydus Lifesciences Limited - VTC Unit
+
+Dear Mitul, Bhai,
+Attached herewith PO for the Self Compliance report of VTC plant as per com=
+pliance of the conditions. Request you to arrange the self-compliance as ea=
+rliest.
+
+Thanks & Kind Regards,
+Vimal J. Patel
+EHS
+M - 9925010785
+E =96 VIMAL.J.PATEL@zyduslife.com
+A =96 Vaccine Technology Center
+Opposite Ramdev Masala, Sarkhej Bavla N.H. 8A, Changodar Road, Ahmedabad-38=
+2213, Gujarat, India
+
+-----Original Message-----
+From: VIMAL J PATEL
+Sent: 25 May 2026 13:26
+To: Mitul Jain <mitul@excelenviro.com>
+Cc: Neel Pandya <Neel.Pandya@zyduslife.com>; Patel Ankit <Patel.Ankit@zydus=
+life.com>; Vishal M. Patel <VishalMPatel@zyduslife.com>; Parag Shah <Parag.=
+Shah@zyduslife.com>; Praveen Reddy <Praveen.Reddy@zyduslife.com>; Prasanna =
+Hota <Prasanna.Hota@ZydusLife.com>
+Subject: RE: [EXTERNAL] Action Required: Documents Needed for Self Complian=
+ce Report - Zydus Lifesciences Limited - VTC Unit
+
+Dear Mr. Mitul,
+Please find the update on the following points for the Submission of Self C=
+ompliance report of VTC plant.
+=95 1.        Geotagged photographs of all borewells with flowmeter --- Att=
+ached
+=95 2.        Geotagged photographs of borewells --- Attached
+=95 3.        Geotagged photographs of flowmeter display --- Attached
+=95 4.        Date of flowmeter Installation --- You have the details as it=
+'s process done by your team.
+=95 5.        Flowmeter telemetry details - URL, User ID, Password --- Alre=
+ady provided.
+=95 6.        Flow meter data as per new NOC valid from to till data --- Al=
+ready provided.
+=95 7.        Calibration certificate --- In your scope.
+=95 8.        Ground water analysis report --- In your scope.
+=95 9.        Rainwater harvesting report --- In your scope.
+=95 Land area break up details
+=95 10.        Geotagged photographs of Piezometer --- Attached.
+=95 11.        Piezometer data as per new NOC valid from to till date --- I=
+n your scope.
+=95 12.        No. of installed ETP and STP --- Combined ETP
+=95 13.        Geotagged photos of STP and ETP (IF installed) --- Attached.
+=95 14.        Capacity of STP and ETP --- Combined ETP - 500 KLD.
+=95 15.        Quantum of treated wastewater generated (cum/y) --- Average =
+- 250 KLD
+=95 16.        Quantum of treated water used (cum/y) --- Average 150 KLD in=
+ Cooling Tower
+
+Thanks & Kind Regards,
+Vimal J. Patel
+EHS
+M - 9925010785
+E =96 VIMAL.J.PATEL@zyduslife.com
+A =96 Vaccine Technology Center
+Opposite Ramdev Masala, Sarkhej Bavla N.H. 8A, Changodar Road, Ahmedabad-38=
+2213, Gujarat, India
+
+-----Original Message-----
+From: Neel Pandya <Neel.Pandya@zyduslife.com>
+Sent: 18 May 2026 11:08
+To: VIMAL J PATEL <VIMAL.J.PATEL@ZydusLife.com>; Patel Ankit <Patel.Ankit@Z=
+yduslife.com>
+Subject: FW: [EXTERNAL] Action Required: Documents Needed for Self Complian=
+ce Report - Zydus Lifesciences Limited - VTC Unit
+
+
+
+-----Original Message-----
+From: mitul@excelenviro.com <mitul@excelenviro.com>
+Sent: 18 May 2026 10:30
+To: Neel Pandya <Neel.Pandya@zyduslife.com>
+Subject: [EXTERNAL] Action Required: Documents Needed for Self Compliance R=
+eport - Zydus Lifesciences Limited - VTC Unit
+
+This message is from an EXTERNAL SENDER - be CAUTIOUS, particularly with li=
+nks and attachments.
+
+Dear Mr. Neel Pandya,
+
+I hope this email finds you well.
+
+I am writing to follow up on the documents required to proceed with the Sel=
+f Compliance Report for Zydus Lifesciences Limited - VTC Unit.
+
+To ensure a smooth and timely process, especially as your validity date of =
+ is approaching, we kindly request you to provide the following documents:
+
+=95 1.        Geotagged photographs of all borewells with flowmeter
+=95 2.        Geotagged photographs of borewells
+=95 3.        Geotagged photographs of flowmeter display
+=95 4.        Date of flowmeter Installation
+=95 5.        Flowmeter telemetry details - URL, User ID, Password
+=95 6.        Flow meter data as per new NOC valid from to till data
+=95 7.        Calibration certificate
+=95 8.        Ground water analysis report
+=95 9.        Rain water harvesting report
+=95 Land area break up details
+=95 10.        Geotagged photographs of Piezometer
+=95 11.        Piezometer data as per new NOC valid from to till date
+=95 12.        No. of installed ETP and STP
+=95 13.        Geotagged photos of STP and ETP (IF Installed)
+=95 14.        Capacity of STP and ETP
+=95 15.        Quantum of treated wastewater generated (cum/y)
+=95 16.        Quantum of treated water used (cum/y)
+=95 Industrial Process
+=95 Greenbelt
+=95 Other use
+
+Your timely cooperation is essential for us to complete the necessary repor=
+ts and renewals without any delays.
+
+The validity date is approaching on , so your prompt submission would be gr=
+eatly appreciated.
+
+If you have any questions or need any clarification, please don't hesitate =
+to get in touch.
+Thank you for your attention to this matter.
+
+Best regards,
+Mitul Jain
+Disclaimer: The information contained in this electronic message or in any =
+trailing messages herein or in any attachments to this message is confident=
+ial, legally privileged and non-public information, intended to be conveyed=
+ only to the designated recipient(s). If you are not the intended recipient=
+ of this electronic message, please notify the sender immediately, delete t=
+his electronic message and its attachments, without reading or saving them =
+in any manner and preserve its confidentiality. You are hereby notified tha=
+t any unauthorized distribution, disclosure, copying, review, retransmissio=
+n, dissemination or other use of this electronic message or the information=
+ contained in it, is strictly prohibited and may be unlawful. Before openin=
+g any attachment(s) to this electronic message, please check them for virus=
+es and defects. Neither sender nor his/her organization accepts any liabili=
+ty for damage caused by any virus transmitted by this electronic message.=
+=92 If the disclaimer can't be applied, take no action.
+
+
+Disclaimer: The information contained in this electronic message or in any =
+trailing messages herein or in any attachments to this message is confident=
+ial, legally privileged and non-public information, intended to be conveyed=
+ only to the designated recipient(s). If you are not the intended recipient=
+ of this electronic message, please notify the sender immediately, delete t=
+his electronic message and its attachments, without reading or saving them =
+in any manner and preserve its confidentiality. You are hereby notified tha=
+t any unauthorized distribution, disclosure, copying, review, retransmissio=
+n, dissemination or other use of this electronic message or the information=
+ contained in it, is strictly prohibited and may be unlawful. Before openin=
+g any attachment(s) to this electronic message, please check them for virus=
+es and defects. Neither sender nor his/her organization accepts any liabili=
+ty for damage caused by any virus transmitted by this electronic message.=
+=92 If the disclaimer can't be applied, take no action.
+
+--_000_PN4PR01MB117503B33D8076C5A7947F94FAB112PN4PR01MB11750IN_
+Content-Type: text/html; charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+
+<html>
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3DWindows-1=
+252">
+</head>
+<body>
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt; color: rgb(3=
+3, 33, 33);">
+Reminder for the self-compliance report of VTC plant as per trailing mail&n=
+bsp;</div>
+<div id=3D"ms-outlook-mobile-body-separator-line" data-applydefaultfontstyl=
+es=3D"true" dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, =
+-apple-system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt;">
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt;">
+<br>
+</div>
+</div>
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt; color: rgb(3=
+3, 33, 33);" id=3D"ms-outlook-mobile-signature">
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt; color: rgb(3=
+3, 33, 33);">
+Thanks &amp; Kind Regards, </div>
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt; color: rgb(3=
+3, 33, 33);">
+<br>
+</div>
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt; color: rgb(3=
+3, 33, 33);">
+Vimal J. Patel </div>
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt; color: rgb(3=
+3, 33, 33);">
+<br>
+</div>
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt; color: rgb(3=
+3, 33, 33);">
+EHS </div>
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt; color: rgb(3=
+3, 33, 33);">
+<br>
+</div>
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt; color: rgb(3=
+3, 33, 33);">
+M - 9925010785 </div>
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt; color: rgb(3=
+3, 33, 33);">
+<br>
+</div>
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt; color: rgb(3=
+3, 33, 33);">
+E =96 VIMAL.J.PATEL@zyduslife.com </div>
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt; color: rgb(3=
+3, 33, 33);">
+<br>
+</div>
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt; color: rgb(3=
+3, 33, 33);">
+A =96 Vaccine Technology Center </div>
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt; color: rgb(3=
+3, 33, 33);">
+<br>
+</div>
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt; color: rgb(3=
+3, 33, 33);">
+Opposite Ramdev Masala, Sarkhej Bavla N.H. 8A, Changodar Road, </div>
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt; color: rgb(3=
+3, 33, 33);">
+<br>
+</div>
+<div dir=3D"auto" style=3D"font-family: Aptos, Aptos_MSFontService, -apple-=
+system, Roboto, Arial, Helvetica, sans-serif; font-size: 12pt; color: rgb(3=
+3, 33, 33);">
+Ahmedabad-382213, Gujarat, India</div>
+</div>
+<div dir=3D"auto" id=3D"mail-editor-reference-message-container"><br>
+<hr style=3D"display: inline-block; width: 98%;">
+<div id=3D"divRplyFwdMsg" style=3D"font-size: 11pt;" dir=3D"auto"><b>From:<=
+/b>&nbsp;VIMAL J PATEL &lt;VIMAL.J.PATEL@ZydusLife.com&gt;<br>
+<b>Sent:</b>&nbsp;Wednesday, June 3, 2026 9:03:00 AM<br>
+<b>To:</b>&nbsp;Mitul Jain &lt;mitul@excelenviro.com&gt;<br>
+<b>Cc:</b>&nbsp;Neel Pandya &lt;Neel.Pandya@zyduslife.com&gt;; Patel Ankit =
+&lt;Patel.Ankit@zyduslife.com&gt;; Vishal M. Patel &lt;VishalMPatel@zydusli=
+fe.com&gt;; Parag Shah &lt;Parag.Shah@zyduslife.com&gt;; Praveen Reddy &lt;=
+Praveen.Reddy@zyduslife.com&gt;; Prasanna Hota &lt;Prasanna.Hota@ZydusLife.=
+com&gt;<br>
+<b>Subject:</b>&nbsp;RE: [EXTERNAL] Action Required: Documents Needed for S=
+elf Compliance Report - Zydus Lifesciences Limited - VTC Unit<br>
+</div>
+<br>
+<meta name=3D"Generator" content=3D"Microsoft Exchange Server">
+<div dir=3D"auto" class=3D"PlainText" style=3D"font-size: 11pt;">Mitul, Bha=
+i,<br>
+As per trailing mail, requesting you to update the status of self-complianc=
+e report of Zydus Lifesciences Limited - VTC Unit.<br>
+<br>
+Thanks &amp; Kind Regards,<br>
+Vimal J. Patel<br>
+EHS<br>
+M - 9925010785<br>
+E =96 VIMAL.J.PATEL@zyduslife.com<br>
+A =96 Vaccine Technology Center<br>
+Opposite Ramdev Masala, Sarkhej Bavla N.H. 8A, Changodar Road,<br>
+Ahmedabad-382213, Gujarat, India<br>
+<br>
+-----Original Message-----<br>
+From: VIMAL J PATEL<br>
+Sent: 28 May 2026 12:51<br>
+To: Mitul Jain &lt;mitul@excelenviro.com&gt;<br>
+Cc: Neel Pandya &lt;Neel.Pandya@zyduslife.com&gt;; Patel Ankit &lt;Patel.An=
+kit@zyduslife.com&gt;; Vishal M. Patel &lt;VishalMPatel@zyduslife.com&gt;; =
+Parag Shah &lt;Parag.Shah@zyduslife.com&gt;; Praveen Reddy &lt;Praveen.Redd=
+y@zyduslife.com&gt;; Prasanna Hota &lt;Prasanna.Hota@ZydusLife.com&gt;<br>
+Subject: RE: [EXTERNAL] Action Required: Documents Needed for Self Complian=
+ce Report - Zydus Lifesciences Limited - VTC Unit<br>
+<br>
+Dear Mitul, Bhai,<br>
+Attached herewith PO for the Self Compliance report of VTC plant as per com=
+pliance of the conditions. Request you to arrange the self-compliance as ea=
+rliest.<br>
+<br>
+Thanks &amp; Kind Regards,<br>
+Vimal J. Patel<br>
+EHS<br>
+M - 9925010785<br>
+E =96 VIMAL.J.PATEL@zyduslife.com<br>
+A =96 Vaccine Technology Center<br>
+Opposite Ramdev Masala, Sarkhej Bavla N.H. 8A, Changodar Road, Ahmedabad-38=
+2213, Gujarat, India<br>
+<br>
+-----Original Message-----<br>
+From: VIMAL J PATEL<br>
+Sent: 25 May 2026 13:26<br>
+To: Mitul Jain &lt;mitul@excelenviro.com&gt;<br>
+Cc: Neel Pandya &lt;Neel.Pandya@zyduslife.com&gt;; Patel Ankit &lt;Patel.An=
+kit@zyduslife.com&gt;; Vishal M. Patel &lt;VishalMPatel@zyduslife.com&gt;; =
+Parag Shah &lt;Parag.Shah@zyduslife.com&gt;; Praveen Reddy &lt;Praveen.Redd=
+y@zyduslife.com&gt;; Prasanna Hota &lt;Prasanna.Hota@ZydusLife.com&gt;<br>
+Subject: RE: [EXTERNAL] Action Required: Documents Needed for Self Complian=
+ce Report - Zydus Lifesciences Limited - VTC Unit<br>
+<br>
+Dear Mr. Mitul,<br>
+Please find the update on the following points for the Submission of Self C=
+ompliance report of VTC plant.<br>
+=95 1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Geotagged photographs of a=
+ll borewells with flowmeter --- Attached<br>
+=95 2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Geotagged photographs of b=
+orewells --- Attached<br>
+=95 3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Geotagged photographs of f=
+lowmeter display --- Attached<br>
+=95 4.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date of flowmeter Installa=
+tion --- You have the details as it's process done by your team.<br>
+=95 5.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Flowmeter telemetry detail=
+s - URL, User ID, Password --- Already provided.<br>
+=95 6.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Flow meter data as per new=
+ NOC valid from to till data --- Already provided.<br>
+=95 7.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Calibration certificate --=
+- In your scope.<br>
+=95 8.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ground water analysis repo=
+rt --- In your scope.<br>
+=95 9.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rainwater harvesting repor=
+t --- In your scope.<br>
+=95 Land area break up details<br>
+=95 10.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Geotagged photographs of =
+Piezometer --- Attached.<br>
+=95 11.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Piezometer data as per ne=
+w NOC valid from to till date --- In your scope.<br>
+=95 12.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No. of installed ETP and =
+STP --- Combined ETP<br>
+=95 13.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Geotagged photos of STP a=
+nd ETP (IF installed) --- Attached.<br>
+=95 14.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Capacity of STP and ETP -=
+-- Combined ETP - 500 KLD.<br>
+=95 15.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Quantum of treated wastew=
+ater generated (cum/y) --- Average - 250 KLD<br>
+=95 16.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Quantum of treated water =
+used (cum/y) --- Average 150 KLD in Cooling Tower<br>
+<br>
+Thanks &amp; Kind Regards,<br>
+Vimal J. Patel<br>
+EHS<br>
+M - 9925010785<br>
+E =96 VIMAL.J.PATEL@zyduslife.com<br>
+A =96 Vaccine Technology Center<br>
+Opposite Ramdev Masala, Sarkhej Bavla N.H. 8A, Changodar Road, Ahmedabad-38=
+2213, Gujarat, India<br>
+<br>
+-----Original Message-----<br>
+From: Neel Pandya &lt;Neel.Pandya@zyduslife.com&gt;<br>
+Sent: 18 May 2026 11:08<br>
+To: VIMAL J PATEL &lt;VIMAL.J.PATEL@ZydusLife.com&gt;; Patel Ankit &lt;Pate=
+l.Ankit@Zyduslife.com&gt;<br>
+Subject: FW: [EXTERNAL] Action Required: Documents Needed for Self Complian=
+ce Report - Zydus Lifesciences Limited - VTC Unit<br>
+<br>
+<br>
+<br>
+-----Original Message-----<br>
+From: mitul@excelenviro.com &lt;mitul@excelenviro.com&gt;<br>
+Sent: 18 May 2026 10:30<br>
+To: Neel Pandya &lt;Neel.Pandya@zyduslife.com&gt;<br>
+Subject: [EXTERNAL] Action Required: Documents Needed for Self Compliance R=
+eport - Zydus Lifesciences Limited - VTC Unit<br>
+<br>
+This message is from an EXTERNAL SENDER - be CAUTIOUS, particularly with li=
+nks and attachments.<br>
+<br>
+Dear Mr. Neel Pandya,<br>
+<br>
+I hope this email finds you well.<br>
+<br>
+I am writing to follow up on the documents required to proceed with the Sel=
+f Compliance Report for Zydus Lifesciences Limited - VTC Unit.<br>
+<br>
+To ensure a smooth and timely process, especially as your validity date of&=
+nbsp; is approaching, we kindly request you to provide the following docume=
+nts:<br>
+<br>
+=95 1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Geotagged photographs of a=
+ll borewells with flowmeter<br>
+=95 2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Geotagged photographs of b=
+orewells<br>
+=95 3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Geotagged photographs of f=
+lowmeter display<br>
+=95 4.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date of flowmeter Installa=
+tion<br>
+=95 5.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Flowmeter telemetry detail=
+s - URL, User ID, Password<br>
+=95 6.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Flow meter data as per new=
+ NOC valid from to till data<br>
+=95 7.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Calibration certificate<br=
+>
+=95 8.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ground water analysis repo=
+rt<br>
+=95 9.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rain water harvesting repo=
+rt<br>
+=95 Land area break up details<br>
+=95 10.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Geotagged photographs of =
+Piezometer<br>
+=95 11.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Piezometer data as per ne=
+w NOC valid from to till date<br>
+=95 12.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No. of installed ETP and =
+STP<br>
+=95 13.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Geotagged photos of STP a=
+nd ETP (IF Installed)<br>
+=95 14.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Capacity of STP and ETP<b=
+r>
+=95 15.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Quantum of treated wastew=
+ater generated (cum/y)<br>
+=95 16.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Quantum of treated water =
+used (cum/y)<br>
+=95 Industrial Process<br>
+=95 Greenbelt<br>
+=95 Other use<br>
+<br>
+Your timely cooperation is essential for us to complete the necessary repor=
+ts and renewals without any delays.<br>
+<br>
+The validity date is approaching on , so your prompt submission would be gr=
+eatly appreciated.<br>
+<br>
+If you have any questions or need any clarification, please don't hesitate =
+to get in touch.<br>
+Thank you for your attention to this matter.<br>
+<br>
+Best regards,<br>
+Mitul Jain<br>
+Disclaimer: The information contained in this electronic message or in any =
+trailing messages herein or in any attachments to this message is confident=
+ial, legally privileged and non-public information, intended to be conveyed=
+ only to the designated recipient(s).
+ If you are not the intended recipient of this electronic message, please n=
+otify the sender immediately, delete this electronic message and its attach=
+ments, without reading or saving them in any manner and preserve its confid=
+entiality. You are hereby notified
+ that any unauthorized distribution, disclosure, copying, review, retransmi=
+ssion, dissemination or other use of this electronic message or the informa=
+tion contained in it, is strictly prohibited and may be unlawful. Before op=
+ening any attachment(s) to this
+ electronic message, please check them for viruses and defects. Neither sen=
+der nor his/her organization accepts any liability for damage caused by any=
+ virus transmitted by this electronic message.=92 If the disclaimer can't b=
+e applied, take no action.<br>
+<br>
+</div>
+<br>
+</div>
+Disclaimer: The information contained in this electronic message or in any =
+trailing messages herein or in any attachments to this message is confident=
+ial, legally privileged and non-public information, intended to be conveyed=
+ only to the designated recipient(s).
+ If you are not the intended recipient of this electronic message, please n=
+otify the sender immediately, delete this electronic message and its attach=
+ments, without reading or saving them in any manner and preserve its confid=
+entiality. You are hereby notified
+ that any unauthorized distribution, disclosure, copying, review, retransmi=
+ssion, dissemination or other use of this electronic message or the informa=
+tion contained in it, is strictly prohibited and may be unlawful. Before op=
+ening any attachment(s) to this
+ electronic message, please check them for viruses and defects. Neither sen=
+der nor his/her organization accepts any liability for damage caused by any=
+ virus transmitted by this electronic message.=92 If the disclaimer can't b=
+e applied, take no action.
+</body>
+</html>
+
+--_000_PN4PR01MB117503B33D8076C5A7947F94FAB112PN4PR01MB11750IN_--

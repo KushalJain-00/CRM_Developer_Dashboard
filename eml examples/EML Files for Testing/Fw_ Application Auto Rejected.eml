@@ -1,0 +1,642 @@
+Delivered-To: mitul@excelenviro.com
+Authentication-Results: mx.zohomail.in;
+	dkim=pass;
+	spf=pass (zohomail.in: domain of dorfketal.com designates 52.101.227.103 as permitted sender)  smtp.mailfrom=Madan.Sancheti@dorfketal.com;
+	arc=fail (Chain Validation is failed);
+	dmarc=pass(p=quarantine dis=none)  header.from=dorfketal.com
+Received: from MA0PR01CU009.outbound.protection.outlook.com (mail-southindiaazon11020103.outbound.protection.outlook.com [52.101.227.103]) by mx.zoho.in
+	with SMTPS id 1777520192950771.9298872750368; Thu, 30 Apr 2026 09:06:32 +0530 (IST)
+Received: from MA5P287CA0165.INDP287.PROD.OUTLOOK.COM (2603:1096:a01:1ba::7)
+ by MA5P287MB5268.INDP287.PROD.OUTLOOK.COM (2603:1096:a01:1be::21) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9870.21; Thu, 30 Apr
+ 2026 03:36:29 +0000
+Received: from MA1PEPF00007262.INDPRD01.PROD.OUTLOOK.COM
+ (2603:1096:a01:1ba:cafe::93) by MA5P287CA0165.outlook.office365.com
+ (2603:1096:a01:1ba::7) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.20.9846.30 via Frontend Transport; Thu,
+ 30 Apr 2026 03:36:29 +0000
+Received: from mfod-euw1.prod.hydra.sophos.com (198.154.180.225) by
+ MA1PEPF00007262.mail.protection.outlook.com (10.167.242.4) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.9846.18 via Frontend Transport; Thu, 30 Apr 2026 03:36:28 +0000
+Received: from ip-172-19-0-101.eu-west-1.compute.internal (ip-172-19-0-101.eu-west-1.compute.internal [127.0.0.1])
+	by mfod-euw1.prod.hydra.sophos.com (Postfix) with ESMTP id 4g5fwW1dKfzWgNZ
+	for <mitul@excelenviro.com>; Thu, 30 Apr 2026 03:36:27 +0000 (UTC)
+Received: from MA0PR01CU012.outbound.protection.outlook.com
+ (mail-southindiaazon11021074.outbound.protection.outlook.com [40.107.57.74])
+ (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+ (No client certificate requested)
+ by mf-outbound-eu-west-1.prod.hydra.sophos.com (Postfix) with ESMTPS id
+ 4g5fwT5zW4zgY8J
+ for <mitul@excelenviro.com>; Thu, 30 Apr 2026 03:36:25 +0000 (UTC)
+Received: from PNYP287MB5459.INDP287.PROD.OUTLOOK.COM (2603:1096:c01:327::14)
+ by MAUP287MB5060.INDP287.PROD.OUTLOOK.COM (2603:1096:a01:1c1::17)
+ with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9870.20; Thu, 30 Apr
+ 2026 03:36:21 +0000
+Received: from PNYP287MB5459.INDP287.PROD.OUTLOOK.COM
+ ([fe80::8647:7a20:8f56:270b]) by PNYP287MB5459.INDP287.PROD.OUTLOOK.COM
+ ([fe80::8647:7a20:8f56:270b%5]) with mapi id 15.20.9870.020; Thu, 30 Apr 2026
+ 03:36:21 +0000
+Return-Path: <Madan.Sancheti@dorfketal.com>
+Return-Path: madan.sancheti@dorfketal.com
+ARC-Seal: i=2; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=fail;
+ b=spArDPv+erFXZ1ClJOHb3Ahr5TgYgPnx9yKySwwOvsiKM0KTGe4PgveqtErpsJltTT4io4fxqxsgLVLU2f9/+xdTl4j6IG3BfWvA4v+xh2new/QDUenXKhxOagU5HFys3uc4MsAl28ih49VMlp34FglGdr7wmbdrA8nCRksuDr9QaxE+0ANphxMp6t52tuhXoT1fGdMNrQP9rpXM5dvmdK/OvFLmgDDF+VEz32iMk3JiChnJrYIMXxuOLPSrOyS6NIbHRAVPZt+EjwDAAmLJ6p9rLsDLX6D052OByS6Xjavsmt+EC8F7cdDI2Oh4oByaSp6vhpc/vHlKCqQTyjIz+A==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=vs4Eo731dSzALWBDauPCezlT0QOaqncoi+q3HgK13mA=;
+ b=Y5z4WeCnIWig9oJhyp1oNQh3mHiVJG27rlJVrKFEw42M7AoHrZFzGZwcFScCuo5G/EsuYF+fd/o0ZlZc6s6/SIbPB3bnjRDP7BRHju4Uy5HW6OgBFRXZ0wq1dVhobFhHT9XoXiPqF8zf3KNmnh674KQFGLpPoF4L3KdVk54kIFlcRNIG+4XdjEFGkRA8ammpLs5vP77++fbGUlj+OEXIUd6cYJU4dEpC7j+TGfKVEkbigrpbUjE2aVkOh2rNL78zx028NTIHhqlhTDz3OV0ZbcNhcq8JolyRSpEz5NfN6Uotfv3KTxs9BGV0BZT2RGmGO0s3R78poC1vq/P/3Ph6JQ==
+ARC-Authentication-Results: i=2; mx.microsoft.com 1; spf=pass (sender ip is
+ 198.154.180.225) smtp.rcpttodomain=excelenviro.com
+ smtp.mailfrom=dorfketal.com; dmarc=pass (p=quarantine sp=quarantine pct=100)
+ action=none header.from=dorfketal.com; dkim=pass (signature was verified)
+ header.d=dorfketal.com; dkim=pass (signature was verified)
+ header.d=mail-dkim-eu-west-1.prod.hydra.sophos.com; arc=fail (47)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dorfketal.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=vs4Eo731dSzALWBDauPCezlT0QOaqncoi+q3HgK13mA=;
+ b=ducywNtKz0Zw19gqm17/fdcm2AeycqT4NFe42i9/ug79UW/3KJu5lRZxN8Oy1NTYPEtG//S8Yi8QXIiohJZbGN6RxGysouSEQ9D4zljbMTalYRn1qe5Tdvpara2RQ/dC351MT5+6b8wX3Td314rtWDlEJ2U4pYFV9HsM/Wmqy3yQxem2g4yXASVlYxr8SSY8GUbfDt4QJkxXREqiK3WqcQF+bT7XYtvyXBXXSVeVWCsB2//lgidRSJszDbaHEvtWa2qNKebeHRT+Yw5bMejjO18nEKb+QTQs/y4qzflTSPAlsCx53DukMAQIygUHAnmJkp3KADRqpq1AAfYrvuqLRg==
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 198.154.180.225)
+ smtp.mailfrom=dorfketal.com; dkim=pass (signature was verified)
+ header.d=dorfketal.com;dkim=pass (signature was verified)
+ header.d=mail-dkim-eu-west-1.prod.hydra.sophos.com;dmarc=pass action=none
+ header.from=dorfketal.com;
+Received-SPF: pass (zohomail.in: domain of dorfketal.com designates 52.101.227.103 as permitted sender) client-ip=52.101.227.103; envelope-from=Madan.Sancheti@dorfketal.com; helo=MA0PR01CU009.outbound.protection.outlook.com;
+Received-SPF: Pass (protection.outlook.com: domain of dorfketal.com designates
+ 198.154.180.225 as permitted sender) receiver=protection.outlook.com;
+ client-ip=198.154.180.225; helo=mfod-euw1.prod.hydra.sophos.com; pr=C
+X-Sophos-Product-Type: Mailflow
+X-Sophos-Email-ID: 4fe9ad9bb2344e868114f8107d2fbcdb
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=ocqTgPPZjB/z/DDb3S05TFxeCQf3FjblnR2PexOhZ/a5I3PC8GLFX8D7T6aJnioR3TxZPVEUgXILwBeky6ErWCbN8a95g0LpyHsad4lzJAY+2d33obsdkNw2tHJFxeLrBrllPJ5JYo2WZzVkpMfYkpQs/Dgk4x6VDlFcPQhbE9c5jv3H5njyaE+F6N8YiSiYXZpU9pY21MMVVd+96PxqoZOxgXCtqH9bl1X+AeMbfapGgTm75dVfmyPrLDfPrB9TgRk2QKjZBrgQcyhMxyUxSzp5l7dHEdeGYIIIEekSrKIjybcQgIXr0xu2btjaIHnx/tIVOlthdNZPZ5aufvjZVQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com; 
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=fpEdSm+gNVBOPlKoCeMDsAbaiS4GJFEIGPKvWtK7ZCs=;
+ b=eAVMRF5wUOs2zB7I+l/AZZcCDIcRM7XgXiTIO5sYczOVR1zK0+7s6ZeD+Zv0mUe+Wl7eWm3qGxA4YcuvtoniocoG70eGlxZO/vg76v0trZRJzup1P0LhLWoAjG2MksHQKccI2vh30Z8t2FhRpWSdk3ARfeaM0eBVTkpMzuGCNQD9jGj9UoFbPgKFw327LDtv6yRd7YOC9LnXPuJpoihLVVh9KOHknnkJV/71KIFhx9p+dnuJseKCyHxmJg9g9eErkUejCiW1WQlbltLi11N6laRuH+4qHypKi6DKAE0C82XBt5r6qzZ+ov6/HtQk5eTBd29YO1EmB3f+r2wFc6yKOw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=dorfketal.com; dmarc=pass action=none
+ header.from=dorfketal.com; dkim=pass header.d=dorfketal.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1777520181; 
+ s=sophosd23353ce13c44eab885018f276a7004c; d=dorfketal.com;
+ h=Content-Type:Date:Subject:CC:To:From;
+ bh=Igc2jHkU929+00nKLHITPq0AXNhAKFQGEP/J2rDVGL8=;
+ b=Oq7A6COsMHlntdimIug+BDurLgUh9IPu7ABlDPc6KL+Q/JXqGT+pP9ZmIZxSD4s6
+ 1CaXp8dKzye4OX7onOCKxkgcdCBFVulqop2JdyHG9c6R43hsf2xIOhGwMM4Aogj0FPw
+ Azhgr4FwtoTacGFBkx6OnQuZS0GycPVw9YdBJxOyE628uxQ1QPSx9l3X/x1wNsp1Okw
+ UtC5OeVMeWU3+rpR3tHImsrInefAhaITeIxvGJwTMeg7wRldxeo3FK8ZTrA4l5nLkpI
+ 67ACdwc9Er57XBOF/yN9vBo8JViv3mr4SsSn31W1/VslDqMYzsS+4ubdELDJn2OrggL
+ iEzPAPzG7w==
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1777520181; 
+ s=v1; d=mail-dkim-eu-west-1.prod.hydra.sophos.com;
+ h=Content-Type:Date:Subject:CC:To:From;
+ bh=Igc2jHkU929+00nKLHITPq0AXNhAKFQGEP/J2rDVGL8=;
+ b=cFbIDfPrW31VsQkqzerLPRiSk/BdgWMFQNnK774h73z/nU8L5HZgDWY0r4ExTmQI
+ 8q/EMEQPOfpVj6dSvewqquVZXEm2tM9xollTiqo+GqnKAPFS2INkXJgY33OdrK62QA0
+ Ajbajce8D9XsptmSpExPkbSLOKgNHsOy1obA9u+Gk1T585YcUyb4xTiq2DZcGUyWfII
+ VVCP9DLjAAxfyj4GWtsC6ZqYq3R8l0a079D9aT/zSBNoaDYCSVL/gWqv89CWbfKATyB
+ GJQTu5J4mHUpo9rwWkSYBDYr/7J26+nACaZQsWdnvIfRTQiL5son22k1CQQGtCmtLGR
+ 24Duwa4MaA==
+From: Madan Sancheti <Madan.Sancheti@dorfketal.com>
+To: Mitul Jain <mitul@excelenviro.com>
+CC: Deepakkumar Saumshi <deepakkumar.saumshi@dorfketal.com>, Kaushik Biswas
+ <kaushik.biswas@dorfketal.com>
+Subject: Fw: Application Auto Rejected
+Thread-Topic: Application Auto Rejected
+Thread-Index: AQHc2BGBFxpPWv4cHEq6GTY1NqMRtbX29LwF
+Date: Thu, 30 Apr 2026 03:36:21 +0000
+Message-ID: <PNYP287MB5459DE0C7EECA1CEBF832E399B352@PNYP287MB5459.INDP287.PROD.OUTLOOK.COM>
+References: <20260429195140.413073019AB49@vastu13199.nic.in>
+In-Reply-To: <20260429195140.413073019AB49@vastu13199.nic.in>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: yes
+X-MS-TNEF-Correlator: 
+msip_labels: 
+Authentication-Results-Original: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=dorfketal.com;
+x-ms-traffictypediagnostic: PNYP287MB5459:EE_|MAUP287MB5060:EE_|MA1PEPF00007262:EE_|MA5P287MB5268:EE_
+X-MS-Office365-Filtering-Correlation-Id: f3705808-e722-42df-0b5b-08dea669aa4c
+X-MS-Exchange-AtpMessageProperties: SA
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam-Untrusted: BCL:0;
+ ARA:13230040|376014|39142699007|31052699007|1800799024|366016|6049299003|8096899003|55112099003|4053099003|13003099007|38070700021|18002099003|22082099003|56012099003;
+X-Microsoft-Antispam-Message-Info-Original: UV+9YDPgsEF477RiMBZF6tWCRnyPucJAFt20wd4Oxxk2tBMI/nqicOSgQs8aUtL5tKWGy6qgfwVBTHY+pMOmRRIRVuMrbIU1huRO7l0pf4L2ayGd05XJfSbHY95mMKQi83tw/pktG6oeLprERgRXA5yfWSeWZJ2WFicZCvYHM9oKGzQ0llZZqD+8iODmS9MU6uP7nvF1R7q4fyVDi1iaAApyF75iFy+8t+1CWGMt68ec1M9UuGk3VBirjbdOZeswIlOtwcLSxsPPOLyMlXXYYi5nbcyPr9rYtnJQ23s0NYh/FTj4erjCIDQblN9DKO9YwkVK9G3NYnSfNmr4M3ny5NbUgAT6loma9wx+YF/4uUZjAUxriVeLOMJLDrEg4+1XWkWHlwOdsOTdNTxIlDBT7lCYIdVZoGr6GrjAS/8h7TndESgtu3hJroY/Kj11go6jRyP+fUDjNwgftRO8TU/T5L+1SzAMMm0MRjLMKlmhsrHy+DwOTqexlDFIpgjuJKQ1ZXGs9kQ6ni15ie2NR9r30Rt+/BIt8Kjf6X1s3oHIV118Ny3rhpE1e/XhdYIOC8Q6OlxsdUwZf6leA3D54JldPrcNNOLOzesIyEtPbP+RrnAtm1w09Pd2o7fRI/g7SfvYYeIdSubDyqq/ahIONj8vXq0k/kY+G/GO1yQToRSc8siHvlclEYW03UAcgIlzBtd1H15EiPIhmyTwb53Jn4DqKsB8iMPa6y3YxQsc9CqJnVY=
+X-Forefront-Antispam-Report-Untrusted: CIP:255.255.255.255; CTRY:; LANG:en;
+ SCL:1; SRV:; IPV:NLI; SFV:NSPM; H:PNYP287MB5459.INDP287.PROD.OUTLOOK.COM;
+ PTR:; CAT:NONE;
+ SFS:(13230040)(376014)(39142699007)(31052699007)(1800799024)(366016)(6049299003)(8096899003)(55112099003)(4053099003)(13003099007)(38070700021)(18002099003)(22082099003)(56012099003);
+ DIR:OUT; SFP:1102; 
+Content-Type: multipart/related;
+ boundary="_004_PNYP287MB5459DE0C7EECA1CEBF832E399B352PNYP287MB5459INDP_";
+ type="multipart/alternative"
+MIME-Version: 1.0
+X-Exchange-RoutingPolicyChecked: eapx4JpU5H5pu2AtNh0O92weDA5vgZvBNhmd8idirWqxWD2GY0xjyk7xa0gsoPPF7dRpNYLE1Als2afLqETxxNZG+XCHNC60rOmwzl7e4ltQIGhPSOL6CIhU3kt89q23CHVZiRrhZ5ikX1JUM9GHFjNuosv76NyHDEhXRsawwlwfkeKPX9KdLY/aCCWV8xO0zxI6ckQcFbz7NNev2QgbKqBTLh+NZKFb3utnllZqVqE8uBeJxAg8AQ4OUo4ppCnjGcrPnkpcR582GUe9edkKMuKkS/41yVuV0gLZwu3Wid0kQkO6/ujLXgJ6kKv+353oycmGAWm/jF5+T1Obs2aWhg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MAUP287MB5060
+X-Sophos-Email: [eu-west-1] Antispam-Engine: 6.0.3,
+ AntispamData: 2026.4.30.25719
+X-LASED-SpamProbability: 0.093215
+X-LASED-Hits: ARCAUTH_PASSED 0.000000, BODYTEXTH_SIZE_10000_LESS 0.000000,
+ BODYTEXTH_SIZE_3000_MORE 0.000000, BODYTEXTP_SIZE_3000_LESS 0.000000,
+ BODY_SIZE_10000_PLUS 0.000000, DKIM_ALIGNS 0.000000, DKIM_SIGNATURE 0.000000,
+ FONT_STYLE_0PT 0.000000, HREF_LABEL_TEXT_ONLY 0.000000, HTML_70_90 0.100000,
+ HTML_FONT_INVISIBLE 0.100000, IMP_FROM_NOTSELF 0.000000, IN_REP_TO 0.000000,
+ IN_TLD 0.100000, JPG_COMMON_HEADER_ORDER 0.000000, JPG_PIXPERBYTE_LOW 0.000000,
+ JPG_SPAMMY_SEGMENT 0.000000, JPG_SPAMMY_Y_RESOLUTION 0.000000,
+ LEGITIMATE_SIGNS 0.000000, MSG_THREAD 0.000000, MULTIPLE_RCPTS 0.100000,
+ MULTIPLE_REAL_RCPTS 0.000000, NO_FUR_HEADER 0.000000, OBFUSCATION 0.000000,
+ OUTBOUND 0.000000, OUTBOUND_SOPHOS 0.000000, REFERENCES 0.000000,
+ SINGLE_IMG_ATTACH 0.000000, SUPERLONG_LINE 0.050000, SUSP_DH_NEG 0.000000,
+ TEXT_DIRECTION 0.000000, TEXT_DIR_LTR_ONLY 0.000000,
+ URI_TOC_SOPHOS_NO_ID 0.000000, URI_WITH_PATH_ONLY 0.000000, __ANY_URI 0.000000,
+ __ARCAUTH_DKIM_PASSED 0.000000, __ARCAUTH_DMARC_PASSED 0.000000,
+ __ARCAUTH_PASSED 0.000000, __ARC_SEAL_MICROSOFT 0.000000,
+ __ARC_SIGNATURE_MICROSOFT 0.000000, __ATTACH_CTE_BASE64 0.000000,
+ __ATTACH_CTE_QUOTED_PRINTABLE 0.000000, __BANNER_TRUSTED_SENDER 0.000000,
+ __BODY_TEXT_X4 0.000000, __BOUNCE_NDR_SUBJ_EXEMPT 0.000000,
+ __BULK_NEGATE 0.000000, __BUSINESS_SIGNATURE 0.000000, __CC_NAME 0.000000,
+ __CC_NAME_DIFF_FROM_ACC 0.000000, __CC_REAL_NAMES 0.000000,
+ __CP_URI_IN_BODY 0.000000, __CT 0.000000, __CTYPE_HAS_BOUNDARY 0.000000,
+ __CTYPE_MULTIPART 0.000000, __CTYPE_MULTIPART_ALT 0.000000,
+ __DKIM_ALIGNS_1 0.000000, __DKIM_ALIGNS_2 0.000000, __DQ_NEG_DOMAIN 0.000000,
+ __DQ_NEG_HEUR 0.000000, __DQ_NEG_IP 0.000000, __EXTRA_MPART_TYPE_1 0.000000,
+ __EXTRA_MPART_TYPE_N1 0.000000, __FRAUD_MONEY_DENOMINATION 0.000000,
+ __FRAUD_NEGATE 0.000000, __FROM_DOMAIN_IN_ANY_CC1 0.000000,
+ __FROM_DOMAIN_IN_RCPT 0.000000, __FUR_RDNS_SOPHOS 0.000000,
+ __HAS_ATTACHMENT 0.000000, __HAS_ATTACHMENT1 0.000000,
+ __HAS_ATTACHMENT2 0.000000, __HAS_CC_HDR 0.000000, __HAS_FROM 0.000000,
+ __HAS_HTML 0.000000, __HAS_MSGID 0.000000, __HAS_REFERENCES 0.000000,
+ __HAS_X_FF_ASR 0.000000, __HAS_X_FF_ASR_CAT 0.000000,
+ __HAS_X_FF_ASR_SFV 0.000000, __HIDDEN_HTML_CONTENT 0.000000,
+ __HIGHBIT_ASCII_MIX 0.000000, __HREF_LABEL_TEXT 0.000000,
+ __HREF_LABEL_URI 0.000000, __HTML_AHREF_TAG 0.000000, __HTML_ATTR_DIR 0.000000,
+ __HTML_BOLD 0.000000, __HTML_DIR_LTR 0.000000, __HTML_HREF_TAG_X2 0.000000,
+ __HTML_TAG_DIV 0.000000, __HTML_TAG_TABLE 0.000000, __HTTPS_URI 0.000000,
+ __IMG_ATTACHED 0.000000, __IMG_SIZE_1K_10K 0.000000, __IMG_THEN_TEXT 0.000000,
+ __IMP_FROM_MY_ORG 0.000000, __IMP_FROM_NOTSELF 0.000000, __IN_REP_TO 0.000000,
+ __JPG_SPAMMY_SEGMENT_2 0.000000, __JPG_SPAMMY_Y_RESOLUTION_3 0.000000,
+ __JPG_WIDTH_100 0.000000, __JSON_HAS_SCHEMA_VERSION 0.000000,
+ __JSON_HAS_TENANT_DOMAINS 0.000000, __JSON_HAS_TENANT_ID 0.000000,
+ __JSON_HAS_TENANT_SCHEMA_VERSION 0.000000, __JSON_HAS_TENANT_VIPS 0.000000,
+ __JSON_HAS_TRACKING_ID 0.000000, __MAIL_CHAIN 0.000000,
+ __MAIL_CHAIN_MULTI 0.000000, __MIME_ATTACHMENT_1_N 0.000000,
+ __MIME_ATTACHMENT_N_2 0.000000, __MIME_HTML 0.000000, __MIME_TEXT_H 0.000000,
+ __MIME_TEXT_H1 0.000000, __MIME_TEXT_H2 0.000000, __MIME_TEXT_P 0.000000,
+ __MIME_TEXT_P1 0.000000, __MIME_TEXT_P2 0.000000, __MIME_VERSION 0.000000,
+ __MSGID_32_64_CAPS 0.000000, __MULTIPLE_RCPTS_CC_X2 0.000000,
+ __MULTIPLE_URI_HTML 0.000000, __MULTIPLE_URI_TEXT 0.000000,
+ __OUTBOUND_SOPHOS_FUR 0.000000, __OUTBOUND_SOPHOS_FUR_IP 0.000000,
+ __OUTBOUND_SOPHOS_FUR_RDNS 0.000000, __PHISH_PHRASE10_D 0.000000,
+ __PRODUCT_TYPE_MAILFLOW 0.000000, __REFERENCES 0.000000,
+ __RUS_OBFU_PHONE 0.000000, __SANE_MSGID 0.000000, __SCAN_D_NEG 0.000000,
+ __SCAN_D_NEG2 0.000000, __SCAN_D_NEG_HEUR 0.000000,
+ __SCAN_D_NEG_HEUR2 0.000000, __SL_HEAVY 0.000000, __STOCK_CRUFT 0.000000,
+ __STYLE_RATWARE_NEG 0.000000, __STYLE_TAG 0.000000, __SUBJ_ALPHA_END 0.000000,
+ __SUBJ_FORWARD 0.000000, __TAG_EXISTS_BODY 0.000000,
+ __TAG_EXISTS_HEAD 0.000000, __TAG_EXISTS_HTML 0.000000,
+ __TAG_EXISTS_META 0.000000, __TEXT_DIR_LTR 0.000000, __TO_MALFORMED_2 0.000000,
+ __TO_NAME 0.000000, __TO_NAME_DIFF_FROM_ACC 0.000000, __TO_REAL_NAMES 0.000000,
+ __URI_ENDS_IN_SLASH 0.000000, __URI_HAS_HYPHEN_USC 0.000000,
+ __URI_HREF_DIFF_LABEL 0.000000, __URI_IN_BODY 0.000000, __URI_MAILTO 0.000000,
+ __URI_NOT_IMG 0.000000, __URI_NS 0.000000, __URI_REDIR 0.000000,
+ __URI_TOC_SOPHOS 0.000000, __URI_WITH_PATH 0.000000,
+ __X_FF_ASR_SCL_NSP 0.000000, __X_FF_ASR_SFV_NSPM 0.000000
+X-LASED-Impersonation: False
+X-LASED-Spam: NonSpam
+X-Sophos-Mailflow-Processing-Id: e72901ba230b47e8a9f3b84eec5848fe
+X-Sophos-MH-Mail-Info-Key: NGc1ZndXMWRLZnpXZ05aLTE3Mi4xOS4wLjEwMQ==
+X-EOPAttributedMessage: 0
+X-MS-Exchange-Transport-CrossTenantHeadersStripped: MA1PEPF00007262.INDPRD01.PROD.OUTLOOK.COM
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id-Prvs: b108c2f6-1006-42ba-f370-08dea669a5df
+X-Microsoft-Antispam: BCL:0;ARA:13230040|36860700016|1800799024|376014|14060799003|6049299003|39142699007|7149299003|82310400026|31052699007|35042699022|4076899003|8096899003|22082099003|56012099003|55112099003|18002099003|4053099003|13003099007;
+X-Microsoft-Antispam-Message-Info: /0DKaqe3tSVo+yu2CCjYxR6ELhiMnS7R6N0712bDLYV0U+HTS6OEaJpG6tTZ6L1dpS0mPbHbawikZF2xDUNJRrdPYT4/YFn9lZ2wYQ8mK9tRxRIJyEGR/0Hy9p6ODiJxs91cQchTFxRS12KRzYUFMg7ikqQ3PTs3RBdse/luQzoHY2sFmpUHIutdFCFkhRMMjV3XVVwqdqUR0NkqXbbdyEjq/p4bvdMRXV+iYnbSpTRD/ow65v48zlnIsLA2o61XCLSWpOdzIl+euSMPu18SySV3Maxre0YfkWFKrRhaf3auUVKqanITh3BFD/MOygFyUnAp5SHfoNfNZJMAOlSWSCQ+2nTLJhbz2bmJb/hqd3DTM/4IYSzjL5BB6E6b5dhSdAcw1rWNqXlYFZQ2bH7QNeamClelaH/o0Z/ETclxrhbRPks4G495Svj5qNquw5NYzDcFJCZzS/BvZs5cscMhtQNGosMyDg5Z5/IODEX9khomPyTc+/fgtTd2lzdDjDlUp3BV4fGw1oxdMdf+Vh4IoIvsj/lgkkU0w99ZGeR16GBytSU/jTKUGDW3fKJrhQNpvzblnRN376nlfYQggfnIApvBkCtwC0z7mipY/2O8M9XnoHajl9XuiQAzlHHjqD6ySy6zE40KSoXga+ql30PUXQ+z2nQPg3lwMTf7lJOtpZ38yyXUrKsa8dn8b4hsqWMJHdlW8Ny3XZ5LNCVIpvOtcS2+5vaIFsG1eFznXh3LaDY=
+X-Forefront-Antispam-Report: CIP:198.154.180.225;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mfod-euw1.prod.hydra.sophos.com;PTR:mfod-euw1.prod.hydra.sophos.com;CAT:NONE;SFS:(13230040)(36860700016)(1800799024)(376014)(14060799003)(6049299003)(39142699007)(7149299003)(82310400026)(31052699007)(35042699022)(4076899003)(8096899003)(22082099003)(56012099003)(55112099003)(18002099003)(4053099003)(13003099007);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: LDA8Bags3tnhrD8xhcz7MOmv5Ott0oj1MEhKZs1LA7BNnXV6JDQRDoco/4BQF6sNvP9C9TvNueIGMPVtKFpX661w5bEhEy5D1AVAjrRZIdCtHrDXZmwfGj/DWAT/WMq6LWH/QlHm6VpG9dPFUyyxrd82Gdxexf88nrOHaGH2TOcyDp2WajNykRCjP0z+68YlcaJpRRpsNIdEImGWpeN+8MrWEwYYs0kmNkw1PfW6+VfECL+MQr56me+BRPpguuifj37P/tAXiZdT6+DPRHvNWhPQNdrPn7hZ83u7KWHnv09phPwTUspecALHOoj2PiVxh7NF3AqrRt5bk1eAL5lhdzqz2+X78dF42SNzGLjh46bxhIM9adkRCJkbYTp7I7S6STqRHYna7Rppu2lwGXHKwQfPZJZAh/c6YfMfv/TRaXXY/7JwDAH0SCxSqQCpbBHz
+X-OriginatorOrg: dorfketal.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 Apr 2026 03:36:28.6980
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: f3705808-e722-42df-0b5b-08dea669aa4c
+X-MS-Exchange-CrossTenant-Id: ebe0d059-2ddf-4b4e-aba6-8a6726708439
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=ebe0d059-2ddf-4b4e-aba6-8a6726708439;Ip=[198.154.180.225];Helo=[mfod-euw1.prod.hydra.sophos.com]
+X-MS-Exchange-CrossTenant-AuthSource: MA1PEPF00007262.INDPRD01.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MA5P287MB5268
+X-Zoho-Virus-Status: 1
+X-Zoho-AV-Stamp: zmail-av-0.2.2.1.5.2/277.493.67
+X-ZohoMail-DKIM: pass (identity @dorfketal.com)
+
+--_004_PNYP287MB5459DE0C7EECA1CEBF832E399B352PNYP287MB5459INDP_
+Content-Type: multipart/alternative;
+	boundary="_000_PNYP287MB5459DE0C7EECA1CEBF832E399B352PNYP287MB5459INDP_"
+
+--_000_PNYP287MB5459DE0C7EECA1CEBF832E399B352PNYP287MB5459INDP_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+Dear Mitul,
+
+CGWA application rejected.
+What action now ?
+
+Warm Regards
+
+Madan Sancheti
+
+Vice President - OBA
+
+Khyati Chemicals Private Limited
+
+( A wholly owned subsidiary of Dorf-Ketal Chemicals India Limited)
+
+(Formerly known as  Dorf-Ketal Chemicals India Private Limited)
+
+A/3, 2nd Floor, Safal Profitaire,
+
+Opp Prahladnagar AUDA Garden,
+
+Corporate Road,
+
+Ahmedabad 380 015
+
+M: +91 94276 15440
+
+E: madan.sancheti@dorfketal.com<mailto:madan.sancheti@dorfketal.com>
+
+W: www.khyatichemicals.com<https://eu-west-1.protection.sophos.com/?d=3Dkhy=
+atichemicals.com&u=3DaHR0cDovL3d3dy5raHlhdGljaGVtaWNhbHMuY29t&i=3DNjA1M2NmZ=
+GQ1ZjljNjcwZjU2ODhmNDlm&t=3DZ1dtUlp1a05MekVZTXlBeTY3eFpxWjlsbWMyeTlNdjdvM1F=
+0b2pYSzhxZz0=3D&h=3De6a13795f147476f9fbb1744ae2fdc15>
+
+[cid:d4fcb88a-01c9-44cb-9dd2-fbf1f4d65b6f]
+
+
+
+________________________________
+From: no-reply-cgwa@gov.in <no-reply-cgwa@gov.in>
+Sent: Thursday, April 30, 2026 1:20 AM
+To: Madan Sancheti <Madan.Sancheti@dorfketal.com>
+Subject: Application Auto Rejected
+
+
+** This mail has been sent from an external source.
+Please do not click links or open attachments unless you recognize the sour=
+ce of this mail and are sure that the content is safe. **
+
+Dear , Application Number : IND/GJ/2025/3095/R-1-REV-6 , (M/s M/S. KHYATI C=
+HEMICAL PVT LTD (UNIT-1)) has been auto-rejected due to non submission of Q=
+uery Response., For details, please login https://
+sophospsmartbannerend
+
+Dear ,
+
+Application Number : IND/GJ/2025/3095/R-1-REV-6 , (M/s M/S. KHYATI CHEMICAL=
+ PVT LTD (UNIT-1)) has been auto-rejected due to non submission of Query Re=
+sponse.,
+
+For details, please login https://cgwa-bhuneer.mowr.gov.in/<https://eu-west=
+-1.protection.sophos.com/?d=3Dmowr.gov.in&u=3DaHR0cHM6Ly9jZ3dhLWJodW5lZXIub=
+W93ci5nb3YuaW4v&p=3Dm&i=3DNjdiMDE5ZjI5NTkxZmM0M2EwNjlkMzJh&t=3DSVZJL2srNzQv=
+YzRxZEpvc3oyZEhLQmNjUWRNSHIzWllXOFN0NTJVNUE4ST0=3D&h=3D4faf6feb2cf140b9a261=
+f44d6eb86ff7&s=3DAVNPUEhUT0NFTkNSWVBUSVbgp4GFQy3TtTNXfE14aYy10q0cc7VZxwNj8k=
+HKIHjWeQ>
+
+This is an auto-generated email. Do not reply to this email.
+
+Regards,
+
+CGWA Team
+
+***************************************************************************=
+*******************************************************************
+
+Disclaimer: This communication is for use by the intended recipient and con=
+tains information that may be privileged, confidential or copyrighted under=
+ applicable law. If you are not the intended recipient, you are hereby form=
+ally notified that any use, copying or distribution of this e-mail, in whol=
+e or in part, is strictly prohibited. Please notify the sender by return e-=
+mail and delete this e-mail from your system. This e-mail does not constitu=
+te consent to the use of sender's contact information for direct marketing =
+purposes or for transfers of any data contained herein to third parties.
+
+***************************************************************************=
+*******************************************************************
+
+--_000_PNYP287MB5459DE0C7EECA1CEBF832E399B352PNYP287MB5459INDP_
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+<html>
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
+>
+<style type=3D"text/css" style=3D"display:none;"> P {margin-top:0;margin-bo=
+ttom:0;} </style>
+</head>
+<body dir=3D"ltr">
+<div class=3D"elementToProof" style=3D"font-family: Aptos, Aptos_EmbeddedFo=
+nt, Aptos_MSFontService, Calibri, Helvetica, sans-serif; font-size: 11pt; c=
+olor: rgb(0, 0, 0);">
+Dear Mitul, </div>
+<div class=3D"elementToProof" style=3D"font-family: Aptos, Aptos_EmbeddedFo=
+nt, Aptos_MSFontService, Calibri, Helvetica, sans-serif; font-size: 11pt; c=
+olor: rgb(0, 0, 0);">
+<br>
+</div>
+<div class=3D"elementToProof" style=3D"font-family: Aptos, Aptos_EmbeddedFo=
+nt, Aptos_MSFontService, Calibri, Helvetica, sans-serif; font-size: 11pt; c=
+olor: rgb(0, 0, 0);">
+CGWA application rejected. </div>
+<div id=3D"Signature" class=3D"elementToProof">
+<div class=3D"elementToProof" style=3D"font-family: Aptos, Aptos_EmbeddedFo=
+nt, Aptos_MSFontService, Calibri, Helvetica, sans-serif; font-size: 11pt; c=
+olor: rgb(0, 0, 0);">
+What action now ? </div>
+<div class=3D"elementToProof" style=3D"font-family: Aptos, Aptos_EmbeddedFo=
+nt, Aptos_MSFontService, Calibri, Helvetica, sans-serif; font-size: 11pt; c=
+olor: rgb(0, 0, 0);">
+<br>
+</div>
+<div class=3D"elementToProof" style=3D"font-family: Aptos, Aptos_EmbeddedFo=
+nt, Aptos_MSFontService, Calibri, Helvetica, sans-serif; font-size: 11pt; c=
+olor: rgb(0, 0, 0);">
+Warm Regards&nbsp; </div>
+<p class=3D"elementToProof" style=3D"margin: 0cm; font-family: Calibri, san=
+s-serif;">
+<span style=3D"font-size: 10pt;">Madan Sancheti&nbsp;</span></p>
+<p class=3D"elementToProof" style=3D"margin: 0cm; font-family: Calibri, san=
+s-serif;">
+<span style=3D"font-size: 10pt; color: rgb(36, 36, 36);">Vice President - O=
+BA</span></p>
+<p class=3D"elementToProof" style=3D"background-color: white; margin: 0cm; =
+font-family: Calibri, sans-serif;">
+<span style=3D"font-size: 10pt; color: black;">Khyati Chemicals Private Lim=
+ited</span></p>
+<p class=3D"elementToProof" style=3D"background-color: white; margin: 0cm; =
+font-family: Calibri, sans-serif;">
+<span style=3D"font-size: 10pt; color: rgb(36, 36, 36);">( A wholly owned s=
+ubsidiary of Dorf-Ketal Chemicals India Limited)</span></p>
+<p class=3D"elementToProof" style=3D"background-color: white; margin: 0cm;"=
+><span style=3D"font-family: Calibri, sans-serif; font-size: 10pt; color: r=
+gb(36, 36, 36);">(Formerly known as&nbsp;
+</span><span style=3D"font-family: Calibri, sans-serif; font-size: 13.3333p=
+x; color: rgb(36, 36, 36); background-color: rgb(255, 255, 255);">Dorf-Keta=
+l Chemicals India Private Limited</span><span style=3D"font-family: Calibri=
+, sans-serif; font-size: 10pt; color: rgb(36, 36, 36);">)</span></p>
+<p class=3D"elementToProof" style=3D"background-color: white; margin: 0cm; =
+font-family: Calibri, sans-serif;">
+<span style=3D"font-size: 10pt; color: black;">A/3, 2<sup>nd</sup>&nbsp;Flo=
+or, Safal Profitaire,</span></p>
+<p class=3D"elementToProof" style=3D"background-color: white; margin: 0cm; =
+font-family: Calibri, sans-serif;">
+<span style=3D"font-size: 10pt; color: black;">Opp Prahladnagar AUDA Garden=
+,</span></p>
+<p class=3D"elementToProof" style=3D"background-color: white; margin: 0cm; =
+font-family: Calibri, sans-serif;">
+<span style=3D"font-size: 10pt; color: black;">Corporate Road,</span></p>
+<p class=3D"elementToProof" style=3D"background-color: white; margin: 0cm; =
+font-family: Calibri, sans-serif;">
+<span style=3D"font-size: 10pt; color: black;">Ahmedabad 380 015</span></p>
+<p class=3D"elementToProof" style=3D"background-color: white; margin: 0cm; =
+font-family: Calibri, sans-serif;">
+<span style=3D"font-size: 10pt; color: black;">M: +91 9</span><span style=
+=3D"font-size: 10pt; color: rgb(36, 36, 36);">4276 15440</span></p>
+<p class=3D"elementToProof" style=3D"background-color: white; margin: 0cm; =
+font-family: Calibri, sans-serif;">
+<span style=3D"font-size: 10pt; color: black;">E: </span><span style=3D"fon=
+t-size: 10pt; color: rgb(5, 99, 193);"><a href=3D"mailto:madan.sancheti@dor=
+fketal.com" style=3D"color: rgb(5, 99, 193); margin-top: 0px; margin-bottom=
+: 0px;"><u>madan.sancheti@dorfketal.com</u></a></span></p>
+<p class=3D"elementToProof" style=3D"background-color: white; margin: 0cm; =
+font-family: Calibri, sans-serif;">
+<span style=3D"font-size: 10pt; color: black;">W: </span><span style=3D"fon=
+t-size: 10pt; color: rgb(5, 99, 193);"><a href=3D"https://eu-west-1.protect=
+ion.sophos.com/?d=3Dkhyatichemicals.com&amp;u=3DaHR0cDovL3d3dy5raHlhdGljaGV=
+taWNhbHMuY29t&amp;i=3DNjA1M2NmZGQ1ZjljNjcwZjU2ODhmNDlm&amp;t=3DZ1dtUlp1a05M=
+ekVZTXlBeTY3eFpxWjlsbWMyeTlNdjdvM1F0b2pYSzhxZz0=3D&amp;h=3De6a13795f147476f=
+9fbb1744ae2fdc15" style=3D"color: rgb(5, 99, 193); margin-top: 0px; margin-=
+bottom: 0px;"><u>www.khyatichemicals.com</u></a></span></p>
+<p class=3D"elementToProof" style=3D"background-color: white; margin: 0cm; =
+font-family: Calibri, sans-serif; font-size: 11pt;">
+<span style=3D"color: black;"><img width=3D"342" height=3D"89" style=3D"wid=
+th: 342px; height: 89px; margin-top: 0px; margin-bottom: 0px;" data-outlook=
+-trace=3D"F:1|T:1" src=3D"cid:d4fcb88a-01c9-44cb-9dd2-fbf1f4d65b6f"></span>=
+</p>
+<p class=3D"elementToProof" style=3D"margin: 0cm; font-family: Calibri, san=
+s-serif; font-size: 11pt;">
+&nbsp;</p>
+</div>
+<div id=3D"appendonsend"></div>
+<hr style=3D"display:inline-block;width:98%" tabindex=3D"-1">
+<div id=3D"divRplyFwdMsg" dir=3D"ltr"><font face=3D"Calibri, sans-serif" st=
+yle=3D"font-size:11pt" color=3D"#000000"><b>From:</b> no-reply-cgwa@gov.in =
+&lt;no-reply-cgwa@gov.in&gt;<br>
+<b>Sent:</b> Thursday, April 30, 2026 1:20 AM<br>
+<b>To:</b> Madan Sancheti &lt;Madan.Sancheti@dorfketal.com&gt;<br>
+<b>Subject:</b> Application Auto Rejected</font>
+<div>&nbsp; </div>
+</div>
+<div>
+<p style=3D"font-family:calibri; text-align:center; color:#000000; backgrou=
+nd-color:#FFFF00">
+** This mail has been sent from an external source.<br>
+Please do not click links or open attachments unless you recognize the sour=
+ce of this mail and are sure that the content is safe. **</p>
+<b></b>
+<div>
+<div id=3D"x_4e50eb4870d211ef20ae166375039dc2467a19b0">
+<div id=3D"x_4a2dd44fd018cf9733e2eaec116b2d7d6a610e13" style=3D"display:non=
+e; font-size:0; color:#ffffff; line-height:0; max-height:0; max-width:0; op=
+acity:0; overflow:hidden">
+Dear , Application Number : IND/GJ/2025/3095/R-1-REV-6 , (M/s M/S. KHYATI C=
+HEMICAL PVT LTD (UNIT-1)) has been auto-rejected due to non submission of Q=
+uery Response., For details, please login https://
+</div>
+<span id=3D"x_cdc4b985335792a3f6c7e3b1f2edf8fd548799ef" style=3D"display:no=
+ne; font-size:0; color:#ffffff; line-height:0; max-height:0; max-width:0; o=
+pacity:0; overflow:hidden">sophospsmartbannerend
+</span></div>
+<p>Dear ,</p>
+<p><strong>Application Number : IND/GJ/2025/3095/R-1-REV-6 , (M/s M/S. KHYA=
+TI CHEMICAL PVT LTD (UNIT-1))</strong> has been auto-rejected due to non su=
+bmission of Query Response.,</p>
+<p>For details, please login <a href=3D"https://eu-west-1.protection.sophos=
+.com/?d=3Dmowr.gov.in&amp;u=3DaHR0cHM6Ly9jZ3dhLWJodW5lZXIubW93ci5nb3YuaW4v&=
+amp;p=3Dm&amp;i=3DNjdiMDE5ZjI5NTkxZmM0M2EwNjlkMzJh&amp;t=3DSVZJL2srNzQvYzRx=
+ZEpvc3oyZEhLQmNjUWRNSHIzWllXOFN0NTJVNUE4ST0=3D&amp;h=3D4faf6feb2cf140b9a261=
+f44d6eb86ff7&amp;s=3DAVNPUEhUT0NFTkNSWVBUSVbgp4GFQy3TtTNXfE14aYy10q0cc7VZxw=
+Nj8kHKIHjWeQ" originalsrc=3D"https://eu-west-1.protection.sophos.com/?d=3Dm=
+owr.gov.in&amp;u=3DaHR0cHM6Ly9jZ3dhLWJodW5lZXIubW93ci5nb3YuaW4v&amp;p=3Dm&a=
+mp;i=3DNjdiMDE5ZjI5NTkxZmM0M2EwNjlkMzJh&amp;t=3DSVZJL2srNzQvYzRxZEpvc3oyZEh=
+LQmNjUWRNSHIzWllXOFN0NTJVNUE4ST0=3D&amp;h=3D4faf6feb2cf140b9a261f44d6eb86ff=
+7&amp;s=3DAVNPUEhUT0NFTkNSWVBUSVbgp4GFQy3TtTNXfE14aYy10q0cc7VZxwNj8kHKIHjWe=
+Q">
+https://cgwa-bhuneer.mowr.gov.in/</a></p>
+<p><strong>This is an auto-generated email. Do not reply to this email.</st=
+rong></p>
+<p>Regards,</p>
+<p>CGWA Team</p>
+</div>
+</div>
+***************************************************************************=
+*******************************************************************
+<p>Disclaimer: This communication is for use by the intended recipient and =
+contains information that may be privileged, confidential or copyrighted un=
+der applicable law. If you are not the intended recipient, you are hereby f=
+ormally notified that any use, copying
+ or distribution of this e-mail, in whole or in part, is strictly prohibite=
+d. Please notify the sender by return e-mail and delete this e-mail from yo=
+ur system. This e-mail does not constitute consent to the use of sender's c=
+ontact information for direct marketing
+ purposes or for transfers of any data contained herein to third parties.</=
+p>
+***************************************************************************=
+*******************************************************************
+</body>
+</html>
+
+--_000_PNYP287MB5459DE0C7EECA1CEBF832E399B352PNYP287MB5459INDP_--
+
+--_004_PNYP287MB5459DE0C7EECA1CEBF832E399B352PNYP287MB5459INDP_
+Content-Type: image/jpg; name="Outlook-egi0kqmg"
+Content-Description: Outlook-egi0kqmg
+Content-Disposition: inline; filename="Outlook-egi0kqmg"; size=7133;
+	creation-date="Thu, 30 Apr 2026 03:36:21 GMT";
+	modification-date="Thu, 30 Apr 2026 03:36:21 GMT"
+Content-ID: <d4fcb88a-01c9-44cb-9dd2-fbf1f4d65b6f>
+Content-Transfer-Encoding: base64
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsK
+CwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQU
+FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCABZAVYDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9U6KK
+KAEx7UYFQSzLCjOzbUX7zNVL/hINN/6CFr/3+T/GgzlUjHdmnxRxWV/wkWmf9BC1/wC/yf40f8JF
+pn/QQtf+/wAn+NTzLuT7an3NUGlIzWfa6tY3zbIby3nf/nnFKr1fZwg5IFUaKUWrpi7RRtFZ7atY
+rN5TXkAn/uGVN/5VeVlbkNmgFKMtmLuo49KwpPFGmw+JLfQnuo01ae3e8itWPLRI4Vn/ADcVu/eo
+FGcZbDqKKx7PVnuNc1K0ZF8u2WHa/rvBoLNiiiigAooooAKKKKACiiigAooooAKKKKACiiigAooo
+oAKKKKACiiigAooooAKKTcPWloAKKKKACiiigAooooAKKKKAOU+JBh/4QHxD9p3/AGY6fced5P39
+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
+ABRRRQB//9k=
+
+--_004_PNYP287MB5459DE0C7EECA1CEBF832E399B352PNYP287MB5459INDP_--

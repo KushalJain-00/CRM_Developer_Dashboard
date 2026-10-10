@@ -1350,14 +1350,15 @@ function showView(id) {
   const nav=document.querySelector(`.nav-item[data-view="${id}"]`);
   if (nav) nav.classList.add('active');
   S.currentView=id;
-  const titles={upload:'Import File',mapping:'Field Mapping',processing:'Processing',dashboard:'Dashboard',analytics:'Analytics',table:'Data Table',quality:'Data Quality',dedup:'Deduplication',history:'Upload History','eml-upload':'EML Upload','eml-contacts':'EML Contacts','eml-emails':'EML Emails','eml-settings':'LLM Settings'};
+  const titles={upload:'Import File',mapping:'Field Mapping',processing:'Processing',dashboard:'Dashboard',analytics:'Analytics',table:'Data Table',quality:'Data Quality',dedup:'Deduplication',history:'Upload History','eml-upload':'EML Upload','customer-profiles':'Customer Profiles','eml-contacts':'Staged Contacts','eml-emails':'EML Emails','eml-settings':'LLM Settings'};
   document.getElementById('topTitle').textContent=titles[id]||id;
-  if (!['upload','mapping','processing','eml-upload','eml-contacts','eml-emails','eml-settings'].includes(id))
+  if (!['upload','mapping','processing','eml-upload','customer-profiles','eml-contacts','eml-emails','eml-settings'].includes(id))
     document.getElementById('topSub').textContent=`${S.fileName} · ${S.clean.length.toLocaleString()} records`;
   else
     document.getElementById('topSub').textContent='Supports .xlsx · .xls · .csv · .txt · .pdf — any column structure';
   if (id==='table') renderTable();
   if (id==='history') loadHistory();
+  if (id==='customer-profiles' && window.AppUI) window.AppUI.loadCustomerProfiles();
   if (window.EmlUI) {
     if (id==='eml-contacts') EmlUI.loadContacts();
     if (id==='eml-emails') EmlUI.loadEmails();
@@ -2032,3 +2033,91 @@ async function downloadZip() {
   }
   if (btn) { btn.innerHTML = '📦 ZIP'; btn.disabled = false; }
 }
+
+window.AppUI = {
+  loadCustomerProfiles: async function(page=1) {
+    const search = document.getElementById('cpSearch').value || '';
+    try {
+      const q = new URLSearchParams({ search, page, page_size: 50 });
+      const res = await fetch(`/api/contacts?${q}`);
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      this.renderCustomerProfiles(data);
+    } catch (e) {
+      document.getElementById('cpGrid').innerHTML = `<div style="color:var(--rose)">Error: ${e.message}</div>`;
+    }
+  },
+
+  renderCustomerProfiles: function(data) {
+    const grid = document.getElementById('cpGrid');
+    if (!data.items || !data.items.length) {
+      grid.innerHTML = `<div style="color:var(--text-3); grid-column: 1/-1; text-align: center; padding: 40px;">No profiles found.</div>`;
+      return;
+    }
+    grid.innerHTML = data.items.map(p => {
+      const name = p.name || 'Unknown Contact';
+      const initials = name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+      const role = p.position || 'Professional';
+      const company = (p.company && p.company.name) ? p.company.name : 'Unknown Company';
+      
+      let html = `
+        <div class="profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar">${initials}</div>
+            <div class="profile-info">
+              <div class="profile-name" title="${name}">${name}</div>
+              <div class="profile-role">💼 ${role}</div>
+              <div class="profile-company">🏢 ${company}</div>
+            </div>
+          </div>
+          <div class="profile-details">`;
+
+      if (p.email_primary) {
+        html += `<div class="profile-detail-row">
+          <span class="profile-detail-icon">✉️</span>
+          <a class="profile-link profile-detail-text" href="mailto:${p.email_primary}">${p.email_primary}</a>
+        </div>`;
+      }
+      if (p.email_secondary) {
+        html += `<div class="profile-detail-row">
+          <span class="profile-detail-icon">✉️</span>
+          <a class="profile-link profile-detail-text" href="mailto:${p.email_secondary}">${p.email_secondary}</a>
+        </div>`;
+      }
+      if (p.phone_primary) {
+        html += `<div class="profile-detail-row">
+          <span class="profile-detail-icon">📞</span>
+          <a class="profile-link profile-detail-text" href="tel:${p.phone_primary}">${p.phone_primary}</a>
+        </div>`;
+      }
+      if (p.phone_secondary) {
+        html += `<div class="profile-detail-row">
+          <span class="profile-detail-icon">📞</span>
+          <a class="profile-link profile-detail-text" href="tel:${p.phone_secondary}">${p.phone_secondary}</a>
+        </div>`;
+      }
+
+      html += `</div>`;
+      
+      if (p.files) {
+        html += `<div class="profile-badges">
+          <span class="profile-badge profile-badge-blue">${p.files}</span>
+        </div>`;
+      }
+
+      html += `</div>`;
+      return html;
+    }).join('');
+
+    // Setup pager
+    let phtml = '';
+    if (data.page > 1) {
+      phtml += `<button class="btn btn-secondary btn-sm" onclick="AppUI.loadCustomerProfiles(${data.page - 1})">Prev</button> `;
+    }
+    phtml += `<span style="font-size:13px;color:var(--text-2);margin:0 10px;">Page ${data.page}</span>`;
+    if (data.items.length === 50) {
+      phtml += `<button class="btn btn-secondary btn-sm" onclick="AppUI.loadCustomerProfiles(${data.page + 1})">Next</button>`;
+    }
+    document.getElementById('cpPager').innerHTML = phtml;
+  }
+};

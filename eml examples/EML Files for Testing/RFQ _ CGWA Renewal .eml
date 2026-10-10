@@ -1,0 +1,471 @@
+Delivered-To: mitul@excelenviro.com
+Received-SPF: none (zohomail.in: 209.222.82.60 is neither permitted nor denied by domain of kashivindia.com) client-ip=209.222.82.60; envelope-from=rajdeepsinh.vaghela@kashivindia.com; helo=outbound-ip193a.ess.barracuda.com;
+Authentication-Results: mx.zohomail.in;
+	dkim=pass;
+	spf=none (zohomail.in: 209.222.82.60 is neither permitted nor denied by domain of kashivindia.com)  smtp.mailfrom=rajdeepsinh.vaghela@kashivindia.com;
+	arc=pass (i=1 dmarc=pass fromdomain=kashivindia.com)
+ARC-Seal: i=2; a=rsa-sha256; t=1781068687; cv=pass; 
+	d=zohomail.in; s=zohoarc; 
+	b=BfQYnCrcRsIDUDUFHYEMjSWRAyCgHntEp0cnDBvns/T0rE+BsixY6vh7KnqxkV04YnOCMNzRYpAIXgECLwg5h4AnyHHEDxa5hrgASly5TdUviK9876zyDoNBYk+a+ImIsqbHr77k0/lDqMgLfaSwG722vcaphTPmqkJSiWbEucA=
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.in; s=zohoarc; 
+	t=1781068687; h=Content-Type:Cc:Cc:Date:Date:From:From:MIME-Version:Message-ID:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=0VPUPF8jnDt2GCzL4aGHq+nNXegDXpEWLedjnMQmWHI=; 
+	b=Yp5oe13O8C/lGUwQFU9rXmCc18phbbQg4TuloLRn+9Se8m37lTbBcQdunHGtxwbWg2P8f68Q6NQJzm5upjg0X+ztPaYj9JTv7wzPACw513d1oLxlr9dCjCV+ITKoiMXpvixAMtwJqhdoRQa+54YTWWHhTCwapDf82XNqXEPGm0I=
+ARC-Authentication-Results: i=2; mx.zohomail.in;
+	dkim=pass;
+	spf=none (zohomail.in: 209.222.82.60 is neither permitted nor denied by domain of kashivindia.com)  smtp.mailfrom=rajdeepsinh.vaghela@kashivindia.com;
+	arc=pass (i=1 dmarc=pass fromdomain=kashivindia.com)
+Return-Path: <rajdeepsinh.vaghela@kashivindia.com>
+Received: from outbound-ip193a.ess.barracuda.com (outbound-ip193a.ess.barracuda.com [209.222.82.60]) by mx.zoho.in
+	with SMTPS id 1781068687597603.4139271226512; Wed, 10 Jun 2026 10:48:07 +0530 (IST)
+Received: from CY7PR03CU001.outbound.protection.outlook.com (mail-westcentralusazon11020082.outbound.protection.outlook.com [40.93.198.82]) by mx-outbound43-82.us-east-2c.ess.aws.cudaops.com (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO); Wed, 10 Jun 2026 05:18:02 +0000
+Received: from MN2PR13MB3774.namprd13.prod.outlook.com (2603:10b6:208:1ed::21)
+ by DS7PR13MB7377.namprd13.prod.outlook.com (2603:10b6:8:258::16) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.113.11; Wed, 10 Jun
+ 2026 05:18:00 +0000
+Received: from MN2PR13MB3774.namprd13.prod.outlook.com
+ ([fe80::dfc:8f0a:3048:e873]) by MN2PR13MB3774.namprd13.prod.outlook.com
+ ([fe80::dfc:8f0a:3048:e873%6]) with mapi id 15.21.0092.004; Wed, 10 Jun 2026
+ 05:17:59 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=LXY9yJlSYah6i9s/p4DaOdswzAXz1bXLOZOuZeLoZ8NyHm9c2KEEe6j5z/+9hKLaVyp3AsVmKmXmywCOr2qfFaymDkTJHKhZ5YkBytCgXyvN+8l9DYW9Nb3XmnW3UxsUDOHOzRcE39zVfYVenb1G8tioLTofYOvTGtohZxVQz5Ibv2ICQIpNzOAk5d1J4l3p6YoUxeGFdx7RAbDz6XPa01DmehYh6/03fTtctqDPbIcu6xTV5ktJ/4oO1lmzVnvek/SQ25+Tmcx5AC1/p9gnS/VSr4epmFRYfp53IMUrroIMAkmaxsTzbg98BbOxYkAbipt5f1v7zEsJD9SdrE1RWQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=0VPUPF8jnDt2GCzL4aGHq+nNXegDXpEWLedjnMQmWHI=;
+ b=mpSNtapi4MmRpmScVKYJ6AhVN5Rt4Trcmfurh0y90477f/ICAb5OHa3/Z8d6Hu9crl0n3QEFoJ22CA4DLE6D6uTM96EnpJcsWOcgW8pUSy5kYOdPIcYwBVrnpZ7oVGCHiSy6BfP9md87IYUcgc/1BoEyxqZ92Iyh3VMb9ovlOZQu7lekkzekG3Nrv04iZgnyy39PiSNuA6jMy66a5QMGPmzemff6/afAbIVeAY9yTgx7a2UyjXyHAw6r1RG7nTGz7e3e/gKTckdW4C3atYjteafLMBP3fhNDY0UvyTykFU/2uM1yHX3ZpFlha3AgNxWBQZw6gAi616ox3YIl7ywzbA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=kashivindia.com; dmarc=pass action=none
+ header.from=kashivindia.com; dkim=pass header.d=kashivindia.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kashivindia.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=0VPUPF8jnDt2GCzL4aGHq+nNXegDXpEWLedjnMQmWHI=;
+ b=GMYiwAO6cTmN4FZYCCMsf50x2HU4x22dvUzrbCGOnXITkj/JFHopy3FCaAsCDeJjXUF/7+VGAMk5U02FWFxEjZF4s84Mjt4tuD8m8nf8FtZpOszCA3kTTIE4TFyYeBc15pTOy0wOBaO4Wf24TBrvgjKnBShl0X8SgRauLfIqJNQQ1fyme9V7FrU2nIpNFGdKzFs3n+U4kG7hufg5gO+2///xB6j9cZIsUsUUJ/XXJujLKWx7ZopJZww3KMs4IYTpaQ4VrK6OeqU2BdIR0Yp+I1fTqFxeil/SSKRH9kyQHg81w9+BIrSKT7ZDJdJDoJQ/jUIE3VhpUPwJzbzH9EOAoA==
+From: Rajdeepsinh Vaghela <rajdeepsinh.vaghela@kashivindia.com>
+To: Mitul Jain <mitul@excelenviro.com>
+CC: Pratik Bhatt <pratik.bhatt@kashivindia.com>, Vishnu Vardhan
+	<vishnu.vardhan@kashivindia.com>
+Subject: RFQ : CGWA Renewal 
+Thread-Topic: RFQ : CGWA Renewal 
+Thread-Index: Adz4mHoKrbV1bstST6mQCy/EWPf+BQ==
+Date: Wed, 10 Jun 2026 05:17:59 +0000
+Message-ID: <MN2PR13MB3774F89BEB00159AE0899785FF1A2@MN2PR13MB3774.namprd13.prod.outlook.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: yes
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=kashivindia.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: MN2PR13MB3774:EE_|DS7PR13MB7377:EE_
+x-ms-office365-filtering-correlation-id: fe7586b9-de3c-400b-20c0-08dec6afa363
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;ARA:13230040|23010399003|376014|366016|6049299003|1800799024|8096899003|11063799006|6133799003|56012099006|13003099007|38070700021|4053099003|18002099003;
+x-microsoft-antispam-message-info: EDAx0r4HHTlnuBIUC8shVh0EbZTYqBDaB4BPyGq8TYXnj9yQuJeAm+spQu6CjNAYRkWkg0+nKNJpxoqwyGzG4LRgW1CMrqh0SS32v0mOwHbNFxw+6Lg5xFHGYjm2fMQRYZxWuQJTVWumyQDzP5g17CIPrXdhsHM987U03HioM6GkOitzc7XmZOmRsFmwaJRyUDAudj6JskygY1UBwrbqJ2Laicu/1Xlac03bAU9dB6H+MUszymYFjMOwWmgAtU9RxvCeFUHXANNAKi0CbadF2CQ0F3Qmgi7E4xpI2iqczqdXetQabeqFqwNZ5W/Uuj0DhBme5T8PELuXPXZFcbxF7o5WDRqzrF1hS0eP/44YgzpLbyVYGjj3XhUDVRND8IwrtwkRMn1Bc4Yhr1903Iz6cceraibLwitpl0OUAflMtgqKpqDiRsIBAlfI6rKJpASb6hyoveRIKOh2/02ViPkDQVmYCIiB18yZqZq8ZT/V2AGVIpv3XKsEHsPwSpbJmy76JdFLmdRvNYchQpNz765LMxNkWGIFOBn3Aqp5vA0HmP3EyPWYM9C5NyaNR67hVSpq0hcEV09OZy5gWhQm6CIJfA28jK5V5mHQlmyNjR7sA3JpLaZqa7z26+BSn29yCNVWJrA7haM3A0n6x561OszQrvRz1XP97owCN3lBEf/sJIwRtGtXp0nlUidYdU/BjTGV7Tek5BxzjaDA3TvTiWfwlQ==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MN2PR13MB3774.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(23010399003)(376014)(366016)(6049299003)(1800799024)(8096899003)(11063799006)(6133799003)(56012099006)(13003099007)(38070700021)(4053099003)(18002099003);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?r9QQkLUbWNHnqDUdFI6oqf+8x4X70ddaP1N/cnDQxej23Y/uyXgkAmfjawJs?=
+ =?us-ascii?Q?9pWlmIzpa97hbCA3iR5MuwoEf23pP5z/FZrfgvoCW7f6p8fpa1cSOsaZ+/Aw?=
+ =?us-ascii?Q?KG4INNPWcKfKIKnmBo4B7kf3L0kCYV4w6AmiREHsXxwi5MW/19P/sSEdKjI1?=
+ =?us-ascii?Q?0v7x06nkx7z/yg+bhBXmYdsWzc89jCaGW8/8VcMzOMyNfouAy58+F2QSsf7k?=
+ =?us-ascii?Q?4i47qxEbKCiO/TkxS7uywTpEsL2m7SyPDcUiqwCkgT0OHz1xPh4NhFIjfAhg?=
+ =?us-ascii?Q?BUsV7jEY828xO1fE+mXy9DJddak9wJYTa1ia7vvO2FpZPmqr5ircyXtV2kpU?=
+ =?us-ascii?Q?3U5OOxADx5f8Gyz3SXLOGF+CkUMzkrSp5UvFRGzIt++XTM0K6WdVsWYAA21H?=
+ =?us-ascii?Q?kQjEflG2r9AICeE1ss3kYmVwXAiLOHCfL+UKGDomwcyxCfaCQ3w7tmAKsIyF?=
+ =?us-ascii?Q?NFAr0nZ8sXVab3uTAXMQE0JfU+w3qd85oZMov6GRfofeIxuh3e6UP0QjNnSB?=
+ =?us-ascii?Q?h+L7LiGX3CSfB1+ZJc+TNiRfqoqJqpsrPTGb4goJax8LjPahLicUKUr2bXWk?=
+ =?us-ascii?Q?Dgo9xSY10ao0OVSxJpsz1z6fyKs/e88qL+KZf1c9LiHmYKJhKfsQe31GWEgW?=
+ =?us-ascii?Q?40uvryzyZwoPO6hoGQ1SW1TMfBUUaGrAjyPA8yvjz9uHkvvH+Yr7k05BXuAM?=
+ =?us-ascii?Q?TTd/o52fVG0anNWxUR2GOPfHhdqU0VmPFg7q80pie8y+uRsDD9CEVOPKEIv1?=
+ =?us-ascii?Q?f1jBUPcfsUftVGwz5XF6tMLKNe4F/1teRkDdjBk0Y0DboP9X7P8ePs1rFj9M?=
+ =?us-ascii?Q?A1venWbbB467hnNZ25wqvpAC2qXCX2fh75MFy/vWVW0JVlkO8YU7H4b4LLW1?=
+ =?us-ascii?Q?ejZlLonsK1/5WwWHDVes+c/Pu5aH15hPBmb1/l2/da6/W+m3sb3087jBuEi7?=
+ =?us-ascii?Q?gTBIKfrA+mHI0lsQ2o8vS47ht22ZeIklvXeSiPbPRL6C2kwtEnhbQ57mj/OU?=
+ =?us-ascii?Q?6N1gNEerL4o19AGdz5KZRI6smmX70tfXqzfnEq9Inj/giH6vtBl8qNsLRWJJ?=
+ =?us-ascii?Q?ka+E5jkYe8b13wdlDyfPxFwWI4BVFjs0Lo4ZS2Qa1OV3lhcS6jatxHZDEaIM?=
+ =?us-ascii?Q?KJIz9TPTg0KAj5z47g91yEegwAoOgAxkD4hFQyfHPG/dn/Ehx3n38IQvYA4s?=
+ =?us-ascii?Q?BypCC5A6C07tYX/u0vCNvxd/5mByZd5/GcKpJAFzRK3/VliiMdeS881TPOI2?=
+ =?us-ascii?Q?o65MyoQ/2jmLkuu2IwB91wCF0QUs/7lJrQDFrTlBn2U8vZZqwWebHGFZm9MG?=
+ =?us-ascii?Q?EHlOPccZNSTlErnuW2YjHBwhePAr0Vs8oP5oqFl3Ma0V5o2NUa+Ht/gk7Vxh?=
+ =?us-ascii?Q?BN1AqNRRPpYAxH0YzEnLNmQJBXyHuZsqL0GZ6gXiZpCMAP4PBdGFycIWKYkG?=
+ =?us-ascii?Q?HJgo+wraazsTw+J/YIU3rM9XFJK8dWlcutZZd4CNKYfc5v3j3jlFkp2K7YrZ?=
+ =?us-ascii?Q?dgHprULSJY7a54iTbk1TvnQIEXKRebSd0LIrcVZGbNKG8msFzKE50OtkYeBB?=
+ =?us-ascii?Q?L59GyQ4+eKI4ciUBZc37Vhq5gjlJY7V1JjPx0rclW0r9hGiBIVQmBvT3ZQba?=
+ =?us-ascii?Q?AmuosTMe91J/r59KqAebqnNU5XOGhm4NKFj9JXkiLUBmiWmAJ4xIpp5FM14/?=
+ =?us-ascii?Q?0TUE7MthN+emfBL/yY9iEn5sk0zIe7Bdk425a6RR1dUlSS/+yOqnEWQBhpbI?=
+ =?us-ascii?Q?gmocr4Goq+o1IZ4mF8mdnsBMM1litTU=3D?=
+Content-Type: multipart/related;
+	boundary="_004_MN2PR13MB3774F89BEB00159AE0899785FF1A2MN2PR13MB3774namp_";
+	type="multipart/alternative"
+MIME-Version: 1.0
+X-Exchange-RoutingPolicyChecked: FsvzNz9NlnnwYhEdBTQ2AgRdgTq6b2kuX4JKXsnVnRARz6gYlIJD2ic9BlgT4PzvK1JNqaTjbxQZcOejDzfIqWh9mAVKCLQ0/Cr5JMJtXr/5uryflKYj5XIKxcXiLt+zj+TbXZFNtG/Kfvpwx28UW417qYiSfPuswhKZgr5K3OkVqaImMVBM0PjTlGNgn356FVyQRNxn5wQfKMuvKBlFIan6I5SniBiZ6QE5KFwkaoeco9ctSfQ8oKSLwS2JjkVLKTgTE8FChp7ZGXPvPR+FLtOdq5JZdwHMKJZO9bFlZdqduJ5XeSta1X715cIGGOz2CF/3nfwN8YBIVanEdkzUOw==
+X-OriginatorOrg: kashivindia.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: MN2PR13MB3774.namprd13.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: fe7586b9-de3c-400b-20c0-08dec6afa363
+X-MS-Exchange-CrossTenant-originalarrivaltime: 10 Jun 2026 05:17:59.5374
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 7f311753-b280-4897-b195-b7eb4b0dc4f1
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: KcxB8vXU+nlyzSVSPOWImGxZNBCSQnbTwahtym6d4i9VHvlpITcQmBlZw8QOpvPjJs05bgwzztT+PCisCf5omNCZaoJoxtnHZP6M3jVkm6N2fTJJN8mQanSNXNfjW3gq
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS7PR13MB7377
+X-BESS-ID: 1781068682-111090-9893-49395-1
+X-BESS-VER: 2019.1_20260609.1839
+X-BESS-Apparent-Source-IP: 40.93.198.82
+X-BESS-Parts: H4sIAAAAAAACA03LuwoCMRCF4XeZeovJXHLZVxGLZJK4CKLgFoLsu5siCzaHnw
+	Pf5Qvts8MK+9gFnm9YQ8IR2/jUMzJWU0NflKqr6DxR4FpUNHs4lpNv+2PyqKjTFyq5eT
+	XXI1fCho00m1jCyCzk/vz9dZueiE+vXVBSIonFfAvcY0rZjFRLqGQCx/UHlKrdP8AAAA
+	A=
+X-BESS-Outbound-Spam-Score: 0.20
+X-BESS-Outbound-Spam-Report: Code version 3.2, rules version 3.2.2.273818 [from 
+	cloudscan8-196.us-east-2a.ess.aws.cudaops.com]
+	Rule breakdown below
+	 pts rule name              description
+	---- ---------------------- --------------------------------
+	0.00 HTML_MESSAGE           BODY: HTML included in message 
+	0.00 BSF_BESS_OUTBOUND      META: BESS Outbound 
+	0.20 BSF_SC0_SA953          META: Custom Rule BSF_SC0_SA953 
+X-BESS-Outbound-Spam-Status: SCORE=0.20 using account:ESS83025 scores of KILL_LEVEL=7.0 tests=HTML_MESSAGE, BSF_BESS_OUTBOUND, BSF_SC0_SA953
+X-BESS-BRTS-Status: 1
+X-Zoho-Virus-Status: 1
+X-Zoho-AV-Stamp: zmail-av-0.2.2.1.5.2/281.49.31
+X-ZohoMail-DKIM: pass (identity @kashivindia.com)
+X-ZohoMail-Owner: <MN2PR13MB3774F89BEB00159AE0899785FF1A2@MN2PR13MB3774.namprd13.prod.outlook.com>+zmo_0_rajdeepsinh.vaghela@kashivindia.com
+
+--_004_MN2PR13MB3774F89BEB00159AE0899785FF1A2MN2PR13MB3774namp_
+Content-Type: multipart/alternative;
+	boundary="_000_MN2PR13MB3774F89BEB00159AE0899785FF1A2MN2PR13MB3774namp_"
+
+--_000_MN2PR13MB3774F89BEB00159AE0899785FF1A2MN2PR13MB3774namp_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+Dear Sir,
+
+Please share best offer for below requirement of our Pipan site:
+
+
+  *   CGWA Renwal
+
+1. Prepare Self Compliance Report on NOCAP.
+
+2. Registration on Bhuneer Portal for NOC.
+
+3. Self Compliance on Bhuneer Portal for NOC.
+
+4. Renewal of NOC on Bhuneer Portal.
+
+For more technical details, You can connect below mentioned EHS person:
+
+
+  *   Mr. Akash Tikhe
+
+8238070998
+
+
+
+With Regards,
+
+Rajdeepsinh Vaghela
+Associate Manager - Procurement
+Kashiv Biosciences Pvt. Ltd. India,
+[cid:image001.jpg@01DCF8C3.EA9D97E0]
+FP 27/2, 43, TP-86,BLOCK-B, OPP. Apple Woods Township,
+SP Ring road, Ahmedabad (Gujarat) India - 382 210
+rajdeepsinh.vaghela@kashivindia.com<mailto:rajdeepsinh.vaghela@kashivindia.=
+com>; https://kashivbiosciences.com<https://kashivbiosciences.com/>,
+M: +91 6359575970
+
+
+--_000_MN2PR13MB3774F89BEB00159AE0899785FF1A2MN2PR13MB3774namp_
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
+osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
+//www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
+>
+<meta name=3D"Generator" content=3D"Microsoft Word 15 (filtered medium)">
+<!--[if !mso]><style>v\:* {behavior:url(#default#VML);}
+o\:* {behavior:url(#default#VML);}
+w\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style><![endif]--><style><!--
+/* Font Definitions */
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Aptos;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0cm;
+	font-size:12.0pt;
+	font-family:"Aptos",sans-serif;
+	mso-ligatures:standardcontextual;
+	mso-fareast-language:EN-US;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{mso-style-priority:34;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:36.0pt;
+	font-size:12.0pt;
+	font-family:"Aptos",sans-serif;
+	mso-ligatures:standardcontextual;
+	mso-fareast-language:EN-US;}
+span.EmailStyle17
+	{mso-style-type:personal-compose;
+	font-family:"Aptos",sans-serif;
+	color:windowtext;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	mso-fareast-language:EN-US;}
+@page WordSection1
+	{size:612.0pt 792.0pt;
+	margin:72.0pt 72.0pt 72.0pt 72.0pt;}
+div.WordSection1
+	{page:WordSection1;}
+/* List Definitions */
+@list l0
+	{mso-list-id:418410261;
+	mso-list-type:hybrid;
+	mso-list-template-ids:1031154024 2144239904 1074331651 1074331653 10743316=
+49 1074331651 1074331653 1074331649 1074331651 1074331653;}
+@list l0:level1
+	{mso-level-start-at:0;
+	mso-level-number-format:bullet;
+	mso-level-text:\F0D8;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;
+	mso-fareast-font-family:Aptos;
+	mso-bidi-font-family:"Times New Roman";}
+@list l0:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l0:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l0:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l0:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l0:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l0:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l0:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l0:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+ol
+	{margin-bottom:0cm;}
+ul
+	{margin-bottom:0cm;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext=3D"edit">
+<o:idmap v:ext=3D"edit" data=3D"1" />
+</o:shapelayout></xml><![endif]-->
+</head>
+<body lang=3D"EN-IN" link=3D"#467886" vlink=3D"#96607D" style=3D"word-wrap:=
+break-word">
+<div class=3D"WordSection1">
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt">Dear Sir,<o:p></o:p=
+></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt"><o:p>&nbsp;</o:p></=
+span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt">Please share best o=
+ffer for below requirement of our Pipan site:<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt"><o:p>&nbsp;</o:p></=
+span></p>
+<ul style=3D"margin-top:0cm" type=3D"disc">
+<li class=3D"MsoListParagraph" style=3D"margin-left:0cm;mso-list:l0 level1 =
+lfo1"><span style=3D"font-size:11.0pt">CGWA Renwal
+<o:p></o:p></span></li></ul>
+<p class=3D"MsoListParagraph"><span style=3D"font-size:11.0pt">1. Prepare S=
+elf Compliance Report on NOCAP.
+<o:p></o:p></span></p>
+<p class=3D"MsoListParagraph"><span style=3D"font-size:11.0pt">2. Registrat=
+ion on Bhuneer Portal for NOC.
+<o:p></o:p></span></p>
+<p class=3D"MsoListParagraph"><span style=3D"font-size:11.0pt">3. Self Comp=
+liance on Bhuneer Portal for NOC.
+<o:p></o:p></span></p>
+<p class=3D"MsoListParagraph"><span style=3D"font-size:11.0pt">4. Renewal o=
+f NOC on Bhuneer Portal.<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt"><o:p>&nbsp;</o:p></=
+span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt">For more technical =
+details, You can connect below mentioned EHS person:<o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt"><o:p>&nbsp;</o:p></=
+span></p>
+<ul style=3D"margin-top:0cm" type=3D"disc">
+<li class=3D"MsoListParagraph" style=3D"margin-left:0cm;mso-list:l0 level1 =
+lfo1"><span style=3D"font-size:11.0pt">Mr. Akash Tikhe<o:p></o:p></span></l=
+i></ul>
+<p class=3D"MsoListParagraph"><span style=3D"font-size:11.0pt">8238070998<o=
+:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt"><o:p>&nbsp;</o:p></=
+span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt"><o:p>&nbsp;</o:p></=
+span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt"><o:p>&nbsp;</o:p></=
+span></p>
+<div>
+<div>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;mso-ligatures:none;m=
+so-fareast-language:EN-IN">With Regards,</span><span style=3D"mso-ligatures=
+:none;mso-fareast-language:EN-IN"><o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;mso-ligatures:none;m=
+so-fareast-language:EN-IN">&nbsp;</span><span style=3D"mso-ligatures:none;m=
+so-fareast-language:EN-IN"><o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;mso-ligatures:none;m=
+so-fareast-language:EN-IN">Rajdeepsinh Vaghela</span><span style=3D"mso-lig=
+atures:none;mso-fareast-language:EN-IN"><o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;mso-ligatures:none;m=
+so-fareast-language:EN-IN">Associate Manager &#8211; Procurement</span><spa=
+n style=3D"mso-ligatures:none;mso-fareast-language:EN-IN"><o:p></o:p></span=
+></p>
+<p class=3D"MsoNormal"><b><span style=3D"mso-ligatures:none;mso-fareast-lan=
+guage:EN-IN">Kashiv Biosciences Pvt. Ltd. India,
+</span></b><span style=3D"mso-ligatures:none;mso-fareast-language:EN-IN"><o=
+:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;mso-fareast-language=
+:EN-IN"><img width=3D"108" height=3D"37" style=3D"width:1.125in;height:.383=
+3in" id=3D"Picture_x0020_1" src=3D"cid:image001.jpg@01DCF8C3.EA9D97E0"></sp=
+an><span style=3D"mso-ligatures:none;mso-fareast-language:EN-IN"><o:p></o:p=
+></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;mso-ligatures:none;m=
+so-fareast-language:EN-IN">FP 27/2, 43, TP-86,BLOCK-B, OPP. Apple Woods Tow=
+nship,
+</span><span style=3D"mso-ligatures:none;mso-fareast-language:EN-IN"><o:p><=
+/o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;mso-ligatures:none;m=
+so-fareast-language:EN-IN">SP Ring road, Ahmedabad (Gujarat) India &#8211; =
+382 210</span><span style=3D"mso-ligatures:none;mso-fareast-language:EN-IN"=
+><o:p></o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;color:#0563C1;mso-li=
+gatures:none;mso-fareast-language:EN-IN"><a href=3D"mailto:rajdeepsinh.vagh=
+ela@kashivindia.com"><span style=3D"color:#467886">rajdeepsinh.vaghela@kash=
+ivindia.com</span></a>;
+</span><span style=3D"font-size:11.0pt;mso-ligatures:none;mso-fareast-langu=
+age:EN-IN"><a href=3D"https://kashivbiosciences.com/"><span style=3D"color:=
+#467886">https://kashivbiosciences.com</span></a>,
+</span><span style=3D"mso-ligatures:none;mso-fareast-language:EN-IN"><o:p><=
+/o:p></span></p>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;mso-ligatures:none;m=
+so-fareast-language:EN-IN">M: +91 6359575970</span><span style=3D"mso-ligat=
+ures:none;mso-fareast-language:EN-IN"><o:p></o:p></span></p>
+</div>
+</div>
+<p class=3D"MsoNormal"><span style=3D"font-size:11.0pt;mso-ligatures:none;m=
+so-fareast-language:EN-IN">&nbsp;</span><o:p></o:p></p>
+</div>
+</body>
+</html>
+
+--_000_MN2PR13MB3774F89BEB00159AE0899785FF1A2MN2PR13MB3774namp_--
+
+--_004_MN2PR13MB3774F89BEB00159AE0899785FF1A2MN2PR13MB3774namp_
+Content-Type: image/jpeg; name="image001.jpg"
+Content-Description: image001.jpg
+Content-Disposition: inline; filename="image001.jpg"; size=2235;
+	creation-date="Wed, 10 Jun 2026 05:17:58 GMT";
+	modification-date="Wed, 10 Jun 2026 05:17:59 GMT"
+Content-ID: <image001.jpg@01DCF8C3.EA9D97E0>
+Content-Transfer-Encoding: base64
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAoHBwkHBgoJCAkLCwoMDxkQDw4ODx4WFxIZJCAmJSMg
+IyIoLTkwKCo2KyIjMkQyNjs9QEBAJjBGS0U+Sjk/QD3/2wBDAQsLCw8NDx0QEB09KSMpPT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT3/wAARCAAlAGwDASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD0fUtT
+u7bVRBE5Efy8fZ93Xr82aw/iB49k8NPb2GlJHNqUxDMrqWCL0AwO5PSsjxnqHiaDxwsOlRStZ4hw
+fs4ZcnrlsZxWH4Omjf4qTN4nDHUTK4j3fdWYHgfl938K1smloc8eZSd3u/uPXNCOpNpMD60Yftzr
+ukWFcKmf4evauG8dfEXUtC8RtpukxW8iwwiSYyIWIJ57HoBj869Id1iRnZsKoyx9AK8Q8NXNhr/i
+vxDqOq3dvbx3MEscRnkCg7/lGM+igVENXdmsnbRHqvg3Xm8SeGLXUJAgncFZlToHBwcVyPij4haq
+vidtA8MWkclyj+W0kg3FnxkgDIAA7k1T+CuqELqWkSNypFxHz/wFv5L+dL4x8AazH4jk1/w1IXkk
+fzWRWCyRvjkrngg+n1ppJS1E23G6NLR/EHjm1121sNc0aOeG4OPOiAUIO5LAkcehxntVn4k+M9R8
+JfYP7NS3b7QJN/nKT93GMYI9awNC+KGrWGrx6Z4qtdu5hG0vl+XJGT0LL0I+lHxwxu0fPTEuf/Ha
+dve1E5e7od3qes3Nn4Gl1eNYzcrZCcAj5dxUHp6VmfDnxVfeLNOvJ9RSBXhmEaiFSBjaD3JrhtQ1
+Px2/hKSG60+NdJNqFaQRrkRbRg53Z6e1b/wT/wCQLqf/AF9D/wBAFJxtFjUryRN4P8eapr3jS50q
+8jtlt4hKVMaEN8rYHOaTRPHerTfEKTw/qqWqxLJJErRoQxI5Xv3H865v4a/8lPv/AKXH/oYqf4jQ
+nw/8R9N1qMYSYxysR/eQhW/8dxTsr2JUny3Op+JHja88JCwj01IHmuN7OJVJwox0wR3NdfpT3M2l
+Wsl8EF08StKEGAGIyQBXlXi5f+Em+L+n6ap3wwCJWx02/wCsb9MV7AOnFS1ZIuLbbOT1uW6XX1WK
+C5eP5PmRJCvvyBiud+KPg26vbq31vRbeWS7BCTJCMscfdce46flXY3viL7HqEtuY4iIpI48eYQ7b
+8cgYxxnue1ad1exWbW6y7s3EwhTAz8xBPPtwapzbtpsRGkk2+5yN1q2t6j8NLln0u8TWXj+zPCIi
+GJPBcD0wSa5/wV8L7O/0Rp/EdlcxXRmZUjLmMqgAxwPU5r0y7v0tJY4lhlnmdSwjiAJ2jqTkgdx+
+dD6gh0lr+2jedfLLqij5m9setTd2NOVXueV6P4b1Pwr8T1ex027fSvNMQmCll8px3PfBx+VbOr+J
+fG2g67dvJoyX+mu37gQKWCr2+ZecnvkfSu70y9+32xkLQNhsZhkLj8cgEH2NJaait5IfJhn8nnbM
+VARsHBxzn9OaOa+6Eo22Z5FJo3iH4i+KoL6/0xtOtECqzuhULGpzgZ5Zj9K3vi/oupav/Zf9mWFx
+deWsu8Qpu2524zXokd3HLdzWy53wqrNkcfNnH8jUNtqcVzfzWkcb7oSVdiVxkAHgZz364p87uHIr
+WMbWLK5m+Gk1nFBI90dOWMRAfNu2DjHrWN8I9Kv9J0nUI9Ss57V3uAyrKu0kbQMiuvvNatLK8e2m
+LiRYPPwF4ZRngH14PFWLy8js4VkcOxdgiIgyzMegFTd2sOyvc8v8AaBqth8Q7y7vNOuYLZxPtlkT
+CnLjHPvXQ/Fbw9ca54chext5Li6tZgyxxjLFW4bH6H8K7GO43Wpmkiki2gko4G4Y+lRabqCanb+f
+GjKhxt3MpzkZ7E4696bk73BRVrHm/wAM/D2rDxTeavrlnPBIsASMzJt3McAkfRVx+Neq1RsdSiv5
+pkhRwIWKlmxyQcHjOR07gVepSd2EVZWM640W3uZpnkkn2zlTLGr4R8AAZH0Aqzc2UV2YDMCTBKJk
+wcYYAj+poopFDLvTo7t0kLyxSoCFkifa2D1H04H5U9LKKKyFrFuiiC7V2MQQPY9c+9FFADbPT4rI
+ysjSPJKwZ5JGyzEDA/IU210yKzlLQyTBDkiIuSi5OTgdqKKAJY7SOO6muFB8yYKrnPULnH8zUUOm
+RW97LcxyShpWLOm75ScAZx+AoooAjvtFs9RMpuoy/moqN8xGApJGPQ5J5qxd2UV7AIpdwAYMrKcM
+rDoQexoooAWO1EdsYGkkkUggtI2WOfeo7DT49Ph8qKSVkGABI2cADGBRRQA2DS4YL97wNI8zqVy7
+Zwuc4H41doooA//Z
+
+--_004_MN2PR13MB3774F89BEB00159AE0899785FF1A2MN2PR13MB3774namp_--

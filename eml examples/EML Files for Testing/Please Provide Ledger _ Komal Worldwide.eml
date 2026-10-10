@@ -1,0 +1,405 @@
+Delivered-To: mitul@excelenviro.com
+ARC-Seal: i=1; a=rsa-sha256; t=1790408130; cv=none; 
+	d=zohomail.in; s=zohoarc; 
+	b=EPWSwSXgfxcOvd1eNontciUFFmzgDYz1MbExhfuxo2NgYpVExXQ5pzkIQs1JzGJ2OmYURBX2HUdmunUD7VUGqmARW6H3PMrEpAAsF5GWw7Hh2crea4KVqFn+PJ1SjqF3eFUKuKbh3OkUnUEzxBrPxFwJ390CKLqMwY9W/mSeA0o=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.in; s=zohoarc; 
+	t=1790408130; h=Content-Type:Cc:Cc:Date:Date:From:From:MIME-Version:Message-ID:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=Em66jqBpXK9rDpotAsT5FtglB6bV95g4qcFqhQwpCag=; 
+	b=RFFnIPxXw1u7N5t/Eu2L1C46EpsVsLwjiRFEo4485lXc0RmcpgfMKzRxY7BmM2jLgrUXcRKcin4ioZHMYOfBVvgJdVhKqLrMHF2cpe16w/xtp/TbAPK+qBHg7fLQNezmdbwhDKwZmBoDXZYpae79dvpCFd+Xako/qakHFGzV+dA=
+ARC-Authentication-Results: i=1; mx.zohomail.in;
+	dkim=pass;
+	spf=pass (zohomail.in: domain of komaltexfab.com designates 35.89.44.39 as permitted sender)  smtp.mailfrom=account1.kww@komaltexfab.com;
+	dmarc=pass header.from=<account1.kww@komaltexfab.com> (p=none dis=none)
+Return-Path: <account1.kww@komaltexfab.com>
+Received: from omta40.uswest2.a.cloudfilter.net (omta40.uswest2.a.cloudfilter.net [35.89.44.39]) by mx.zoho.in
+	with SMTPS id 1790408128196922.6503761303267; Sat, 26 Sep 2026 13:05:28 +0530 (IST)
+Received: from eig-obgw-6007b.ext.cloudfilter.net ([10.0.30.166])
+	by cmsmtp with ESMTPS
+	id AEtfx6kaSc3XsAMwNxbxLh; Sat, 26 Sep 2026 07:35:23 +0000
+Received: from 192-185-129-38.unifiedlayer.com ([192.185.129.109])
+	by cmsmtp with ESMTPS
+	id AMwMx98gpcwgGAMwNxUG2K; Sat, 26 Sep 2026 07:35:23 +0000
+Received: from [103.206.56.94] (port=52057 helo=DESKTOP90UVG4Q)
+	by bh-ht-5.webhostbox.net with esmtpsa  (TLS1.2) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.100.1)
+	(envelope-from <account1.kww@komaltexfab.com>)
+	id 1xALDD-00000002JlG-07p3;
+	Sat, 26 Sep 2026 11:14:40 +0530
+Received-SPF: pass (zohomail.in: domain of komaltexfab.com designates 35.89.44.39 as permitted sender) client-ip=35.89.44.39; envelope-from=account1.kww@komaltexfab.com; helo=omta40.uswest2.a.cloudfilter.net;
+Authentication-Results: mx.zohomail.in;
+	dkim=pass;
+	spf=pass (zohomail.in: domain of komaltexfab.com designates 35.89.44.39 as permitted sender)  smtp.mailfrom=account1.kww@komaltexfab.com;
+	dmarc=pass(p=none dis=none)  header.from=komaltexfab.com
+X-Authority-Analysis: v=2.4 cv=AJDR9BPs c=1 sm=1 tr=0 ts=6ab775bb
+ a=atlmAiSzzUYIdLWMOYv8CQ==:117 a=atlmAiSzzUYIdLWMOYv8CQ==:17
+ a=VdqzKS8jKosA:10 a=fvaatzRkqMYA:10 a=DAwyPP_o2Byb1YXLmDAA:9
+ a=ednyiSqpyKc65F4trAkA:9 a=CjuIK1q_8ugA:10 a=yMhMjlubAAAA:8 a=SSmOFEACAAAA:8
+ a=8kgpLt-owI0c1RDT0t0A:9 a=Z7e55JlCrahZKt8C:21 a=gKO2Hq4RSVkA:10
+ a=UiCQ7L4-1S4A:10 a=hTZeC7Yk6K0A:10 a=frz4AuCg-hUA:10 a=lqcHg5cX4UMA:10
+ a=gTt71R7PrY_rD7p1zvAA:9 a=KQqxNPgzF0kA:10 a=VEiTNn8F7TgA:10
+ a=mCmA1j9fyqqGcrPtHo2I:22
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=komaltexfab.com; s=default; h=Content-Type:MIME-Version:Message-ID:Date:
+	Subject:Cc:To:From:Sender:Reply-To:Content-Transfer-Encoding:Content-ID:
+	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
+	:Resent-Message-ID:In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:
+	List-Unsubscribe-Post:List-Subscribe:List-Post:List-Owner:List-Archive;
+	bh=Em66jqBpXK9rDpotAsT5FtglB6bV95g4qcFqhQwpCag=; b=NAuPeyiVXNWbCQbT4j963oGyYp
+	Xc17hogYXxDITjG4TLdLbQhMr2Sv/pHcHSD+0Q2LhuNAOBfFBq2b7KOQyaxxMVlTfXV4tNLzMMx6X
+	xAF/eqC0lJ4sXAydVKPQxguvMUlqODVok+M5An1/l6XMnYpjTFZrFqytPW8dfMwqyJMJnJWQEoDoC
+	cYMC6TBLhVcThV1pgu9E6S588ZcqOYumpx8NS9j6Q7Y+4zfGtQO6vyzqTeXMRGVzFcpqpTM9lg6yT
+	XJS8xdylYft5jRzFqA0SLmSrxtw7vq7Nrv7pM2lfKDq1c39Yo/xsL3qQqPIkj3uuAZj5Lb9vvcZs+
+	9wm4c/EA==;
+From: "Pravinsingh Chauhan" <account1.kww@komaltexfab.com>
+To: <MITUL@EXCELENVIRO.COM>
+Cc: <cfo.kww@komaltexfab.com>,
+	<manager2.kww@komaltexfab.com>,
+	<account6.kww@komaltexfab.com>
+Subject: Please Provide Ledger : Komal Worldwide
+Date: Sat, 26 Sep 2026 11:14:01 +0530
+Message-ID: <00ce01dd4d7a$1f4446a0$5dccd3e0$@komaltexfab.com>
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	boundary="----=_NextPart_000_00CF_01DD4DA8.38FE0940"
+X-Mailer: Microsoft Outlook 16.0
+Thread-Index: Ad1Nefl6S7ZypojgRGCLpAPESoF1Iw==
+Content-Language: en-us
+Reply-By: Sun, 26 Sep 2027 11:13:00 +0530
+X-Message-Flag: Follow up
+X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
+X-AntiAbuse: Primary Hostname - bh-ht-5.webhostbox.net
+X-AntiAbuse: Original Domain - excelenviro.com
+X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
+X-AntiAbuse: Sender Address Domain - komaltexfab.com
+X-BWhitelist: no
+X-Source-IP: 103.206.56.94
+X-Source-L: No
+X-Exim-ID: 1xALDD-00000002JlG-07p3
+X-Source: 
+X-Source-Args: 
+X-Source-Dir: 
+X-Source-Sender: (DESKTOP90UVG4Q) [103.206.56.94]:52057
+X-Source-Auth: account1.kww@komaltexfab.com
+X-Email-Count: 103
+X-Org: HG=direseller_whb_net_legacy;ORG=directi;
+X-Source-Cap: dGV4a29tbmFyb2w7c29sdXRwcjM7YmgtaHQtNS53ZWJob3N0Ym94Lm5ldA==
+X-Local-Domain: yes
+X-CMAE-Envelope: MS4xfGZvkCi6BkqpwniQdTUxSGJonRRpeTyX7r4MD81f6Un8cheJqGhXu0cWxiPFBdcimGdksjB9kAjtFHlL7Asbm2MmFG17rmjC/BLPZufRE8ESS+J/ra9h
+ 0Bs/jS5g9fsAy1K9BiAnkfC+hsdGhd0YCWKNGsxdoYvHYFhZmVp/U5UxnyAxuoujyRZ32YPHF1LzcCDc3xLHlwIPFL94xAeCgvnZiju/pQIqGWN+8YeqjD3I
+X-Zoho-Virus-Status: 1
+X-Zoho-AV-Stamp: zmail-av-0.2.12.1.5.3/290.392.26
+X-ZohoMail-DKIM: pass (identity @komaltexfab.com)
+X-ZohoMail-Owner: <00ce01dd4d7a$1f4446a0$5dccd3e0$@komaltexfab.com>+zmo_0_account1.kww@komaltexfab.com
+
+This is a multipart message in MIME format.
+
+------=_NextPart_000_00CF_01DD4DA8.38FE0940
+Content-Type: multipart/alternative;
+	boundary="----=_NextPart_001_00D0_01DD4DA8.38FE0940"
+
+
+------=_NextPart_001_00D0_01DD4DA8.38FE0940
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+
+Hello   Excel Enviro Tech,
+
+Please provide the ledger in both PDF and Excel format for our accounting
+and reconciliation purposes.
+
+*	Financial Year 2025-26
+*	Financial Year 2026-27 up to August 2026
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Thanks & regards,
+
+Pravin Chauhan
+
+M- 7069004081.
+
+
+
+ 
+
+
+------=_NextPart_001_00D0_01DD4DA8.38FE0940
+Content-Type: text/html;
+	charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" =
+xmlns:o=3D"urn:schemas-microsoft-com:office:office" =
+xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" =
+xmlns=3D"http://www.w3.org/TR/REC-html40"><head><META =
+HTTP-EQUIV=3D"Content-Type" CONTENT=3D"text/html; =
+charset=3Dus-ascii"><meta name=3DGenerator content=3D"Microsoft Word 15 =
+(filtered medium)"><!--[if !mso]><style>v\:* =
+{behavior:url(#default#VML);}
+o\:* {behavior:url(#default#VML);}
+w\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style><![endif]--><style><!--
+/* Font Definitions */
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:Aparajita;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0in;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{mso-style-type:export-only;
+	margin-bottom:8.0pt;
+	line-height:107%;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+	{page:WordSection1;}
+/* List Definitions */
+@list l0
+	{mso-list-id:1168984574;
+	mso-list-template-ids:-1850158596;}
+@list l0:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l0:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:1.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:"Courier New";
+	mso-bidi-font-family:"Times New Roman";}
+@list l0:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:1.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Wingdings;}
+@list l0:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:2.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Wingdings;}
+@list l0:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:2.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Wingdings;}
+@list l0:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Wingdings;}
+@list l0:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:3.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Wingdings;}
+@list l0:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:4.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Wingdings;}
+@list l0:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:4.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Wingdings;}
+ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+--></style></head><body lang=3DEN-US style=3D'word-wrap:break-word'><div =
+class=3DWordSection1><p class=3DMsoNormal =
+style=3D'mso-margin-top-alt:auto;mso-margin-bottom-alt:auto'>Hello =
+&nbsp;&nbsp;Excel Enviro Tech,<o:p></o:p></p><p class=3DMsoNormal =
+style=3D'mso-margin-top-alt:auto;mso-margin-bottom-alt:auto'>Please =
+provide the ledger in both <b>PDF and Excel format</b> for our =
+accounting and reconciliation purposes.<o:p></o:p></p><ul =
+type=3Ddisc><li class=3DMsoNormal =
+style=3D'mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;mso-list:l0 =
+level1 lfo1'><b>Financial Year 2025-26</b><o:p></o:p></li><li =
+class=3DMsoNormal =
+style=3D'mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;mso-list:l0 =
+level1 lfo1'><b>Financial Year 2026-27 up to August =
+2026</b><o:p></o:p></li></ul><p =
+class=3DMsoNormal><o:p>&nbsp;</o:p></p><p =
+class=3DMsoNormal><o:p>&nbsp;</o:p></p><p =
+class=3DMsoNormal><o:p>&nbsp;</o:p></p><p =
+class=3DMsoNormal><o:p>&nbsp;</o:p></p><p class=3DMsoNormal><span =
+lang=3DEN-IN><o:p>&nbsp;</o:p></span></p><p class=3DMsoNormal><span =
+style=3D'font-size:16.0pt;font-family:"Aparajita",serif;color:#0070C0'>Th=
+anks &amp; regards,<o:p></o:p></span></p><p class=3DMsoNormal><span =
+style=3D'font-size:16.0pt;font-family:"Aparajita",serif;color:#0070C0'>Pr=
+avin Chauhan<o:p></o:p></span></p><p class=3DMsoNormal><span =
+style=3D'font-size:16.0pt;font-family:"Aparajita",serif;color:#0070C0'>M-=
+ 7069004081.<o:p></o:p></span></p><p class=3DMsoNormal><span =
+style=3D'font-size:16.0pt;color:#1F497D'><img width=3D189 height=3D101 =
+id=3D"_x0000_i1025" src=3D"cid:image001.jpg@01DD4DA8.13388AA0" =
+alt=3D"Description: LOGO copy---"></span><o:p></o:p></p><p =
+class=3DMsoNormal><o:p>&nbsp;</o:p></p></div></body></html>
+------=_NextPart_001_00D0_01DD4DA8.38FE0940--
+
+------=_NextPart_000_00CF_01DD4DA8.38FE0940
+Content-Type: image/jpeg;
+	name="image001.jpg"
+Content-Transfer-Encoding: base64
+Content-ID: <image001.jpg@01DD4DA8.13388AA0>
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAoHBwkHBgoJCAkLCwoMDxkQDw4ODx4WFxIZJCAmJSMg
+IyIoLTkwKCo2KyIjMkQyNjs9QEBAJjBGS0U+Sjk/QD3/2wBDAQsLCw8NDx0QEB09KSMpPT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT3/wAARCABlAL0DASIA
+AhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQA
+AAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3
+ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWm
+p6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEA
+AwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSEx
+BhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElK
+U1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3
+uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD2KaeO
+2haWZ1SNRksx4Fczf+MTuKWEQI/56Sf0H+NZniHVX1C/eNWP2eFiqKOhI6msC81K0sNv2u4SIt0B
+zk/lU3bdons4bAwjFTqmvPrOoXJPmXcuD2U7R+lQ2qG9v0imaZ02s7ldxbA4HQMepHb1rKi1mxmD
+MlygjXgyOdi59BnGTXQ+Gry0S6eO7uoI7WUK6hiB5z5wBu7gehPUiiMXf3joxElTot0vwMtJZIrp
+7eNpTKg3DYDllzweOPyrTi1LVrO0a6S5Zoo3CMnmCQqT0yOf55q5rN7plvem3trBbnY4aRjKdit1
+wByM+pA4+vTClYzztK6qGYkgKOF9gOwxxTlyrYxoOtXS54q3drc6XTfGySSeVfxFGH8SqRx67T2+
+ldTDNHcRLJC6ujDIZTkGvKdwnuEKcpFnLDoSRjA/r+Fa/hTXXt79oHZfKaTy3QPnYT0PsaSZGJwM
+bOVPR9u56FRRRVHjhRRRQAUUUUAFFFFABRRRQAUVQ1nVotF0yS8mVpCpCxxJ96V2OFQe5JAritV8
+Z3UTyny7yXy5AoW0ZI1BIyV3EMX2924BOMcVcYOWxLklueiUVxFh42aDzHvFne3R18wyKoaKNukg
+K/eQZAPGRnuBXbA5GR0pSi47jTT2FoooqRnlOsu+lzvCVDTtOIUDHALE8E+2Oay5b+9tLyS1fy55
+JFUW7CPZlznORk5VRyT+FekeK/CVv4ktTnKTrghlO3JHTnsR61xCaB/Yty5nSc3LDaZbht7EegPT
+H0oXLFanv0MR7dKzszG061hibVrS5WCbyPmNxLGCW3KWJb6e1VLW7udG023iSONrRlVkWRSXnDty
+BjgEDnbzwa6CXTLOe5aeWBWkddrHJww9x0P41WTR7aPFvF5xVUIy8rN5SnjCZ6EjPPYVaqxe5q6U
+l8JlSeJrlJC9rBbtaZZkU5VxEvVz2GT0qzBqF9qjrEFigKxCW43glIweVXGQWJHJ5AFX30HTmhki
++z7UkjWMhWI+VTkAfj+dLNotpMk6/vkE6BJNkpG7HQn1NDnS6IFTq9WZLa1dXVjbwqq28l6xEXkq
+SyxDgsB6k9PSt7w3o6wXEcNvGqSTSruVTnaB6nuQMkn1zSWXhpbq5i+yR3MkqRiHKykZT0YjgD8q
+9B0Dw9Fo8W9grTkY+UfKg9B/jUykmrR2MK1ZUE3N3l0NqqmqRvNpV1HFN5DtEwEhONvHWrdZl2L5
+p7hYS/lmPKYC4B445655rOc+RXtc8SMeZ2uYC2eL+FxPapEkjEWonJEeQg4JXnlSe2M/WoItPmW1
+WKS/trhwjIHa4cEOQu1+nVNpAA6g565rfK6krP5cKY3FkLBeVwRg47nAP40zy9TKsqRLubjLKgC9
+MEfhnP1rL6x/df3GnsfNfeMubaK8vbGSW8hmIdyucqWXawAAH3sNz+FZlpYyRwaepurcG3bdNiZv
+9IGV4OAOB1ye4APU1sEakZCxiZI9wKqioSo74zViaO9WKJokTzDEfMVVXG/A/wDr01Xvd8r+4TpW
+6ooaZaumtGX7ZHIGyTtkJMgx6fiD7YGK3Tcwq+wyoG9Nw/z3rMtkvxMd8YVdrYJVRxj5c453euK5
+iUSCSXeJftW84znrkY9vTOaqNXmV7Mlws7XR39FVtPEosIRNnzNvOc5/HPerNakHMeOAVttMnY4h
+ivV8wk4ClkdEYnsA7Lz2ryKbTGi02OKTRWSSK4kWRGucFW2r1/I/lXvGqC3ksngu7Z7mCYFHjWMv
+uBHcelcdfeGLG8kkMllLcI+3i4spN2F+6N6EE46ZOTg4rppVOVWZjUp8xw1taiCYztphijg0x0lf
+z92N6MqpjuWLKB9fava9Jhlt9Hsobg5mjgRJD/tBQD+tc1p2j2FpKJZrG4crIJljjs2VA46Mc5LE
+dBk8dgK6m2aZkZp9mGOUAUqQvuD3qKs+YqnDlJ6KKKxNBCQqksQAOST2qvPJZzQkTvA8Zx98gjkZ
+H6VJcw/aLWaHO3zEKZxnGRiubtvBr21tBCdQ80W6skXmRZwrxhGB55xjK+gO3kU0k9xruW7jw7o8
+rna3ktu2EJJ0b0we/tVNvBtosvyXzK0h4DAEsQP/AK1PHguKOe3mhunDwPC4DruDmIEKzc/eIOCf
+SpYfDE1tcxSw34Pk3ElxGJY921pE2uOo43Et+OKOWPc6Y4qtHaZX/wCETs4nKzaiQQMlflU49efp
+Vy38P6NCEdnEwY4UySghj7Y60Xfhp7g3ypebY71neQNEGOWi8vGT2HDAD3GcGqY8EgQzRm+ZhNFJ
+CzNH8wVypJHP3gVwD6Y9M0KEO4SxVaW82dCktnbRBY3gijBxgMAAelWAQQCDkHvXPyeFFltxA1zm
+MXZuB8nJBk8wqTn1OM1uwQR2tvHBAgSKJQiKOiqBgChpdDmZJTJJo4seZIiZ6bmArnfG/iOXQNMj
+WyXde3TFIuM7QOrY744/OvG7qW6u7tmu3lmuGbBMhJYn05qbnrYDKZYuPtHLlR9EAhgCCCD3FLXh
+vhnxXe+HL5MSPJZk/vYGORt7lfQiu21L4nLY6zPp8OkS3LRPtVo5eX4zkDaaLpEYnKa9GpyR95b3
+2O8orzofFliQBoFySxKgeb1I6j7vWnL8VJnUMvhy7Kt0IkJB/wDHaXMjD+zsT/L+K/zPQ6YYoy24
+xqW9cc155J8WzECZNBuEAO07psYPp93rXc6RqA1bSLS+EZjFxEsmwnO3I6Zppp7GVbC1aKUqisn6
+F2iuR8aeLPsGianDoN/YtrNpH5jQvKu6NARuO0nqB2NUvhl4vvtd0aJPEEgF/KzNbsYtnnxDHzDA
+2kg56dhnFM5zqNZ0mTVDamO6e3MEu8lM5YEYIyCMZBIzWTF4T1GN8/29dFSSWwWBY/KOfm9Bj9et
+dTRVKTWgnFM5OfwdezOwTW7mOLzPMjUbm8s7yw6nk8gZ9q6mJSkSKxBYAAkZ/rT6KTk3uCSQUUUU
+hmN4kvLuwtYp7SVUG/Y4Kg5z0xn6VnW/iG7R74SOkyQxF0Lx+WxPGPl9Oa2tU0mPVliWWWVFjO4B
+Mcn8ahj8O2olmluJJrmSVCjNK3ODxxiuOpTrOpeD09TNqV9ChaXesT2dvepc27rIxDRSKEAAOOD+
+FT6TqV3earqFvJICkRIjG0DHzEU5fC1tiKOS4uJIIm3JEzDaD+VW7TRobO7ubiOSQtcZ3A4wOc8U
+Qp1U1f56+QJSCW5mVzscbcAjcDnpnsKltp3mYrJJ83YKD/UU+SySRiWZufQkCm/YEwf3knP+2a3t
+K5epYQnc6k52nr+FPpiJszyST1Jp9aoZwfxPs5xb2OpwoXW1ZkkAzwGxg8e4x+Irz7+3ZuMQwgAg
+/KCOhyOn6+te5388MUOyeF5klypRY9+eOhFcLe+C/Dl1K80X9pWY3YMaQsVB56ZU+lJxufQZbmFK
+nSVKvHbZo5S48Q6h4gC6dFawiS4cKvlAg5z254HXI6Y+gouLqHRPG+ppLPsRY2t8lC6v8qjDYIYA
+46qcivQ9D0rQ/DduLq2tbtpXynmyws0n0AA4H0Fasmo6aW3vaSPuPLfZGPPHXjPek4tk1cwpczhS
+pvks183b17HncHjTSLZ0Eb3TCG6eeJ5BucFmAJJJyfkZ/wBKpSeKLH7botxFdSKto8QmRVcNtUnd
+/FtI56YzXqMd7pkkoRbJ8livNowHHvikN9pok2fYZN27bj7IeOcZ6dKOVnMsVTTv7N/f/wAA8mvf
+EGm3XhiTTS9y87D7R5j8qZvMJPv9w4zntXqPhm6js/AumzzNhEtEJwMk8cADuan/ALQ03Kg2MuWG
+f+PQnHJHPHtWg0FvfWAjKEQSKCAAUI7jHcGhRsY4rEqpBQjFrW+rv+h4zq/gqwg8VS6pqEGpags7
+rdPbWtuZlOcFxIynK5OSBjn2FLceJ9Bjt1tI21izurNz9ltrddgUlmKEqfun58EGvXZbqx0WzKKU
+URgnZuGfUlieg7kmvHtfvb/U7u58StYtHYT7YYJpI1AlQ/IpVTyc5JHGe/FTVk4q8VcywdGFafJO
+Siu7PRofENy4+23tpeWMcJCpBOMGZMctkErnnOM9vema54lvbLVpbRIJRDJE3lSKpHIQMpHHzMzM
+FC/7J98a3ha2eLwvY295seWOMCRcqwU5zt4444H4Vy3iHWfEL+ObjTNKnvltoLeGQrZ20EhBYtkt
+5hHHHarTurnPJcrauadt4tudUkSyk0bU7WVlLuxHlnaoBJXI5zkcA55PTFZZ8W6mdNLaeZneR2jV
+GjWeWIK7LvwuD0XkMO4IJ6GDxL8Rp9M8WNFazZ07TXjjvEFsz+cW/wBYQ4GF8sFTjIySRUupeNda
+svGOpwWNqNQ02KOGGGOFAWSeWPfGxI/gJ4J7ZH4sk0bXx+Y9Pia50nV5JQu13NoUDNnH0GT+Fb/h
+/X4fEdg15bW9xFDvKKZk278dxzyPeuFHjzU7bwPbC9u0Gu3V9LZ+ckHmCII5DyeWo+YKvt1IrqvA
+GvJrvhaBikcVxak208SJsCsvQheMAjBAxxnHagDpaKKYZoxMIjIvmld2zPzY6Zx6UAPoprOqKWdg
+qqMkngAU0TxGJZRIhjcAqwYYYHoQe9AElFMaaNIjI8irGBkuTgAeuagh1OyuJVjiuYmdvuqG5b6e
+tAFqikpaACq11qNnYvGl3dwQNKcIJJApY+2etWa8tvrS213xZr0t7ELi8W5i0zTY3YgREpuZ8D0G
+5vwPrQNW6npRv7QWr3JuYRboSrSmQBVIOCCenB4qD+3dK2s39p2W1QCx+0JgA8DPNc54PhsdZ+HE
+dpqFtH9hQyQyRscKVSQ8nH0zXD3GhWtxoWpa3FahLO/vre2s4ACAIVkALcn+IjP4UJrqHK7XR7Au
+p2L2r3K3ts1uhw0olUov1OcCpTcwidITNH5rqWWPcNzAdSB3FeV+JvD9tomoarpGkRi3tNR0xZzG
+zExrIkyjPPsaXxB4rM2sTy2llc213ZaROiSzKFDE7cFOeQP50adBuNlc9PttRs7yWWK1u4J5ITtk
+WOQMUPoQOlWa5PQ/BVlptzpmpaaxtJEiJuVQZFyWX+LPTnnj2rrKCTD1vSW1G4CyW4mtGT5kG3ls
+/wAQPDcdOuOapp4blmUCS3tzBD8kFvcgOEXrkEZxz2549OldRRXHPBU6k5Tm27q1ruxSk0jN0zTX
+s5pZpTEHkVV2RLhQBnn3PNXVtoEuXuFhjE7qFaQKNzAdAT1IFLcTpbW7zSkhEUscDNcdrXiMQ5N5
+NKqSr+5s7c4ZlycOzkfKCMfLgmt4Qp0KajHRIiU0tZHWpY2iQTQJbQLFMWMsYjAVy33iw757560t
+vZWtoWNtbQwlwoYxoF3BRhQceg4HpXnM3jKK7ujLPprxvjBlt7grIPlK55GCQGNdXo2vJchDHJLc
+20zbFYqS8b/3GA6cc5PoTk5wHCrCekWRCrCeiZsRabZQTLLDZ28cq7sOkSgjcctg47nr61LFawQz
+SyxQxpJMQZHVQC5AwCT3qWitDQKwtUjf+3FurdN1xbW29QOrru+ZfxH6gVu1Vnjigme+ffuSLaQo
+z8oOeAO9AFHUJk1KKK0gbdFcR+dKw/5446f8COB9N3pS6aW/sjTjAoaRLaPI6AAqP14qG2uNO09Z
+mjS7AuH5zC528E7VwOFGScdiTS2OoWQSG2tTeJsVIgXt2AIAwCcj261MldCJ72KO4s4YUnjEpmV0
+Ei/K7jLbSPwP0xntTL2djbY1SzaOFWVjNDKHEZBGG6AjHrjpUF1faa7PDJ9t3h929IJMhweGBxjP
+b0xVpLBr2BDc3txPbvhvKaNY93fDYAP4ce9EdgNQdKWkHSlqhhXnOpaJ4k0/xjqWr6FptvOt5+7Q
+zTAGFtigygZHXHueK9GrI8QxzXemm3s0aWYyJuWKYRuqggsQcjnH86Bo5+98J6pafDBfD+kzo18y
+BZZSdobc26Tn3yRWfPpni+90ODTJNH063gtWhaIRz9djDjr6ZresI/E6yxvqM0Qh3ESAbAFXB5z1
+/XsM96qW1l4otQBDvSLH3GmSRwAP7zZ5zkjt8wz0qZK6LjJrQg1DwzrHiG21OfV4okmntRaQwQuO
+F3hmOc8dPWrniHwtca5rVuHQCzOmT2sku4ZR327TjvyufwqMf8JPGGjhukIjR2Ybo3YN1x0zx0/G
+lt5PFs+mSOWVZpXjMAYRqwTad2fx254z1x2ogrEzdyv4d03xbPrVg3iDyba00qJo0NvMT9rYjaCw
+B6YGee9d1VTS4nt9MtoJXLzRRKshZtx3YGcmrdUSFFFFAGZrVvFeLawTyosbTKxjZc+Zt5wPT61y
+fhi3sb67m17VLqKS4e42xwk/ccnC5Hc9MdgP06vXoJ3tYZ7UFpraZZQoBJYDqAAQCSD3zXnV7YLo
+viC2vcMdOa4EqSAZ2gNkof8AaHIxXPXdrStoYVna0raHoAsdNtLvVbqa3iVXQGdyuQVxk5/ma5m1
+sodE8Wtaabe7ra+t3JWN/miwpZefw4PXBqxqPjLSbiy1OOOSXdcQlEzERztIrE8OadLaR/bZEZZ7
+lTBZRkDc5YfM+CRwFz9ealyUppQIclKaUT0bSJXn0q2kkDBmQfeBB9s5JP5mrlVtPs0sNPgtYwgW
+JAuEGB74FWa6jqCiiigAooooAKSiigBaKKKACuS1vTJW1Ce6hu3idpAcDOMBU44I645/+tRRQgZk
+/wBl3VzZzvJqMpUwqvl5fZk7QSRu561JHpmoRXdsDq87L56vg7uz7SPvdDgnHqfSiikPqSX+iTPN
+fSQXn2aRBMokhjKuQW3ncwb5jzjNPl0q6jCSDUpmIdGYOXO/lR2bI654oooAt6DY3UGuxSNfPJGY
+5S8bA4Y5XB69v5V1tFFCEFFFFMArKvtPitdPv5bdUDSoXZZF3oSBgfKeMDFFFAHPWNvbvPJLHYaf
+G0Mu3ItgScMg9eOHNdXHp1ul814VLXDKFLE9hnGB0HWiikklsJJLYt0UUUxn/9k=
+
+------=_NextPart_000_00CF_01DD4DA8.38FE0940--
+
