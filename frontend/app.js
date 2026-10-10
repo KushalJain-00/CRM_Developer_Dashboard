@@ -2051,11 +2051,11 @@ window.AppUI = {
 
   renderCustomerProfiles: function(data) {
     const grid = document.getElementById('cpGrid');
-    if (!data.items || !data.items.length) {
+    if (!data.contacts || !data.contacts.length) {
       grid.innerHTML = `<div style="color:var(--text-3); grid-column: 1/-1; text-align: center; padding: 40px;">No profiles found.</div>`;
       return;
     }
-    grid.innerHTML = data.items.map(p => {
+    grid.innerHTML = data.contacts.map(p => {
       const name = p.name || 'Unknown Contact';
       const initials = name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
       const role = p.position || 'Professional';
@@ -2116,7 +2116,7 @@ window.AppUI = {
       phtml += `<button class="btn btn-secondary btn-sm" onclick="AppUI.loadCustomerProfiles(${data.page - 1})">Prev</button> `;
     }
     phtml += `<span style="font-size:13px;color:var(--text-2);margin:0 10px;">Page ${data.page}</span>`;
-    if (data.items.length === 50) {
+    if (data.contacts.length === 50) {
       phtml += `<button class="btn btn-secondary btn-sm" onclick="AppUI.loadCustomerProfiles(${data.page + 1})">Next</button>`;
     }
     document.getElementById('cpPager').innerHTML = phtml;
