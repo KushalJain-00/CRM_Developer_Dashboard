@@ -2039,7 +2039,8 @@ window.AppUI = {
     const search = document.getElementById('cpSearch').value || '';
     try {
       const q = new URLSearchParams({ search, page, page_size: 50 });
-      const res = await fetch(`/api/contacts?${q}`);
+      const h = await apiHeaders();
+      const res = await fetch(`${API_BASE}/api/contacts?${q}`, { headers: h });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
       this.renderCustomerProfiles(data);
