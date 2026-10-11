@@ -15,10 +15,10 @@ class ChainEntry(BaseModel):
     model: str
     api_key: str
 
-EXTRACTION_SYSTEM_PROMPT = """You extract one contact from an email signature/header.
+EXTRACTION_SYSTEM_PROMPT = """You extract one contact and company location from an email signature/header/body.
 Return ONLY a raw JSON object (no markdown) with EXACTLY these keys; use null if unknown:
 {"name":null,"email":null,"phone_primary":null,"phone_secondary":null,"company":null,"designation":null,"address":null,"city":null,"pincode":null,"website":null}
-Rules: designation may be null. Prefer signature block over email body. Never invent values."""
+Rules: Always extract the company's location/destination/city/address mentioned in the signature or email (look for Plant, Works, Factory, Office, Branch, City, State, or Industrial Estate/GIDC). Never invent values."""
 
 PROVIDERS = {
     "openrouter": "https://openrouter.ai/api/v1/chat/completions",

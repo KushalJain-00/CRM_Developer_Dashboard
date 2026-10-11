@@ -58,7 +58,7 @@ async def list_contacts(search="", status="", pushed=None, page=1, page_size=50)
         s = search.replace("'", "")
         q = q.or_(
             f"name.ilike.%{s}%,email.ilike.%{s}%,phone_primary.ilike.%{s}%,"
-            f"phone_secondary.ilike.%{s}%,company.ilike.%{s}%"
+            f"phone_secondary.ilike.%{s}%,company.ilike.%{s}%,city.ilike.%{s}%,address.ilike.%{s}%"
         )
     if status in ("NEW", "DUPLICATE"):
         q = q.eq("dedup_status", status)

@@ -25,8 +25,26 @@ COMPANY_RE = re.compile(
     re.I,
 )
 CITY_HINTS = re.compile(
-    r"\b(Mumbai|Delhi|Bangalore|Bengaluru|Chennai|Kolkata|Pune|Hyderabad|Ahmedabad|"
-    r"Jaipur|Surat|Lucknow|Indore|Nagpur|Thane|Navi Mumbai)\b", re.I,
+    r"\b(Mumbai|Bombay|Delhi|New Delhi|Bangalore|Bengaluru|Chennai|Madras|Kolkata|Calcutta|"
+    r"Pune|Hyderabad|Secunderabad|Ahmedabad|Vadodara|Baroda|Surat|Rajkot|Ankleshwar|Bharuch|"
+    r"Dahej|Vapi|Valsad|Navsari|Gandhinagar|Bhavnagar|Jamnagar|Morbi|Kutch|Thane|Navi Mumbai|"
+    r"Nashik|Aurangabad|Nagpur|Kolhapur|Solapur|Noida|Greater Noida|Gurgaon|Gurugram|Faridabad|"
+    r"Ghaziabad|Jaipur|Udaipur|Jodhpur|Indore|Bhopal|Gwalior|Jabalpur|Lucknow|Kanpur|Agra|"
+    r"Varanasi|Chandigarh|Mohali|Panchkula|Ludhiana|Amritsar|Jalandhar|Dehradun|Haridwar|"
+    r"Roorkee|Kochi|Cochin|Trivandrum|Thiruvananthapuram|Coimbatore|Madurai|Trichy|Tiruchirappalli|"
+    r"Visakhapatnam|Vizag|Vijayawada|Guntur|Bhubaneswar|Cuttack|Patna|Ranchi|Jamshedpur|Raipur|"
+    r"Guwahati|Panoli|Halol|Kalol|Sanand|Chhatral|Tarapur|Baddi|Pithampur|Dewas|Daman|Silvassa|"
+    r"Singapore|Dubai|Abu Dhabi|Sharjah|Doha|Riyadh|Jeddah|London|New York|Chicago|Houston|"
+    r"Dallas|San Francisco|Los Angeles|Toronto|Vancouver|Sydney|Melbourne|Tokyo|Hong Kong)\b",
+    re.I,
+)
+LOCATION_PREFIX_RE = re.compile(
+    r"^(?:Location|Address|Plant|Works|Factory|Office|Regd\.?\s*Office|Head\s*Office|Branch|Unit(?:\s*-\s*[I|V|X\d]+)?)\s*[:\-]\s*(.+)$",
+    re.I,
+)
+ADDRESS_LINE_RE = re.compile(
+    r"\b(?:Plot\s+No\.?|Survey\s+No\.?|GIDC|Industrial\s+(?:Area|Estate)|Phase\s+[I|V|X\d]+|Sector\s+\d+|Road|Marg|Street|Floor|Towers?|Building|Opp\.?|Near|Dist\.?|District)\b",
+    re.I,
 )
 # Reject lines that look like greetings/salutations/departments — not real person names
 NAME_REJECT = re.compile(
@@ -171,9 +189,32 @@ def extract_local_fields(parsed: ParsedEml) -> dict:
     pm = PINCODE_RE.search(zone)
     if pm:
         fields["pincode"] = pm.group(0)
-    city = CITY_HINTS.search(zone)
-    if city:
-        fields["city"] = city.group(0).title()
+
+    # Location / Address / Destination extraction from signature or body
+    sig_lines = (parsed.signature_block or parsed.body_text).splitlines()
+    for ln in sig_lines:
+        s = ln.strip()
+        if not s or EMAIL_RE.search(s) or PHONE_RE.search(s) or WEBSITE_RE.search(s):
+            continue
+        loc_m = LOCATION_PREFIX_RE.match(s)
+        if loc_m:
+            val = loc_m.group(1).strip()
+            if not fields["address"]:
+                fields["address"] = val
+            ch = CITY_HINTS.search(val)
+            if ch and not fields["city"]:
+                fields["city"] = ch.group(0).title()
+            break
+        elif ADDRESS_LINE_RE.search(s) and not fields["address"]:
+            fields["address"] = s
+            ch = CITY_HINTS.search(s)
+            if ch and not fields["city"]:
+                fields["city"] = ch.group(0).title()
+
+    if not fields["city"]:
+        city = CITY_HINTS.search(zone)
+        if city:
+            fields["city"] = city.group(0).title()
     # name: first non-empty signature line that isn't delimiter/email/phone
     if parsed.has_signature:
         for ln in parsed.signature_block.splitlines():

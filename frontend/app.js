@@ -2065,6 +2065,10 @@ window.AppUI = {
       const role = p.designation || 'Professional';
       const company = p.company || 'Unknown Company';
       
+      const locParts = [p.address, p.city, p.pincode].filter(Boolean);
+      const fullLocation = locParts.length ? locParts.join(', ') : (p.city || p.address || '');
+      const shortLocation = p.city ? (p.city + (p.pincode ? ` (${p.pincode})` : '')) : (p.address || '');
+
       let html = `
         <div class="profile-card">
           <div class="profile-header">
@@ -2073,10 +2077,17 @@ window.AppUI = {
               <div class="profile-name" title="${name}">${name}</div>
               <div class="profile-role">💼 ${role}</div>
               <div class="profile-company">🏢 ${company}</div>
+              ${shortLocation ? `<div class="profile-location" title="${fullLocation}">📍 ${shortLocation}</div>` : ''}
             </div>
           </div>
           <div class="profile-details">`;
 
+      if (fullLocation) {
+        html += `<div class="profile-detail-row">
+          <span class="profile-detail-icon">📍</span>
+          <span class="profile-detail-text" title="${fullLocation}">${fullLocation}</span>
+        </div>`;
+      }
       if (p.email) {
         html += `<div class="profile-detail-row">
           <span class="profile-detail-icon">✉️</span>
@@ -2101,13 +2112,21 @@ window.AppUI = {
           <a class="profile-link profile-detail-text" href="tel:${p.phone_secondary}">${p.phone_secondary}</a>
         </div>`;
       }
+      if (p.website) {
+        const href = p.website.startsWith('http') ? p.website : `https://${p.website}`;
+        html += `<div class="profile-detail-row">
+          <span class="profile-detail-icon">🌐</span>
+          <a class="profile-link profile-detail-text" href="${href}" target="_blank">${p.website}</a>
+        </div>`;
+      }
 
       html += `</div>`;
       
-      if (p.source_file) {
-        html += `<div class="profile-badges">
-          <span class="profile-badge profile-badge-blue">${p.source_file}</span>
-        </div>`;
+      const badges = [];
+      if (p.city) badges.push(`<span class="profile-badge profile-badge-green">📍 ${p.city}</span>`);
+      if (p.source_file) badges.push(`<span class="profile-badge profile-badge-blue">${p.source_file}</span>`);
+      if (badges.length) {
+        html += `<div class="profile-badges">${badges.join('')}</div>`;
       }
 
       html += `</div>`;
