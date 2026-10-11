@@ -2040,9 +2040,11 @@ window.AppUI = {
     try {
       const q = new URLSearchParams({ search, page, page_size: 50 });
       const h = await apiHeaders();
-      const res = await fetch(`${API_BASE}/api/contacts?${q}`, { headers: h });
+      const res = await fetch(`${API_BASE}/api/eml/contacts?${q}`, { headers: h });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
+      // data = { items: [...], total: N }
+      data._page = page;
       this.renderCustomerProfiles(data);
     } catch (e) {
       document.getElementById('cpGrid').innerHTML = `<div style="color:var(--rose)">Error: ${e.message}</div>`;
@@ -2051,15 +2053,17 @@ window.AppUI = {
 
   renderCustomerProfiles: function(data) {
     const grid = document.getElementById('cpGrid');
-    if (!data.contacts || !data.contacts.length) {
+    const items = data.items || [];
+    if (!items.length) {
       grid.innerHTML = `<div style="color:var(--text-3); grid-column: 1/-1; text-align: center; padding: 40px;">No profiles found.</div>`;
+      document.getElementById('cpPager').innerHTML = '';
       return;
     }
-    grid.innerHTML = data.contacts.map(p => {
+    grid.innerHTML = items.map(p => {
       const name = p.name || 'Unknown Contact';
       const initials = name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
-      const role = p.position || 'Professional';
-      const company = (p.company && p.company.name) ? p.company.name : 'Unknown Company';
+      const role = p.designation || 'Professional';
+      const company = p.company || 'Unknown Company';
       
       let html = `
         <div class="profile-card">
@@ -2073,10 +2077,10 @@ window.AppUI = {
           </div>
           <div class="profile-details">`;
 
-      if (p.email_primary) {
+      if (p.email) {
         html += `<div class="profile-detail-row">
           <span class="profile-detail-icon">✉️</span>
-          <a class="profile-link profile-detail-text" href="mailto:${p.email_primary}">${p.email_primary}</a>
+          <a class="profile-link profile-detail-text" href="mailto:${p.email}">${p.email}</a>
         </div>`;
       }
       if (p.email_secondary) {
@@ -2100,9 +2104,9 @@ window.AppUI = {
 
       html += `</div>`;
       
-      if (p.files) {
+      if (p.source_file) {
         html += `<div class="profile-badges">
-          <span class="profile-badge profile-badge-blue">${p.files}</span>
+          <span class="profile-badge profile-badge-blue">${p.source_file}</span>
         </div>`;
       }
 
@@ -2111,13 +2115,14 @@ window.AppUI = {
     }).join('');
 
     // Setup pager
+    const page = data._page || 1;
     let phtml = '';
-    if (data.page > 1) {
-      phtml += `<button class="btn btn-secondary btn-sm" onclick="AppUI.loadCustomerProfiles(${data.page - 1})">Prev</button> `;
+    if (page > 1) {
+      phtml += `<button class="btn btn-secondary btn-sm" onclick="AppUI.loadCustomerProfiles(${page - 1})">Prev</button> `;
     }
-    phtml += `<span style="font-size:13px;color:var(--text-2);margin:0 10px;">Page ${data.page}</span>`;
-    if (data.contacts.length === 50) {
-      phtml += `<button class="btn btn-secondary btn-sm" onclick="AppUI.loadCustomerProfiles(${data.page + 1})">Next</button>`;
+    phtml += `<span style="font-size:13px;color:var(--text-2);margin:0 10px;">Page ${page} · ${data.total} total</span>`;
+    if (items.length === 50) {
+      phtml += `<button class="btn btn-secondary btn-sm" onclick="AppUI.loadCustomerProfiles(${page + 1})">Next</button>`;
     }
     document.getElementById('cpPager').innerHTML = phtml;
   }
