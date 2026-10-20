@@ -109,7 +109,7 @@
     bar.style.width = '10%';
     label.textContent = `Uploading ${files.length} file(s)…`;
     try {
-      const res = await fetchRetry(`${API}/api/eml/process`, { method: 'POST', body: fd },
+      const res = await fetchRetry(`${API}/api/eml/process`, { method: 'POST', body: fd, headers: await authHeaders() },
         (n, total) => { label.textContent = `Server waking up — retry ${n}/${total}…`; });
       bar.style.width = '100%';
       // gateway error pages are HTML — don't let json() throw a cryptic parse error
@@ -157,7 +157,7 @@
     if (status) qs.set('status', status);
     if (pushed) qs.set('pushed', pushed);
     try {
-      const res = await fetchRetry(`${API}/api/eml/contacts?${qs}`);
+      const res = await fetchRetry(`${API}/api/eml/contacts?${qs}`, { headers: await authHeaders() });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || res.statusText);
       state.contacts = data.items; state.contactTotal = data.total;
@@ -201,7 +201,7 @@
         if (search) qs.set('search', search);
         if (status) qs.set('status', status);
         if (pushed) qs.set('pushed', pushed);
-        const res = await fetchRetry(`${API}/api/eml/contacts?${qs}`);
+        const res = await fetchRetry(`${API}/api/eml/contacts?${qs}`, { headers: await authHeaders() });
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || res.statusText);
         total = data.total;
@@ -219,7 +219,8 @@
     } catch (err) { notify('Export failed: ' + err.message, 'error'); }
   }
 
-  function exportCsv() {
+  // ponytail: fetch+blob instead of window.location — navigation can't send the JWT
+  async function exportCsv() {
     const search = document.getElementById('emlCSearch')?.value || '';
     const status = document.getElementById('emlCStatus')?.value || '';
     const pushed = document.getElementById('emlCPushed')?.value || '';
@@ -227,7 +228,19 @@
     if (search) qs.set('search', search);
     if (status) qs.set('status', status);
     if (pushed) qs.set('pushed', pushed);
-    window.location.href = `${API}/api/eml/contacts/export?${qs}`;
+    try {
+      const res = await fetchRetry(`${API}/api/eml/contacts/export?${qs}`, { headers: await authHeaders() });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || res.statusText);
+      }
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `eml_contacts_${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) { notify('Export failed: ' + err.message, 'error'); }
   }
 
   async function pushSelected() {
@@ -249,7 +262,7 @@
   async function loadEmails(page) {
     state.emailPage = page || 1;
     try {
-      const res = await fetchRetry(`${API}/api/eml/emails?page=${state.emailPage}&page_size=50`);
+      const res = await fetchRetry(`${API}/api/eml/emails?page=${state.emailPage}&page_size=50`, { headers: await authHeaders() });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || res.statusText);
       state.emails = data.items; state.emailTotal = data.total;
@@ -287,7 +300,7 @@
 
   async function openEmail(id) {
     try {
-      const res = await fetchRetry(`${API}/api/eml/emails/${id}`);
+      const res = await fetchRetry(`${API}/api/eml/emails/${id}`, { headers: await authHeaders() });
       const m = await res.json();
       if (!res.ok) throw new Error(m.detail || 'Not found');
       const body = (m.body_text || '').slice(0, 4000);

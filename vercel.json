@@ -9,7 +9,11 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/frontend/$1"
+      "dest": "/frontend/$1",
+      "headers": {
+        "X-Frame-Options": "DENY",
+        "X-Content-Type-Options": "nosniff"
+      }
     },
     { "handle": "filesystem" },
     {
