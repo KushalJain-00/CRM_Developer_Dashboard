@@ -7,10 +7,8 @@
 :root {
   --sb-w: 260px;
   --sb-bg: #1A1B2E;
-  --sb-bg-2: #22233A;
   --sb-text: rgba(255,255,255,.55);
   --sb-text-active: #fff;
-  --sb-accent: #6C5CE7;
   --sb-section: rgba(255,255,255,.25);
   --sb-border: rgba(255,255,255,.06);
   --sb-hover: rgba(255,255,255,.06);
@@ -39,16 +37,13 @@
   --rose: #E74C6F;
   --violet: #8B5CF6;
   --cyan: #00BCD4;
-  --orange: #FF7043;
   --indigo: #6366F1;
-  --teal: #14B8A6;
 
   --font-d: 'Plus Jakarta Sans','Outfit',sans-serif;
   --font-b: 'Inter','DM Sans',sans-serif;
   --font-m: 'JetBrains Mono',monospace;
   --font: var(--font-b);
 
-  --r-xs: 8px;
   --r-sm: 10px;
   --r: 14px;
   --r-lg: 18px;
@@ -61,7 +56,6 @@
   --sh-lg: 0 16px 48px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.04);
   --sh-xl: 0 24px 64px rgba(0,0,0,.12);
 
-  --content-r: 28px;
   --transition: .25s cubic-bezier(.4,0,.2,1);
 }
 
@@ -70,7 +64,6 @@ body.sb-collapsed { --sb-w: 76px; }
 /* ── Theme: Nexus Dark ────────────────────────────────────────────── */
 [data-theme="nexus-dark"] {
   --sb-bg: #12131A;
-  --sb-bg-2: #1A1B25;
   --sb-border: rgba(255,255,255,.05);
 
   --bg: #1A1B25;
@@ -95,8 +88,6 @@ body.sb-collapsed { --sb-w: 76px; }
 /* ── Theme: Ocean ─────────────────────────────────────────────────── */
 [data-theme="ocean"] {
   --sb-bg: #0A1628;
-  --sb-bg-2: #0F1D32;
-  --sb-accent: #00D4FF;
   --sb-active-bg: rgba(0,212,255,.12);
 
   --bg: #0F1D32;
@@ -126,8 +117,6 @@ body.sb-collapsed { --sb-w: 76px; }
 /* ── Theme: Sunset ────────────────────────────────────────────────── */
 [data-theme="sunset"] {
   --sb-bg: #1A1118;
-  --sb-bg-2: #241820;
-  --sb-accent: #FF6B6B;
   --sb-active-bg: rgba(255,107,107,.12);
 
   --bg: #1E1520;

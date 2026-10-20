@@ -18,7 +18,8 @@ from api.export_pdf import router as pdf_router
 from api.contacts import router as contacts_router
 from api.calls import router as calls_router
 from api.eml import router as eml_new_router
-from db.database import init_db
+from db.database import init_db, AsyncSessionLocal
+from sqlalchemy import text
 
 
 import logging
@@ -32,8 +33,8 @@ async def lifespan(app: FastAPI):
     """Initialize database tables on startup"""
     logger.info("Starting database initialization...")
     try:
-        # Wrap in a 10 second timeout so we don't hang forever
-        await asyncio.wait_for(init_db(), timeout=10.0)
+        # 30s so Render free-tier cold starts (slow first DB connect) don't kill startup
+        await asyncio.wait_for(init_db(), timeout=30.0)
         logger.info("Database initialized successfully.")
     except asyncio.TimeoutError:
         logger.error("CRITICAL: Database connection timed out! If you are using Supabase on Render, make sure you use the Connection Pooler URL (IPv4) instead of the direct database URL (IPv6).")
@@ -70,8 +71,6 @@ DEFAULT_ORIGINS = (
 )
 ALLOWED_ORIGINS = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
 ALLOWED_ORIGINS += [o for o in DEFAULT_ORIGINS.split(",") if o not in ALLOWED_ORIGINS]
-if not ALLOWED_ORIGINS:
-    ALLOWED_ORIGINS = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -82,17 +81,21 @@ app.add_middleware(
 )
 
 # Global exception handler — ensures CORS headers are always sent, even on 500 errors
-from fastapi import Request
+from fastapi import Request, Depends
 from fastapi.responses import JSONResponse
 import traceback
+from core.auth import verify_token
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    # ponytail: full tracebacks are great in dev but can leak SQL / connection
+    # strings in prod. For production, swap to structured (JSON) logging with a
+    # redaction filter and drop traceback.format_exc().
     logger.error(f"Unhandled error on {request.method} {request.url.path}: {exc}")
     logger.error(traceback.format_exc())
     origin = request.headers.get("origin", "")
     headers = {}
-    if origin in ALLOWED_ORIGINS or "*" in ALLOWED_ORIGINS:
+    if origin in ALLOWED_ORIGINS:
         headers["Access-Control-Allow-Origin"] = origin
         headers["Access-Control-Allow-Methods"] = "*"
         headers["Access-Control-Allow-Headers"] = "*"
@@ -106,17 +109,27 @@ from fastapi.staticfiles import StaticFiles
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint for Render to verify the app is running."""
-    return {"status": "ok"}
+    """Health check: pings the DB so callers detect cold starts / broken connections."""
+    try:
+        async with AsyncSessionLocal() as s:
+            await asyncio.wait_for(s.execute(text("SELECT 1")), timeout=3.0)
+        return {"status": "ok"}
+    except Exception as e:
+        logger.warning(f"Health check degraded: {e}")
+        return JSONResponse(status_code=503, content={"status": "degraded"})
 
-app.include_router(parse_router, prefix="/api")
-app.include_router(pdf_router, prefix="/api")
-app.include_router(contacts_router, prefix="/api")
-app.include_router(calls_router, prefix="/api")
-app.include_router(auth_router,    prefix="/api")
-app.include_router(history_router, prefix="/api")
-app.include_router(sig_router, prefix="/api")
-app.include_router(eml_new_router, prefix="/api")
+# Auth-protected routers: every /api route requires a valid Supabase JWT.
+# /api/auth/upsert carries its own verify_token dependency in api/auth.py, so
+# it is included here without the router-level dependency. /health is defined
+# directly on the app and stays public.
+app.include_router(parse_router, prefix="/api", dependencies=[Depends(verify_token)])
+app.include_router(pdf_router, prefix="/api", dependencies=[Depends(verify_token)])
+app.include_router(contacts_router, prefix="/api", dependencies=[Depends(verify_token)])
+app.include_router(calls_router, prefix="/api", dependencies=[Depends(verify_token)])
+app.include_router(auth_router, prefix="/api")
+app.include_router(history_router, prefix="/api", dependencies=[Depends(verify_token)])
+app.include_router(sig_router, prefix="/api", dependencies=[Depends(verify_token)])
+app.include_router(eml_new_router, prefix="/api", dependencies=[Depends(verify_token)])
 
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
 

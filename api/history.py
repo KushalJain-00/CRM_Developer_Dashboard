@@ -13,22 +13,12 @@ from crud.history import (
 
 router = APIRouter()
 
-@router.get("/history")
-async def list_history(email: Optional[str] = Query(None), limit: int = 50, db: AsyncSession = Depends(get_db)):
-    sessions = await list_sessions(db, email=email, limit=limit)
-    return JSONResponse({"ok": True, "sessions": [
-        {"id": s.id, "file_name": s.file_name, "sheet_name": s.sheet_name,
-         "upload_date": s.upload_date.isoformat(), "total_records": s.total_records,
-         "imported": s.imported, "skipped": s.skipped, "mapping": s.mapping}
-        for s in sessions]})
+async def _match_records_to_contacts(db: AsyncSession, records):
+    """Fetch contacts referenced by records' email/phone.
 
-@router.get("/history/{session_id}")
-async def get_session_endpoint(session_id: int, page: int = 1, page_size: int = 100, db: AsyncSession = Depends(get_db)):
-    s = await get_session(db, session_id)
-    if not s: raise HTTPException(404, "Not found")
-    total, records = await get_session_records(db, session_id, page, page_size)
-    
-    # Pre-fetch contacts to attach IDs for frontend editing
+    Shared by get_session_endpoint and export_session_with_calls.
+    Returns (unique contacts, by_email map, by_phone map).
+    """
     emails = []
     phones = []
     for r in records:
@@ -37,27 +27,44 @@ async def get_session_endpoint(session_id: int, page: int = 1, page_size: int = 
         p = row.get('Mobile 1') or row.get('phone') or row.get('Phone') or row.get('phone_primary')
         if e: emails.append(e)
         if p: phones.append(p)
-        
-    contacts = []
+
+    fetched = []
     if emails:
-        contacts.extend(await find_contacts_by_emails(db, emails))
+        fetched.extend(await find_contacts_by_emails(db, emails))
     if phones:
-        contacts.extend(await find_contacts_by_phones(db, phones))
-        
-    c_by_email = {c.email_primary.lower(): c for c in contacts if c.email_primary}
-    c_by_phone = {c.phone_primary: c for c in contacts if c.phone_primary}
+        fetched.extend(await find_contacts_by_phones(db, phones))
+    contacts = list({c.id: c for c in fetched}.values())
+    by_email = {c.email_primary.lower(): c for c in contacts if c.email_primary}
+    by_phone = {c.phone_primary: c for c in contacts if c.phone_primary}
+    return contacts, by_email, by_phone
+
+@router.get("/history")
+async def list_history(email: Optional[str] = Query(None), limit: int = Query(50, ge=1, le=500), db: AsyncSession = Depends(get_db)):
+    sessions = await list_sessions(db, email=email, limit=limit)
+    return JSONResponse({"ok": True, "sessions": [
+        {"id": s.id, "file_name": s.file_name, "sheet_name": s.sheet_name,
+         "upload_date": s.upload_date.isoformat(), "total_records": s.total_records,
+         "imported": s.imported, "skipped": s.skipped, "mapping": s.mapping}
+        for s in sessions]})
+
+@router.get("/history/{session_id}")
+async def get_session_endpoint(session_id: int, page: int = 1, page_size: int = Query(100, ge=1, le=1000), db: AsyncSession = Depends(get_db)):
+    s = await get_session(db, session_id)
+    if not s: raise HTTPException(404, "Not found")
+    total, records = await get_session_records(db, session_id, page, page_size)
     
+    # Pre-fetch contacts to attach IDs for frontend editing
+    _, c_by_email, c_by_phone = await _match_records_to_contacts(db, records)
+
     out_records = []
     for r in records:
         row = dict(r.data or {})
         e = row.get('Email 1') or row.get('email') or row.get('Email') or row.get('email_primary')
         p = row.get('Mobile 1') or row.get('phone') or row.get('Phone') or row.get('phone_primary')
         
-        contact = None
-        if e and e.lower() in c_by_email:
-            contact = c_by_email[e.lower()]
-        elif p and p in c_by_phone:
-            contact = c_by_phone[p]
+        contact = c_by_email.get(e.lower()) if e else None
+        if not contact and p:
+            contact = c_by_phone.get(p)
             
         if contact:
             row['_contact_id'] = contact.id
@@ -81,33 +88,8 @@ async def export_session_with_calls(session_id: int, db: AsyncSession = Depends(
 
     records = await get_all_session_records(db, session_id)
 
-    # Pre-fetch contacts
-    emails = []
-    phones = []
-    for r in records:
-        row = dict(r.data or {})
-        e = row.get('Email 1') or row.get('email') or row.get('Email') or row.get('email_primary')
-        p = row.get('Mobile 1') or row.get('phone') or row.get('Phone') or row.get('phone_primary')
-        if e: emails.append(e)
-        if p: phones.append(p)
-
-    contacts = []
-    if emails:
-        contacts.extend(await find_contacts_by_emails(db, emails))
-    if phones:
-        contacts.extend(await find_contacts_by_phones(db, phones))
-
-    # Deduplicate contacts fetched from DB
-    seen_ids = set()
-    unique_contacts = []
-    for c in contacts:
-        if c.id not in seen_ids:
-            seen_ids.add(c.id)
-            unique_contacts.append(c)
-    contacts = unique_contacts
-
-    contact_by_email = {c.email_primary: c for c in contacts if c.email_primary}
-    contact_by_phone = {c.phone_primary: c for c in contacts if c.phone_primary}
+    # Pre-fetch contacts + lookup maps (shared helper)
+    contacts, contact_by_email, contact_by_phone = await _match_records_to_contacts(db, records)
 
     # Pre-fetch call logs
     contact_ids = [c.id for c in contacts]
@@ -122,7 +104,7 @@ async def export_session_with_calls(session_id: int, db: AsyncSession = Depends(
         email = row.get('Email 1') or row.get('email') or row.get('Email') or row.get('email_primary')
         phone = row.get('Mobile 1') or row.get('phone') or row.get('Phone') or row.get('phone_primary')
         
-        contact = contact_by_email.get(email)
+        contact = contact_by_email.get(email.lower() if email else None)
         if not contact and phone:
             contact = contact_by_phone.get(phone)
 

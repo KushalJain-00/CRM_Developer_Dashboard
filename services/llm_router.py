@@ -125,6 +125,8 @@ async def extract_json(chain: list[ChainEntry], user_prompt: str, deadline: Opti
             break
         if not entry.api_key:
             continue
+        # ponytail: 1 attempt per provider — retries blew the Cloudflare ~100s deadline
+        # budget (deliberate in 309180a, locked by test_failing_provider_called_exactly_once)
         for i in range(1):
             try:
                 raw = await _call_provider(entry.provider, entry.model, entry.api_key,

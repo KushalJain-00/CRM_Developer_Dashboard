@@ -1,6 +1,6 @@
 # services/eml_store.py
 """Thin async wrappers over the EML Supabase project (eml_emails / eml_contacts)."""
-import os, logging
+import os, logging, re
 from supabase import create_client, Client
 
 logger = logging.getLogger(__name__)
@@ -55,11 +55,16 @@ async def list_contacts(search="", status="", pushed=None, page=1, page_size=50)
     sb = get_eml_client()
     q = sb.table("eml_contacts").select("*", count="exact")
     if search:
-        s = search.replace("'", "")
-        q = q.or_(
-            f"name.ilike.%{s}%,email.ilike.%{s}%,phone_primary.ilike.%{s}%,"
-            f"phone_secondary.ilike.%{s}%,company.ilike.%{s}%,city.ilike.%{s}%,address.ilike.%{s}%"
-        )
+        # PostgREST's `or()` filter grammar treats () , : * \ " as syntax, so a
+        # raw user string could break out of the filter expression. Strip
+        # everything but plain text characters and cap the length instead of
+        # trusting naive quote removal.
+        s = re.sub(r"[^\w@.\- ]", "", search)[:100]
+        if s:
+            q = q.or_(
+                f"name.ilike.%{s}%,email.ilike.%{s}%,phone_primary.ilike.%{s}%,"
+                f"phone_secondary.ilike.%{s}%,company.ilike.%{s}%,city.ilike.%{s}%,address.ilike.%{s}%"
+            )
     if status in ("NEW", "DUPLICATE"):
         q = q.eq("dedup_status", status)
     if pushed is not None:

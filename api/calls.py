@@ -127,7 +127,7 @@ async def update_call_log(log_id: int, body: CallLogUpdate, db: AsyncSession = D
     if body.next_action is not None:
         log.next_action = body.next_action
     if body.next_action_date is not None:
-        log.next_action_date = datetime.fromisoformat(body.next_action_date)
+        log.next_action_date = datetime.fromisoformat(body.next_action_date.replace('Z', '+00:00')).replace(tzinfo=None)
 
     await db.commit()
     return JSONResponse(content={"ok": True, "message": "Call log updated"})

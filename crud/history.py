@@ -56,8 +56,9 @@ async def get_all_session_records(db: AsyncSession, session_id: int) -> List[Rec
 async def find_contacts_by_emails(db: AsyncSession, emails: List[str]) -> List[Contact]:
     contacts = []
     for i in range(0, len(emails), 2000):
-        chunk = emails[i:i + 2000]
-        result = await db.execute(select(Contact).filter(Contact.email_primary.in_(chunk)))
+        chunk = [e.lower() for e in emails[i:i + 2000]]
+        # ponytail: lower() both sides — records carry mixed-case emails, DB may too
+        result = await db.execute(select(Contact).filter(func.lower(Contact.email_primary).in_(chunk)))
         contacts.extend(result.scalars().all())
     return contacts
 

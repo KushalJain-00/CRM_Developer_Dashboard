@@ -478,7 +478,7 @@ function showUploadProgress(on, ext) {
 function showError(msg) {
   const el = document.getElementById('uploadError');
   if (el) { el.textContent = msg; el.classList.remove('hidden'); setTimeout(() => el.classList.add('hidden'), 6000); }
-  else alert(msg);
+  else showNotification(msg, 'error');
 }
 
 function mergeUnnamedCols(keys, data) {
@@ -515,7 +515,7 @@ function buildMapping() {
   S.headers.forEach(h => {
     const samples = S.rawData.slice(0,40).map(r=>r[h]).filter(v=>v!=null&&v!=='');
     const [type, conf] = detectField(h, samples);
-    const fill = Math.round(S.rawData.filter(r=>r[h]!=null&&r[h]!=='').length / S.rawData.length * 100);
+    const fill = Math.round(S.rawData.filter(r=>r[h]!=null&&r[h]!=='').length / (S.rawData.length||1) * 100);
     mapping[h] = {type, confidence:conf, fill, keep: type !== 'skip'};
   });
   S.mapping = mapping;
@@ -532,7 +532,7 @@ function buildMapping() {
     <div class="map-stat"><div class="map-stat-val">${S.rawData.length.toLocaleString()}</div><div class="map-stat-lbl">Total Records</div></div>
     <div class="map-stat"><div class="map-stat-val">${S.headers.length}</div><div class="map-stat-lbl">Columns Found</div></div>
     <div class="map-stat"><div class="map-stat-val">${detected}</div><div class="map-stat-lbl">Auto-Mapped</div></div>
-    <div class="map-stat"><div class="map-stat-val">${Math.round(Object.values(mapping).reduce((a,m)=>a+m.fill,0)/S.headers.length)}%</div><div class="map-stat-lbl">Avg Fill Rate</div></div>
+    <div class="map-stat"><div class="map-stat-val">${Math.round(Object.values(mapping).reduce((a,m)=>a+m.fill,0)/(S.headers.length||1))}%</div><div class="map-stat-lbl">Avg Fill Rate</div></div>
   `;
 
   const container = document.getElementById('mappingRows');
@@ -547,12 +547,12 @@ function buildMapping() {
     div.className = 'mt-row';
     div.innerHTML = `
       <div>
-        <div class="orig-col">${h}</div>
+        <div class="orig-col">${escapeHTML(h)}</div>
         <div class="fill-bar-outer">
           <div class="fill-bar-bg"><div class="fill-bar-fg" style="width:${m.fill}%;background:${fillColor}"></div></div>
           <span class="fill-pct">${m.fill}%</span>
         </div>
-        <div class="sample-txt">${samples}</div>
+        <div class="sample-txt">${escapeHTML(samples)}</div>
       </div>
       <div class="arr-icon" style="opacity:${m.confidence < 65 ? '1' : '0.4'}">→</div>
       <select class="map-sel" style="${m.confidence < 65 ? 'border-color:var(--amber);box-shadow:0 0 0 2px rgba(245,158,11,0.15)' : ''}" data-col="${h}" onchange="S.mapping['${h}'].type=this.value;S.mapping['${h}'].keep=this.value!=='skip';this.style.borderColor='';this.style.boxShadow='';">${opts}</select>
@@ -755,13 +755,16 @@ function normalizeToStandardFields() {
   });
 
   // Update S.headers and S.mapping to the standard fields
+  const oldMap = S.mapping;
   S.headers = STANDARD.map(s => s.key);
   S.mapping = {};
   S.headers.forEach((h, i) => {
     const std = STANDARD[i];
     const primaryType = std.types[0];
     const fill = Math.round(S.clean.filter(r => r[h] && r[h] !== '').length / (S.clean.length || 1) * 100);
-    S.mapping[h] = { type: primaryType, confidence: 100, fill, keep: true };
+    // ponytail: carry over real detection confidence from source columns, 80 if none
+    const confs = fieldDefs[i].srcCols.map(c => oldMap[c] && oldMap[c].confidence).filter(v => v != null);
+    S.mapping[h] = { type: primaryType, confidence: confs.length ? Math.max(...confs) : 80, fill, keep: true };
   });
 }
 
@@ -854,6 +857,7 @@ function buildAllViews() {
 function buildDashboard() { buildKPIs(); buildInsights(); buildMainCharts(); }
 
 function buildKPIs() {
+  if (!S.clean.length) return;
   const total = S.clean.length;
   const emailCols = colsByType('email');
   const phoneCols = [...colsByType('phone'), ...colsByType('whatsapp')];
@@ -864,7 +868,7 @@ function buildKPIs() {
   const withWeb   = webCols.length   ? countWithAny(webCols)   : null;
   const completeness = Math.round(S.clean.reduce((sum,row)=>{
     const f = keep.filter(c=>row[c]&&row[c]!=='').length;
-    return sum + f/keep.length;
+    return sum + f/(keep.length||1);
   },0)/total*100);
 
   const kpis = [
@@ -918,7 +922,7 @@ function buildInsights() {
   const cityCols = colsByType('city');
   if (cityCols.length) {
     const top = groupBy(cityCols[0],1);
-    if (top.length) insights.push({t:'pin',title:'Top Location',desc:`"${top[0][0]}" is the most common city with ${top[0][1].toLocaleString()} records.`});
+    if (top.length) insights.push({t:'pin',title:'Top Location',desc:`"${escapeHTML(top[0][0])}" is the most common city with ${top[0][1].toLocaleString()} records.`});
   }
   if (S.dupGroups.length) insights.push({t:'dedup',title:'Duplicate Records Detected',desc:`${S.dupGroups.length} potential duplicate groups found. Go to Deduplication to review.`});
   if (insights.length < 2) insights.push({t:'check',title:'Clean Dataset',desc:`${total.toLocaleString()} records processed and normalized. Ready for export.`});
@@ -1000,7 +1004,7 @@ function renderGeoTab(c) {
     div.innerHTML=`<div class="chart-card-title">Top Cities / Locations</div><div class="top-list">${data.map((d,i)=>`
       <div class="tl-row">
         <div class="tl-rank ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}</div>
-        <div class="tl-name">${d[0]}</div>
+        <div class="tl-name">${escapeHTML(d[0])}</div>
         <div class="tl-bar-bg"><div class="tl-bar-fg" style="width:${Math.round(d[1]/data[0][1]*100)}%"></div></div>
         <div class="tl-count">${d[1]}</div>
         <div class="tl-pct">${Math.round(d[1]/total*100)}%</div>
@@ -1056,9 +1060,10 @@ function renderDistTab(c) {
 }
 
 function buildQuality() {
+  if (!S.clean.length) return;
   const keep=keepCols(), total=S.clean.length, c=document.getElementById('qualityContent');
   c.innerHTML='';
-  const avgFill=Math.round(S.clean.reduce((sum,row)=>{ const f=keep.filter(col=>row[col]&&row[col]!=='').length; return sum+f/keep.length; },0)/total*100);
+  const avgFill=Math.round(S.clean.reduce((sum,row)=>{ const f=keep.filter(col=>row[col]&&row[col]!=='').length; return sum+f/(keep.length||1); },0)/total*100);
   const scoreColor=avgFill>75?'var(--emerald)':avgFill>50?'var(--amber)':'var(--rose)';
   const topRow=document.createElement('div');
   topRow.style.cssText='display:grid;grid-template-columns:220px 1fr;gap:20px;margin-bottom:22px';
@@ -1078,7 +1083,7 @@ function buildQuality() {
   botRow.innerHTML=`<div class="chart-card"><div class="chart-card-title">Email Validation</div><div id="emailQual"></div></div><div class="chart-card"><div class="chart-card-title">Phone Validation</div><div id="phoneQual"></div></div>`;
   c.appendChild(botRow);
   const qg=document.getElementById('qualGrid');
-  keep.forEach(col=>{ const filled=S.clean.filter(r=>r[col]&&r[col]!=='').length,pct=Math.round(filled/total*100),color=pct>75?'var(--emerald)':pct>40?'var(--amber)':'var(--rose)',ft=FT[S.mapping[col].type]; qg.innerHTML+=`<div class="qual-row"><div class="qual-label">${ft?ft.icon:''} ${col}</div><div class="qual-bar-bg"><div class="qual-bar-fg" style="width:${pct}%;background:${color}"></div></div><div class="qual-val" style="color:${color}">${pct}%</div></div>`; });
+  keep.forEach(col=>{ const filled=S.clean.filter(r=>r[col]&&r[col]!=='').length,pct=Math.round(filled/total*100),color=pct>75?'var(--emerald)':pct>40?'var(--amber)':'var(--rose)',ft=FT[S.mapping[col].type]; qg.innerHTML+=`<div class="qual-row"><div class="qual-label">${ft?ft.icon:''} ${escapeHTML(col)}</div><div class="qual-bar-bg"><div class="qual-bar-fg" style="width:${pct}%;background:${color}"></div></div><div class="qual-val" style="color:${color}">${pct}%</div></div>`; });
   const emailCols=colsByType('email'), eq=document.getElementById('emailQual');
   if (emailCols.length) {
     let valid=0,invalid=0,empty=0;
@@ -1136,7 +1141,7 @@ function removeAllDupes() {
 function buildTableControls() {
   const keep=keepCols(), cf=document.getElementById('colFilter');
   cf.innerHTML='<option value="">Filter by column…</option>';
-  keep.forEach(c=>{ cf.innerHTML+=`<option value="${c}">${c}</option>`; });
+  keep.forEach(c=>{ cf.innerHTML+=`<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`; });
   S.filtered=[...S.clean]; renderTable();
 }
 
@@ -1144,7 +1149,7 @@ function onColFilterChange() {
   const col=document.getElementById('colFilter').value, vf=document.getElementById('valFilter');
   if (col) {
     const vals=[...new Set(S.clean.map(r=>r[col]||'').filter(Boolean))].sort().slice(0,200);
-    vf.innerHTML='<option value="">All values</option>'+vals.map(v=>`<option value="${v}">${v.slice(0,60)}</option>`).join('');
+    vf.innerHTML='<option value="">All values</option>'+vals.map(v=>`<option value="${escapeHTML(v)}">${escapeHTML(v.slice(0,60))}</option>`).join('');
   } else vf.innerHTML='<option value="">All values</option>';
   filterTable();
 }
@@ -1160,13 +1165,13 @@ function filterTable() {
 
   const q=searchEl.value.toLowerCase();
   const colF=colEl.value, valF=valEl.value, keep=keepCols();
-  S.filtered=S.clean.filter(row=>{ const mQ=!q||keep.some(c=>String(row[c]||'').toLowerCase().includes(q)); const mV=!valF||String(row[colF]||'')===valF; return mQ&&mV; });
+  S.filtered=S.clean.filter(row=>{ const mQ=!q||keep.some(c=>String(row[c]||'').toLowerCase().includes(q)); const mV=!valF||String(row[colF]||'').toLowerCase()===valF.toLowerCase(); return mQ&&mV; });
   S.page=1; renderTable();
 }
 
 function renderTable() {
   const keep=keepCols(), head=document.getElementById('tHead'), body=document.getElementById('tBody');
-  head.innerHTML='<tr>'+keep.map((c,i)=>{ const ft=FT[S.mapping[c].type],icon=ft?ft.icon:'',dir=S.sortCol===i?(S.sortDir===1?' ↑':' ↓'):''; return `<th onclick="sortTable(${i})" title="Sort by ${c}">${icon} ${c}${dir}</th>`; }).join('')+'<th style="width:110px;text-align:center">Actions</th></tr>';
+  head.innerHTML='<tr>'+keep.map((c,i)=>{ const ft=FT[S.mapping[c].type],icon=ft?ft.icon:'',dir=S.sortCol===i?(S.sortDir===1?' ↑':' ↓'):''; return `<th onclick="sortTable(${i})" title="Sort by ${escapeHTML(c)}">${icon} ${escapeHTML(c)}${dir}</th>`; }).join('')+'<th style="width:110px;text-align:center">Actions</th></tr>';
   let data=[...S.filtered];
   if (S.sortCol!==null) { const col=keep[S.sortCol]; data.sort((a,b)=>String(a[col]||'').localeCompare(String(b[col]||''))*S.sortDir); }
   const start=(S.page-1)*S.pageSize, page=data.slice(start,start+S.pageSize);
@@ -1235,10 +1240,14 @@ function addDonutChart(parent, title, labels, data, hClass='h260', colors) {
   } catch(err) { console.error('Chart.js error:', err); }
 }
 
-function killCharts() { S.charts.forEach(c=>c.destroy&&c.destroy()); S.charts=[]; }
+function killCharts() {
+  S.charts.forEach(c=>c.destroy&&c.destroy()); S.charts=[];
+  // ponytail: also clear containers so destroyed canvases don't linger and rebuilds don't stack
+  ['chartsRow1','chartsRow2','analyticsContent'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=''; });
+}
 
 async function downloadPDF() {
-  if (!S.clean.length) { alert('No data to export.'); return; }
+  if (!S.clean.length) { showNotification('No data to export.', 'error'); return; }
   const btn = document.getElementById('btnPDF');
   if (btn) { btn.innerHTML = '<span class="spinner-inline"></span> Generating…'; btn.disabled = true; }
 
@@ -1285,17 +1294,17 @@ async function downloadPDF() {
 
 function _printPDFFallback(keep, total, withEmail, withPhone, completeness) {
   const dispCols=keep.slice(0,7);
-  const tableRows=S.clean.slice(0,300).map(row=>`<tr>${dispCols.map(c=>`<td>${(row[c]||'').toString().slice(0,50)}</td>`).join('')}</tr>`).join('');
-  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CRM Report — ${S.fileName}</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;color:#0F172A;font-size:11px}.cover{background:linear-gradient(135deg,#0F172A,#1E3A8A);color:white;padding:48px;page-break-after:always}.cover h1{font-size:28px;font-weight:900;margin-bottom:8px}.cover-sub{font-size:11px;opacity:.6;margin-bottom:32px}.kpis{display:flex;gap:12px}.kpi{background:rgba(255,255,255,.1);border-radius:8px;padding:14px 18px;flex:1;text-align:center}.kpi strong{font-size:22px;display:block}.kpi span{font-size:9px;opacity:.7;text-transform:uppercase}.section{padding:32px 48px}.h2{font-size:13px;font-weight:800;color:#1E3A8A;border-left:4px solid #3B82F6;padding-left:10px;margin-bottom:14px}.qual-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:10px}.qual-label{width:140px}.qual-bg{flex:1;background:#F1F5F9;border-radius:3px;height:6px;overflow:hidden}.qual-fill{height:100%;border-radius:3px}.qual-val{width:32px;text-align:right;font-weight:700}table{width:100%;border-collapse:collapse;font-size:9px}thead th{background:#0F172A;color:white;padding:7px 9px;text-align:left;font-size:8px;text-transform:uppercase}tbody tr:nth-child(even){background:#F8FAFC}tbody td{padding:6px 9px;border-bottom:1px solid #E2E8F0}@media print{@page{margin:0;size:A4}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>
-  <div class="cover"><div style="font-size:9px;opacity:.5;margin-bottom:12px;letter-spacing:1.5px;text-transform:uppercase">CRM Intelligence · Export Report</div><h1>📊 ${S.fileName}</h1><div class="cover-sub">Sheet: ${S.sheetName} · Generated: ${new Date().toLocaleString()}</div><div class="kpis"><div class="kpi"><strong>${total.toLocaleString()}</strong><span>Records</span></div><div class="kpi"><strong>${keep.length}</strong><span>Fields</span></div>${withEmail!==null?`<div class="kpi"><strong>${withEmail}</strong><span>With Email</span></div>`:''} ${withPhone!==null?`<div class="kpi"><strong>${withPhone}</strong><span>With Phone</span></div>`:''}<div class="kpi"><strong>${completeness}%</strong><span>Quality</span></div></div></div>
-  <div class="section"><div class="h2">Data Quality by Field</div>${keep.map(col=>{const filled=S.clean.filter(r=>r[col]&&r[col]!=='').length,pct=Math.round(filled/total*100),color=pct>75?'#10B981':pct>40?'#F59E0B':'#F43F5E';return `<div class="qual-row"><div class="qual-label">${col}</div><div class="qual-bg"><div class="qual-fill" style="width:${pct}%;background:${color}"></div></div><div class="qual-val" style="color:${color}">${pct}%</div></div>`;}).join('')}</div>
-  <div class="section"><div class="h2">CRM Data (first 300 records)</div><table><thead><tr>${dispCols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${tableRows}</tbody></table></div>
+  const tableRows=S.clean.slice(0,300).map(row=>`<tr>${dispCols.map(c=>`<td>${escapeHTML((row[c]||'').toString().slice(0,50))}</td>`).join('')}</tr>`).join('');
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CRM Report — ${escapeHTML(S.fileName)}</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;color:#0F172A;font-size:11px}.cover{background:linear-gradient(135deg,#0F172A,#1E3A8A);color:white;padding:48px;page-break-after:always}.cover h1{font-size:28px;font-weight:900;margin-bottom:8px}.cover-sub{font-size:11px;opacity:.6;margin-bottom:32px}.kpis{display:flex;gap:12px}.kpi{background:rgba(255,255,255,.1);border-radius:8px;padding:14px 18px;flex:1;text-align:center}.kpi strong{font-size:22px;display:block}.kpi span{font-size:9px;opacity:.7;text-transform:uppercase}.section{padding:32px 48px}.h2{font-size:13px;font-weight:800;color:#1E3A8A;border-left:4px solid #3B82F6;padding-left:10px;margin-bottom:14px}.qual-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:10px}.qual-label{width:140px}.qual-bg{flex:1;background:#F1F5F9;border-radius:3px;height:6px;overflow:hidden}.qual-fill{height:100%;border-radius:3px}.qual-val{width:32px;text-align:right;font-weight:700}table{width:100%;border-collapse:collapse;font-size:9px}thead th{background:#0F172A;color:white;padding:7px 9px;text-align:left;font-size:8px;text-transform:uppercase}tbody tr:nth-child(even){background:#F8FAFC}tbody td{padding:6px 9px;border-bottom:1px solid #E2E8F0}@media print{@page{margin:0;size:A4}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>
+  <div class="cover"><div style="font-size:9px;opacity:.5;margin-bottom:12px;letter-spacing:1.5px;text-transform:uppercase">CRM Intelligence · Export Report</div><h1>📊 ${escapeHTML(S.fileName)}</h1><div class="cover-sub">Sheet: ${escapeHTML(S.sheetName)} · Generated: ${new Date().toLocaleString()}</div><div class="kpis"><div class="kpi"><strong>${total.toLocaleString()}</strong><span>Records</span></div><div class="kpi"><strong>${keep.length}</strong><span>Fields</span></div>${withEmail!==null?`<div class="kpi"><strong>${withEmail}</strong><span>With Email</span></div>`:''} ${withPhone!==null?`<div class="kpi"><strong>${withPhone}</strong><span>With Phone</span></div>`:''}<div class="kpi"><strong>${completeness}%</strong><span>Quality</span></div></div></div>
+  <div class="section"><div class="h2">Data Quality by Field</div>${keep.map(col=>{const filled=S.clean.filter(r=>r[col]&&r[col]!=='').length,pct=Math.round(filled/total*100),color=pct>75?'#10B981':pct>40?'#F59E0B':'#F43F5E';return `<div class="qual-row"><div class="qual-label">${escapeHTML(col)}</div><div class="qual-bg"><div class="qual-fill" style="width:${pct}%;background:${color}"></div></div><div class="qual-val" style="color:${color}">${pct}%</div></div>`;}).join('')}</div>
+  <div class="section"><div class="h2">CRM Data (first 300 records)</div><table><thead><tr>${dispCols.map(c=>`<th>${escapeHTML(c)}</th>`).join('')}</tr></thead><tbody>${tableRows}</tbody></table></div>
   </body></html>`;
   const w=window.open('','_blank'); w.document.write(html); w.document.close(); w.focus(); setTimeout(()=>w.print(),900);
 }
 
 function downloadExcel() {
-  if (!S.clean.length) { alert('No data to export.'); return; }
+  if (!S.clean.length) { showNotification('No data to export.', 'error'); return; }
 
   const wb = XLSX.utils.book_new();
 
@@ -1328,6 +1337,25 @@ function downloadExcel() {
   // File name: original name + _cleaned
   const outName = S.fileName.replace(/\.(xlsx?|xls|csv|txt)$/i, '') + '_cleaned.xlsx';
   XLSX.writeFile(wb, outName);
+}
+
+function downloadCSV() {
+  if (!S.clean.length) { showNotification('No data to export.', 'error'); return; }
+  const keep = keepCols();
+  const cols = [];
+  keep.forEach(c => { cols.push(c); if (S.clean.some(r => r[c + '_2'])) cols.push(c + '_2'); });
+  const headers = cols.map(c => c.endsWith('_2') ? c.replace(/_2$/, '') + ' 2' : c);
+  // RFC-4180: quote fields containing comma/quote/newline; double embedded quotes
+  const q = v => { const s = (v !== undefined && v !== null) ? String(v) : ''; return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const csv = [headers, ...S.clean.map(row => cols.map(c => row[c] ?? ''))].map(r => r.map(q).join(',')).join('\r\n');
+  // UTF-8 BOM so Excel opens it correctly
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = S.fileName.replace(/\.(xlsx?|xls|csv|txt)$/i, '') + '_cleaned.csv';
+  a.click();
+  URL.revokeObjectURL(url);
 }
 function toggleSidebarCollapse() {
   // BUG FIX: Sidebar collapse state was not persisted to localStorage,
@@ -1384,8 +1412,8 @@ function resetApp() {
    ══════════════════════════════════════════════════════════════════════ */
 
 async function saveToCRM() {
-  if (!API_BASE) { alert('Backend not configured. Set CRM_API_BASE in config.js'); return; }
-  if (!S.clean.length) { alert('No data to save.'); return; }
+  if (!API_BASE) { showNotification('Backend not configured. Set CRM_API_BASE in config.js', 'error'); return; }
+  if (!S.clean.length) { showNotification('No data to save.', 'error'); return; }
   const btn = document.getElementById('btnSaveCRM');
   if (btn) { btn.innerHTML = '<span class="spinner-inline"></span> Saving…'; btn.disabled = true; }
 
@@ -1477,10 +1505,12 @@ async function loadHistory() {
         <th style="padding:10px">Actions</th>
       </tr></thead>
       <tbody>${data.sessions.map((s) => {
-        const safeName = String(s.file_name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        // ponytail: JS-string escapes (\\, \') first, then HTML attr escapes (& < ") —
+        // never HTML-escape ' here: browser would decode &#39; back into the inline handler
+        const safeName = String(s.file_name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
         return `<tr style="border-bottom:1px solid var(--border)">
-          <td style="padding:10px;font-weight:600">${s.file_name}</td>
-          <td style="padding:10px;color:var(--text-3)">${s.sheet_name}</td>
+          <td style="padding:10px;font-weight:600">${escapeHTML(s.file_name)}</td>
+          <td style="padding:10px;color:var(--text-3)">${escapeHTML(s.sheet_name)}</td>
           <td style="padding:10px;text-align:center">${s.total_records || '—'}</td>
           <td style="padding:10px;text-align:center;color:var(--emerald)">${s.imported || '—'}</td>
           <td style="padding:10px;color:var(--text-3);font-size:11px">${new Date(s.upload_date).toLocaleString()}</td>
@@ -1491,8 +1521,16 @@ async function loadHistory() {
       }).join('')}</tbody>
     </table></div>`;
   } catch (err) {
-    content.innerHTML = `<div class="empty-state">Could not load history: ${err.message}</div>`;
+    content.innerHTML = `<div class="empty-state">Could not load history: ${escapeHTML(err.message)}</div>`;
   }
+}
+
+function filterHistory() {
+  // ponytail: filter rendered rows by first cell text — no re-render, no state
+  const q = (document.getElementById('histSearch')?.value || '').toLowerCase();
+  document.querySelectorAll('#historyContent tbody tr').forEach(tr => {
+    tr.style.display = tr.cells[0].textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
 }
 
 async function reloadSession(sessionId, fileName, btnEl) {
@@ -1503,8 +1541,9 @@ async function reloadSession(sessionId, fileName, btnEl) {
     const data = await res.json();
     if (!data.ok || !data.records.length) { showNotification('No records found.', 'error'); return; }
 
-    S.rawData = data.records;
-    S.headers = Object.keys(data.records[0]).filter(k => !k.startsWith('_'));
+    S.rawData = data.records.map(r => r.data || r);
+    // ponytail: records may be raw rows or {data,...} wrappers — unwrap for headers too
+    S.headers = Object.keys(data.records[0].data || data.records[0]).filter(k => !k.startsWith('_'));
     S.fileName = fileName;
     S.sheetName = data.sheet_name;
     S.mapping = data.mapping || {};
@@ -1549,7 +1588,7 @@ async function exportSessionWithCalls(sessionId, fileName) {
     const expH = await apiHeaders();
     const res = await fetch(`${API_BASE}/api/history/${sessionId}/export`, { headers: expH });
     const data = await res.json();
-    if (!data.ok || !data.records.length) { alert('No records found.'); return; }
+    if (!data.ok || !data.records.length) { showNotification('No records found.', 'error'); return; }
 
     const wb = XLSX.utils.book_new();
     const rows = data.records;
@@ -1615,8 +1654,8 @@ function editRow(idx) {
     const icon = ft ? ft.icon : '';
     const val = row[col] || '';
     form.innerHTML += `<div class="edit-field">
-      <label>${icon} ${col}</label>
-      <input type="text" data-col="${col}" value="${val.replace(/"/g,'&quot;')}" />
+      <label>${icon} ${escapeHTML(col)}</label>
+      <input type="text" data-col="${escapeHTML(col)}" value="${escapeHTML(val)}" />
     </div>`;
   });
   modal.classList.add('open');
@@ -1774,7 +1813,7 @@ async function showContactPanel(idx) {
   detailsDiv.innerHTML = keep.map(col => {
     const ft = FT[S.mapping[col].type];
     const val = row[col] || '—';
-    return `<div class="pd-row"><span class="pd-label">${ft ? ft.icon : ''} ${col}</span><span class="pd-val">${escapeHTML(val)}</span></div>`;
+    return `<div class="pd-row"><span class="pd-label">${ft ? ft.icon : ''} ${escapeHTML(col)}</span><span class="pd-val">${escapeHTML(val)}</span></div>`;
   }).join('');
 
   // Foreign number flag
@@ -1870,7 +1909,7 @@ async function addCallLogFromPanel() {
       <span class="cle-outcome">${outcome}</span>
       <span class="cle-date">${now.toLocaleDateString()} ${now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
     </div>
-    <div class="cle-notes">${notes}</div>`;
+    <div class="cle-notes">${escapeHTML(notes)}</div>`;
   const list = document.getElementById('callLogsList');
   if (list.querySelector('.empty-state')) list.innerHTML = '';
   list.prepend(entry);
@@ -1880,7 +1919,7 @@ async function addCallLogFromPanel() {
 
 /* ── VCF Export ───────────────────────────────────────────────────── */
 function downloadVCF() {
-  if (!S.clean.length) { alert('No data to export.'); return; }
+  if (!S.clean.length) { showNotification('No data to export.', 'error'); return; }
   const companyCols = colsByType('company');
   const contactCols = colsByType('contact');
   const emailCols = colsByType('email');
@@ -1929,7 +1968,7 @@ function downloadVCF() {
 }
 
 async function downloadZip() {
-  if (!S.clean.length) { alert('No data to export.'); return; }
+  if (!S.clean.length) { showNotification('No data to export.', 'error'); return; }
   const btn = document.querySelector('button[onclick="downloadZip()"]');
   if (btn) { btn.innerHTML = '<span class="spinner-inline"></span> ZIP…'; btn.disabled = true; }
   
@@ -2047,7 +2086,7 @@ window.AppUI = {
       data._page = page;
       this.renderCustomerProfiles(data);
     } catch (e) {
-      document.getElementById('cpGrid').innerHTML = `<div style="color:var(--rose)">Error: ${e.message}</div>`;
+      document.getElementById('cpGrid').innerHTML = `<div style="color:var(--rose)">Error: ${escapeHTML(e.message)}</div>`;
     }
   },
 
@@ -2072,12 +2111,12 @@ window.AppUI = {
       let html = `
         <div class="profile-card">
           <div class="profile-header">
-            <div class="profile-avatar">${initials}</div>
+            <div class="profile-avatar">${escapeHTML(initials)}</div>
             <div class="profile-info">
-              <div class="profile-name" title="${name}">${name}</div>
-              <div class="profile-role">💼 ${role}</div>
-              <div class="profile-company">🏢 ${company}</div>
-              ${shortLocation ? `<div class="profile-location" title="${fullLocation}">📍 ${shortLocation}</div>` : ''}
+              <div class="profile-name" title="${escapeHTML(name)}">${escapeHTML(name)}</div>
+              <div class="profile-role">💼 ${escapeHTML(role)}</div>
+              <div class="profile-company">🏢 ${escapeHTML(company)}</div>
+              ${shortLocation ? `<div class="profile-location" title="${escapeHTML(fullLocation)}">📍 ${escapeHTML(shortLocation)}</div>` : ''}
             </div>
           </div>
           <div class="profile-details">`;
@@ -2085,46 +2124,46 @@ window.AppUI = {
       if (fullLocation) {
         html += `<div class="profile-detail-row">
           <span class="profile-detail-icon">📍</span>
-          <span class="profile-detail-text" title="${fullLocation}">${fullLocation}</span>
+          <span class="profile-detail-text" title="${escapeHTML(fullLocation)}">${escapeHTML(fullLocation)}</span>
         </div>`;
       }
       if (p.email) {
         html += `<div class="profile-detail-row">
           <span class="profile-detail-icon">✉️</span>
-          <a class="profile-link profile-detail-text" href="mailto:${p.email}">${p.email}</a>
+          <a class="profile-link profile-detail-text" href="mailto:${escapeHTML(p.email)}">${escapeHTML(p.email)}</a>
         </div>`;
       }
       if (p.email_secondary) {
         html += `<div class="profile-detail-row">
           <span class="profile-detail-icon">✉️</span>
-          <a class="profile-link profile-detail-text" href="mailto:${p.email_secondary}">${p.email_secondary}</a>
+          <a class="profile-link profile-detail-text" href="mailto:${escapeHTML(p.email_secondary)}">${escapeHTML(p.email_secondary)}</a>
         </div>`;
       }
       if (p.phone_primary) {
         html += `<div class="profile-detail-row">
           <span class="profile-detail-icon">📞</span>
-          <a class="profile-link profile-detail-text" href="tel:${p.phone_primary}">${p.phone_primary}</a>
+          <a class="profile-link profile-detail-text" href="tel:${escapeHTML(p.phone_primary)}">${escapeHTML(p.phone_primary)}</a>
         </div>`;
       }
       if (p.phone_secondary) {
         html += `<div class="profile-detail-row">
           <span class="profile-detail-icon">📞</span>
-          <a class="profile-link profile-detail-text" href="tel:${p.phone_secondary}">${p.phone_secondary}</a>
+          <a class="profile-link profile-detail-text" href="tel:${escapeHTML(p.phone_secondary)}">${escapeHTML(p.phone_secondary)}</a>
         </div>`;
       }
       if (p.website) {
         const href = p.website.startsWith('http') ? p.website : `https://${p.website}`;
         html += `<div class="profile-detail-row">
           <span class="profile-detail-icon">🌐</span>
-          <a class="profile-link profile-detail-text" href="${href}" target="_blank">${p.website}</a>
+          <a class="profile-link profile-detail-text" href="${escapeHTML(href)}" target="_blank">${escapeHTML(p.website)}</a>
         </div>`;
       }
 
       html += `</div>`;
       
       const badges = [];
-      if (p.city) badges.push(`<span class="profile-badge profile-badge-green">📍 ${p.city}</span>`);
-      if (p.source_file) badges.push(`<span class="profile-badge profile-badge-blue">${p.source_file}</span>`);
+      if (p.city) badges.push(`<span class="profile-badge profile-badge-green">📍 ${escapeHTML(p.city)}</span>`);
+      if (p.source_file) badges.push(`<span class="profile-badge profile-badge-blue">${escapeHTML(p.source_file)}</span>`);
       if (badges.length) {
         html += `<div class="profile-badges">${badges.join('')}</div>`;
       }

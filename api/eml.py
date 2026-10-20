@@ -224,7 +224,7 @@ async def eml_process(
     existing_phones = {normalize_phone(p) for p in existing_phones if normalize_phone(p)}
 
     results = []
-    counts = {"new": 0, "duplicate": 0, "merged": 0, "error": 0}
+    counts = {"new": 0, "duplicate": 0, "merged": 0, "error": 0, "failed": 0}
     # ponytail: total LLM budget — keeps the request under the Cloudflare ~100s proxy timeout
     deadline = time.monotonic() + float(os.getenv("EML_PROCESS_BUDGET", "45"))
 
@@ -234,6 +234,8 @@ async def eml_process(
             name = uf.filename or "unnamed.eml"
             try:
                 raw = await uf.read()
+                if not raw:
+                    raise ValueError("file is empty")
                 if len(raw) > 10 * 1024 * 1024:
                     raise ValueError("file too large (max 10MB)")
                 parsed = parse_eml_bytes(raw, name)
@@ -295,6 +297,9 @@ async def eml_process(
 
                 if status == "DUPLICATE" and crm_result["action"] in ("merged",):
                     counts["merged"] += 1
+                elif crm_result["action"] == "push_failed":
+                    # NEW but auto-push blew up — don't report it as saved to CRM
+                    counts["failed"] += 1
                 elif status == "NEW":
                     counts["new"] += 1
                 else:

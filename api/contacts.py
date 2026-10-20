@@ -1,7 +1,7 @@
 """
 Contacts CRUD API — Handles batch import from parser, listing, editing, and deletion.
 """
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -12,6 +12,7 @@ from collections import defaultdict
 import re
 
 from core.auth import verify_token
+from core.rate_limit import limiter
 from db.database import get_db
 from db.models import Company, Contact, SessionData, Record, User
 
@@ -76,13 +77,17 @@ EMAIL_RE = re.compile(r"^[\w.+%-]+@[\w.-]+\.[a-z]{2,}$", re.I)
 
 def classify_phone(num: str) -> str:
     """Return 'IN', a country prefix, or 'INVALID'."""
-    cleaned = re.sub(r"[\s\-\(\)]", "", num.strip())
+    num = num.strip()
+    if num.startswith('+'):
+        cleaned = '+' + re.sub(r'\D', '', num[1:])
+    else:
+        cleaned = re.sub(r'\D', '', num)
     if INDIAN_MOBILE_RE.match(cleaned):
         return "IN"
     if INTL_PHONE_RE.match(cleaned):
-        m = re.match(r"^\+(\d{1,3})", cleaned)
+        m = re.match(r'^\+(\d{1,3})', cleaned)
         return f"+{m.group(1)}" if m else "INTL"
-    if re.match(r"^[6-9]\d{9}$", cleaned):
+    if re.match(r'^[6-9]\d{9}$', cleaned):
         return "IN"
     return "INVALID"
 
@@ -95,9 +100,9 @@ async def _find_or_create_company(db: AsyncSession, name: str, data: ContactIn) 
     """Find existing company by name or create a new one."""
     if not name:
         return None
-    normalized = name.strip().lower()
     result = await db.execute(
-        select(Company).filter(Company.name.ilike(normalized))
+        # exact (non-wildcard) match, case-insensitive to match company_cache keys
+        select(Company).filter(func.lower(Company.name) == name.strip().lower())
     )
     existing = result.scalars().first()
     if existing:
@@ -159,7 +164,8 @@ async def _chunked_query(db: AsyncSession, model, attr, values, chunk_size=3000)
 # ── Routes ────────────────────────────────────────────────────────────
 
 @router.post("/contacts/batch")
-async def batch_import(body: BatchImportRequest, db: AsyncSession = Depends(get_db), current_user = Depends(verify_token)):
+@limiter.limit("10/minute")
+async def batch_import(request: Request, body: BatchImportRequest, db: AsyncSession = Depends(get_db), current_user = Depends(verify_token)):
     """
     Receives the cleaned, mapped contacts from the frontend after the user
     confirms the field mapping. Validates, filters, and persists to the DB.
@@ -264,7 +270,7 @@ async def batch_import(body: BatchImportRequest, db: AsyncSession = Depends(get_
             match = True
             if item.email_primary and existing_contact.email_primary != item.email_primary: match = False
             if match and item.phone_primary and existing_contact.phone_primary != item.phone_primary: match = False
-            if match and item.contact_name and existing_contact.name != item.contact_name: match = False
+            if match and (item.contact_name or '').strip() != (existing_contact.name or '').strip(): match = False
             if match and item.whatsapp and existing_contact.whatsapp != item.whatsapp: match = False
             if match and item.position and existing_contact.position != item.position: match = False
             if match and item.company_name:
@@ -312,6 +318,10 @@ async def batch_import(body: BatchImportRequest, db: AsyncSession = Depends(get_
         db.add(contact)
         imported += 1
         existing_contacts_data.append((contact, company))
+        if contact.email_primary:
+            existing_by_email[contact.email_primary.lower()].append((contact, company))
+        if contact.phone_primary:
+            existing_by_phone[contact.phone_primary].append((contact, company))
         contact_ids.append(contact)
 
     session.imported = imported

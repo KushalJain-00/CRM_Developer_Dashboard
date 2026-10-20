@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://cdn.canvasjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://crm-developer-dashboard.onrender.com https://openrouter.ai https://api.groq.com https://api.openai.com; img-src 'self' data: blob:;">
+<!-- ponytail: X-Frame-Options/nosniff in <meta> are ignored by browsers; kept as
+     a marker — real fix is HTTP headers in vercel.json / Render. -->
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
 <title>CRM Intelligence · v4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -86,6 +90,9 @@
     </div>
     <div class="nav-item" title="Export Excel" onclick="downloadExcel(); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">⬇</span> <span class="ni-label">Export Excel</span>
+    </div>
+    <div class="nav-item" title="Export CSV" onclick="downloadCSV(); if(window.innerWidth<=768)toggleSidebar()">
+      <span class="ni-icon">🧾</span> <span class="ni-label">Export CSV</span>
     </div>
     <div class="nav-item" title="Export PDF" onclick="downloadPDF(); if(window.innerWidth<=768)toggleSidebar()">
       <span class="ni-icon">📄</span> <span class="ni-label">Export PDF</span>
@@ -369,7 +376,10 @@
     </div>
 
     <div class="view" id="view-history">
-      <div class="sec-hd"><div class="sec-title">Upload History</div></div>
+      <div class="sec-hd">
+        <div class="sec-title">Upload History</div>
+        <input class="tbl-search" id="histSearch" placeholder="🔍 Search by file name..." oninput="filterHistory()" style="max-width:260px">
+      </div>
       <div id="historyContent"><div class="empty-state">Loading history…</div></div>
     </div>
 

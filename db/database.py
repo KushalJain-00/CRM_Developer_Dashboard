@@ -1,6 +1,9 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
+import logging
 import os
+
+logger = logging.getLogger(__name__)
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./crm.db").strip().strip('"').strip("'")
 
@@ -60,5 +63,6 @@ async def init_db():
         # Dynamically add the files column if it doesn't exist to support existing DBs
         try:
             await conn.execute(text("ALTER TABLE contacts ADD COLUMN files TEXT"))
-        except Exception:
-            pass
+        except Exception as e:
+            # expected when the column already exists — don't crash startup
+            logger.warning("ALTER TABLE contacts ADD COLUMN files skipped: %s", e)
