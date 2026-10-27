@@ -1,17 +1,16 @@
 """
 Call Logs API — Tracks all call discussions linked to contacts.
 """
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional
 from datetime import datetime
 
-from core.auth import verify_token
 from db.database import get_db
-from db.models import CallLog, Contact, Company
+from db.models import CallLog, Contact
 
 router = APIRouter()
 
@@ -60,7 +59,7 @@ def _log_to_dict(log: CallLog) -> dict:
 # ── Routes ────────────────────────────────────────────────────────────
 
 @router.post("/calls")
-async def create_call_log(body: CallLogIn, db: AsyncSession = Depends(get_db), current_user = Depends(verify_token)):
+async def create_call_log(body: CallLogIn, db: AsyncSession = Depends(get_db)):
     """Record a new call discussion for a contact."""
     # Verify contact exists
     result = await db.execute(select(Contact).filter(Contact.id == body.contact_id))
@@ -110,7 +109,7 @@ async def get_call_logs_for_contact(
 
 
 @router.put("/calls/{log_id}")
-async def update_call_log(log_id: int, body: CallLogUpdate, db: AsyncSession = Depends(get_db), current_user = Depends(verify_token)):
+async def update_call_log(log_id: int, body: CallLogUpdate, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(CallLog).filter(CallLog.id == log_id))
     log = result.scalars().first()
     if not log:
@@ -134,7 +133,7 @@ async def update_call_log(log_id: int, body: CallLogUpdate, db: AsyncSession = D
 
 
 @router.delete("/calls/{log_id}")
-async def delete_call_log(log_id: int, db: AsyncSession = Depends(get_db), current_user = Depends(verify_token)):
+async def delete_call_log(log_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(CallLog).filter(CallLog.id == log_id))
     log = result.scalars().first()
     if not log:

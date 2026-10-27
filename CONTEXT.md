@@ -17,7 +17,6 @@
    - [Database Layer (db/)](#42-database-layer-db)
    - [Models & Schema (db/models.py)](#43-models--schema-dbmodelspy)
    - [Core Utilities (core/)](#44-core-utilities-core)
-   - [CRUD Operations (crud/)](#45-crud-operations-crud)
    - [API Routes (api/)](#46-api-routes-api)
    - [Services (services/)](#47-services-services)
 5. [Frontend — Detailed Breakdown](#5-frontend--detailed-breakdown)
@@ -46,7 +45,7 @@
 - **Deduplication** — Full-row fingerprint-based exact match detection
 - **Dashboard & Analytics** — KPIs, charts (Chart.js), geographic/segment/reachability analytics
 - **CRM CRUD** — Contacts, Companies, Call Logs with full create/read/update/delete
-- **AI Email Signature Extraction** — Multi-provider LLM chain (Groq, OpenAI, OpenRouter, DeepSeek, Anthropic, Gemini) with ordered failover (`services/llm_router.py`, 1 attempt per provider; legacy `api/parse_signature.py` keeps 2 retries)
+- **AI Email Signature Extraction** — Multi-provider LLM chain (Groq, OpenAI, OpenRouter, DeepSeek, Anthropic, Gemini) with ordered failover (`services/llm_router.py`, 1 attempt per provider)
 - **EML Contact Intelligence** — Server-side .eml processing (`POST /api/eml/process`): MIME parse, local regex extraction + LLM enrichment, dedup against EML Supabase store, auto-push into CRM contacts
 - **Export** — Excel (XLSX.js client-side), PDF (ReportLab server-side), VCF (vCard 3.0), ZIP archive
 - **Session History** — Reload, export (with call logs merged), and delete past uploads
@@ -71,22 +70,16 @@ CRM_Developer/
 │   ├── __init__.py
 │   ├── auth.py                 # POST /api/auth/upsert
 │   ├── calls.py                # Call log CRUD (inline SQLAlchemy, no crud/ layer)
-│   ├── contacts.py             # Batch import, CRUD, stats (LARGEST ROUTE FILE — 552 lines)
+│   ├── contacts.py             # Batch import, CRUD (LARGEST ROUTE FILE — 409 lines)
 │   ├── eml.py                  # EML contact intelligence: process, browse, export, push (476 lines)
 │   ├── export_pdf.py           # PDF export endpoint
-│   ├── history.py              # Upload session history + export with call logs
-│   ├── parse.py                # File upload & parsing (.xls, .pdf)
-│   └── parse_signature.py      # Legacy per-email AI signature extraction (multi-LLM, 355 lines)
+│   ├── history.py              # Session queries + history/export routes
+│   └── parse.py                # File upload & parsing (.xls, .pdf)
 │
 ├── core/                       # Shared utilities
 │   ├── __init__.py
 │   ├── auth.py                 # Supabase JWT verification (verify_token dependency)
 │   └── rate_limit.py           # slowapi rate limiter
-│
-├── crud/                       # Database CRUD operations
-│   ├── __init__.py
-│   ├── auth.py                 # User upsert (create or update)
-│   └── history.py              # Session/Record queries + contact lookup helpers
 │
 ├── db/                         # Database configuration & models
 │   ├── __init__.py
@@ -119,9 +112,9 @@ CRM_Developer/
 │
 ├── docs/                       # Developer docs & design plans
 │
-├── tests/                      # Pytest test suite (8 files, 47 tests)
+├── tests/                      # Pytest test suite (7 files, 54 tests)
 │   ├── conftest.py             # In-memory SQLite + verify_token dependency override
-│   ├── test_api.py             # User upsert CRUD tests
+│   ├── test_api.py             # /api/auth/upsert integration tests
 │   ├── test_cors.py            # CORS allow-list preflight contract
 │   ├── test_eml_api.py         # /api/eml/* endpoint tests
 │   ├── test_eml_dedup_rules.py # Dedup helper tests
@@ -161,8 +154,8 @@ CRM_Developer/
 │  └────┬─────┘ └─────┬──────┘ └────┬─────┘ └───────┬──────────┘  │
 │       │              │             │               │             │
 │  ┌────▼──────────────▼─────────────▼───┐   ┌──────▼──────────┐  │
-│  │         crud/ (DB operations)       │   │  LLM Providers  │  │
-│  │         auth.py │ history.py        │   │  via llm_router │  │
+│  │         inlined DB queries           │   │  LLM Providers  │  │
+│  │         (api/auth.py, api/history.py)│   │  via llm_router │  │
 │  └────────────────┬────────────────────┘   │  Groq, OpenAI,  │  │
 │                   │                         │  OpenRouter,    │  │
 │  ┌────────────────▼────────────────────┐   │  DeepSeek,      │  │
@@ -172,7 +165,7 @@ CRM_Developer/
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐   │
 │  │  services/                                                │   │
-│  │  parser.py (XLS: xlrd/openpyxl, PDF: PyMuPDF)            │   │
+│  │  parser.py (XLS: xlrd, PDF: PyMuPDF)                     │   │
 │  │  pdf_exporter.py (ReportLab PDF generation)               │   │
 │  │  llm_router.py · eml_processor.py · eml_store.py          │   │
 │  │  eml_dedup_rules.py                                       │   │
@@ -265,32 +258,21 @@ Company 1──* CallLog (also directly)
 **`core/rate_limit.py`** (4 lines):
 - `limiter = Limiter(key_func=get_remote_address)` — IP-based rate limiting via slowapi
 
-### 4.5 CRUD Operations (`crud/`)
+### 4.5 CRUD Operations
 
-**`crud/auth.py`** (22 lines):
-- `upsert_user(db, email, name, provider_uid)` — Queries by email. If exists: updates `last_login`, `name`, `provider_uid`. If not: creates new User. Returns the user.
-
-**`crud/history.py`** (85 lines):
-- `list_sessions(db, email, limit)` — Lists sessions; filters to user's sessions + orphan sessions (user_id IS NULL)
-- `get_session(db, session_id)` — Single session by ID
-- `get_session_records(db, session_id, page, page_size)` — Paginated records with total count
-- `delete_session(db, session_id)` — Cascading delete
-- `get_all_session_records(db, session_id)` — All records (no pagination)
-- `find_contacts_by_emails(db, emails)` — Chunked IN query (2000/chunk)
-- `find_contacts_by_phones(db, phones)` — Chunked IN query (2000/chunk)
-- `get_call_logs_for_contacts(db, contact_ids)` — Returns `{contact_id: [CallLog, ...]}` chunked
+The old `crud/` package was inlined into its only callers: user upsert lives in `api/auth.py`, and session/contact/call-log queries live as private `_`-prefixed helpers in `api/history.py` (`_list_sessions`, `_get_session`, `_get_session_records`, `_delete_session`, `_get_all_session_records`, `_find_contacts_by_emails`, `_find_contacts_by_phones`, `_get_call_logs_for_contacts`, `_rows_with_contact`).
 
 ### 4.6 API Routes (`api/`)
 
 All routes below (except `/api/auth/upsert`, which carries its own dependency) inherit JWT auth from the router-level `Depends(verify_token)` applied in `main.py`.
 
-#### `api/auth.py` (19 lines)
-- **`POST /api/auth/upsert`** — Protected by `verify_token` (route-level). Calls `crud_upsert_user`, returns `{ok, user_id, email}`.
+#### `api/auth.py` (36 lines)
+- **`POST /api/auth/upsert`** — Protected by `verify_token` (route-level). Upserts the user inline, returns `{ok, user_id, email}`.
 
 #### `api/parse.py` (45 lines)
 - **`POST /api/parse`** — Accepts file upload (max 30MB). Routes `.xls` → `parse_xls()`, `.pdf` → `parse_pdf()`. Returns `{ok, sheet, headers, rows, rowCount}`. Note: `.xlsx` is NOT handled here (parsed client-side via XLSX.js).
 
-#### `api/contacts.py` (552 lines) — **LARGEST ROUTE FILE**
+#### `api/contacts.py` (409 lines) — **LARGEST ROUTE FILE**
 
 Constants:
 - `INDIAN_MOBILE_RE` — `^(\+91[\s\-]?)?[6-9]\d{9}$`
@@ -301,15 +283,14 @@ Routes:
 | Method | Path | Purpose |
 |--------|------|---------|
 | `POST` | `/api/contacts/batch` | **Major endpoint.** Batch import: resolves user, creates SessionData, pre-fetches existing contacts (chunked), O(1) duplicate check via hash maps, validates email/phone, classifies phone country, finds/creates Company (cached), creates Contact, archives raw data as Record. Returns `{ok, imported, skipped, flagged_foreign, session_id, contact_ids}` |
-| `GET` | `/api/contacts` | Paginated listing (default 50, max 500) with search (ILIKE on name/email/phone/company) and city/industry filters. Returns total count. |
-| `GET` | `/api/contacts/{id}` | Single contact with company join |
-| `PUT` | `/api/contacts/{id}` | Updates contact fields with validation; updates or creates company |
+| `PUT` | `/api/contacts/{id}` | Updates contact fields with validation (body: `ContactIn`); updates or creates company |
 | `DELETE` | `/api/contacts/{id}` | Deletes single contact |
 | `DELETE` | `/api/contacts` | Bulk delete (query param `ids`, chunked 5000) |
-| `GET` | `/api/contacts/stats/summary` | Dashboard stats: total contacts, with_email, with_phone, total companies, top 10 cities, top 10 industries |
 
-#### `api/calls.py` (144 lines)
-Call log CRUD is implemented inline with SQLAlchemy in this file (the old `crud/calls.py` layer was deleted).
+Read/list/stats endpoints (`GET /api/contacts`, `GET /api/contacts/{id}`, `GET /api/contacts/stats/summary`) were removed - the frontend never called them (Customer Profiles uses `/api/eml/contacts`).
+
+#### `api/calls.py` (143 lines)
+Call log CRUD is implemented inline with SQLAlchemy in this file.
 | Method | Path | Purpose |
 |--------|------|---------|
 | `POST` | `/api/calls` | Creates call log; verifies contact exists; auto-fills company_id from contact |
@@ -317,7 +298,7 @@ Call log CRUD is implemented inline with SQLAlchemy in this file (the old `crud/
 | `PUT` | `/api/calls/{log_id}` | Updates call log fields |
 | `DELETE` | `/api/calls/{log_id}` | Deletes call log |
 
-#### `api/history.py` (132 lines)
+#### `api/history.py` (198 lines - includes inlined session/contact query helpers)
 | Method | Path | Purpose |
 |--------|------|---------|
 | `GET` | `/api/history` | Lists sessions, optionally filtered by email |
@@ -329,20 +310,6 @@ Call log CRUD is implemented inline with SQLAlchemy in this file (the old `crud/
 | Method | Path | Purpose |
 |--------|------|---------|
 | `POST` | `/api/export/pdf` | Calls `generate_pdf()`, returns PDF bytes with Content-Disposition attachment (filename sanitized against header injection) |
-
-#### `api/parse_signature.py` (355 lines) — legacy per-email signature endpoint
-- **LRU Cache:** In-memory, 500-entry capacity, keyed by MD5 of `{model}_{email_text}`
-- **Multi-provider LLM chain:** Iterates through user-configured `chain` of `{provider, model, api_key}` with fallback; 2 retries per provider with fixed backoff (1.5s, 3s)
-- **Supported providers:** OpenRouter, Groq, OpenAI, DeepSeek, Anthropic, Gemini
-- This is the OLD single-email path. The active EML pipeline uses `services/llm_router.py` (see `api/eml.py`) instead.
-
-| Method | Path | Rate Limit | Purpose |
-|--------|------|------------|---------|
-| `POST` | `/api/parse-signature` | **200/min** | Cleans email text, cache check, iterates chain, calls LLM, parses JSON response, returns `{ok, fields, cached}` |
-| `GET` | `/api/parse-signature/cache-stats` | — | Returns `{size, max_size}` of the in-memory LRU cache |
-| `POST` | `/api/parse-signature-batch` | **50/min** | Combines up to 5 email signatures into one LLM call; returns `{ok, results}` keyed by email ID |
-
-**System Prompt** instructs the LLM to extract: `name, company, designation, phone_primary, phone_secondary, email, website, address, city, pincode` from email signatures (JSON array of contact objects).
 
 #### `api/eml.py` (476 lines) — active EML contact intelligence API
 Multipart/process endpoint uses `services/eml_processor.py` (MIME parse + local extraction), `services/llm_router.py` (single-attempt multi-provider LLM chain), `services/eml_store.py` (EML Supabase persistence), and `services/eml_dedup_rules.py` (dedup). After processing, contacts are auto-pushed (merge-or-create) into the main CRM database.
@@ -359,10 +326,10 @@ Multipart/process endpoint uses `services/eml_processor.py` (MIME parse + local 
 
 ### 4.7 Services (`services/`)
 
-**`services/parser.py`** (316 lines):
-- **`parse_xls(content)`** — Parses ALL valid sheets in XLS/XLSX. Skips lookup/index sheets (patterns: "mob no", "email id", "phone list", "mobile list", "index", "lookup"). Merges multi-sheet data. Uses `xlrd` for `.xls`, `openpyxl` for `.xlsx`.
-- **`parse_pdf(content)`** — 3-tier fallback: (1) PyMuPDF table extraction via `page.find_tables()`, (2) raw text extraction, (3) `_extract_contacts_from_text()` for free-form text
-- **`_extract_contacts_from_text(text)`** — Sophisticated contact extraction using block-based parsing + regex (Indian phone, email, URL, pincode) + delimiter splitting
+**`services/parser.py`** (302 lines):
+- **`parse_xls(content)`** — Parses ALL valid sheets in XLS. Skips lookup/index sheets (patterns: "mob no", "email id", "phone list", "mobile list", "index", "lookup"). Uses `xlrd`. (`.xlsx` is parsed client-side via XLSX.js.)
+- **`parse_pdf(content)`** — 2-tier fallback: (1) PyMuPDF table extraction via `page.find_tables()`, (2) `_extract_contacts_from_text()` for free-form text
+- **`_extract_contacts_from_text(text)`** — Contact extraction using block-based parsing + regex (Indian phone, email, URL, pincode)
 - **`_extract_fields_from_block(block)`** — Extracts Name, Company, Phone, Email, Website, Pincode, Address using regex for company keywords (ltd, pvt, inc) and Indian address keywords (road, nagar, GIDC)
 - **`_dedupe_headers(headers)`** — Deduplicates column names by appending `_1`, `_2` suffixes
 - **Config:** `PARSER_TIMEOUT` (env, default 15s XLS / 30s PDF), `PDF_MAX_PAGES` (env, default 200)
@@ -379,7 +346,7 @@ Multipart/process endpoint uses `services/eml_processor.py` (MIME parse + local 
 - **`extract_json(chain, user_prompt, deadline)`** — Ordered failover across the user-configured provider chain; returns parsed JSON dict or `None`
 - **Retry policy:** intentionally **1 attempt per provider** (retries blew the Cloudflare ~100s proxy deadline budget; locked by `test_failing_provider_called_exactly_once`)
 - **Wall-clock deadline:** optional `deadline` (monotonic) stops the chain early so `/eml/process` stays under the proxy timeout
-- **LRU cache:** 500 entries keyed by MD5 of `{provider}|{model}|{prompt}`
+- **Cache:** capped 500-entry dict (FIFO), keyed by MD5 of `{provider}|{model}|{prompt}`
 - **Providers:** OpenRouter, Groq, OpenAI, DeepSeek, Anthropic, Gemini (Gemini URL built per-call)
 - **`parse_llm_json(raw)`** — Strips markdown fences, JSON-decodes, extracts first `{...}` block as fallback
 
@@ -631,16 +598,10 @@ Every `/api/*` route requires a valid Supabase JWT (router-level `Depends(verify
 | `GET` | `/health` | No | `main.py` | Health check (public) |
 | `POST` | `/api/auth/upsert` | No | `api/auth.py` | Create/update user |
 | `POST` | `/api/parse` | No | `api/parse.py` | Parse uploaded file (XLS/PDF) |
-| `POST` | `/api/parse-signature` | **200/min** | `api/parse_signature.py` | Legacy AI email signature extraction |
-| `GET` | `/api/parse-signature/cache-stats` | No | `api/parse_signature.py` | LRU cache size stats |
-| `POST` | `/api/parse-signature-batch` | **50/min** | `api/parse_signature.py` | Batch signature extraction (≤5 emails per LLM call) |
 | `POST` | `/api/contacts/batch` | No | `api/contacts.py` | Batch import contacts |
-| `GET` | `/api/contacts` | No | `api/contacts.py` | List contacts (paginated, searchable) |
-| `GET` | `/api/contacts/{id}` | No | `api/contacts.py` | Get single contact |
 | `PUT` | `/api/contacts/{id}` | No | `api/contacts.py` | Update contact |
 | `DELETE` | `/api/contacts/{id}` | No | `api/contacts.py` | Delete contact |
 | `DELETE` | `/api/contacts` | No | `api/contacts.py` | Bulk delete contacts |
-| `GET` | `/api/contacts/stats/summary` | No | `api/contacts.py` | Dashboard stats |
 | `POST` | `/api/calls` | No | `api/calls.py` | Create call log |
 | `GET` | `/api/calls/contact/{id}` | No | `api/calls.py` | List call logs for contact |
 | `PUT` | `/api/calls/{id}` | No | `api/calls.py` | Update call log |
@@ -805,11 +766,11 @@ ZIP:   JSZip(Excel + VCF + PDF from backend) → .zip download
 - **Session-scoped event loop** + engine with all tables created
 - **Per-test `db_session`** fixture with rollback after each test
 
-### Test Files (8 files, 47 tests)
+### Test Files (7 files, 54 tests)
 | File | Tests | What's Tested |
 |------|-------|---------------|
 | `tests/conftest.py` | — | Fixtures + `verify_token` dependency override |
-| `tests/test_api.py` | 2 | `crud.auth.upsert_user` — create new user, update existing user (same email → update name, not duplicate) |
+| `tests/test_api.py` | 2 | `POST /api/auth/upsert` — create new user, upsert existing user (same email → update name, not duplicate) |
 | `tests/test_cors.py` | 4 | CORS preflight contract — allows both Vercel domains + localhost, rejects unknown origins |
 | `tests/test_eml_api.py` | 9 | `/api/eml/*` endpoint behavior (process, contacts, push) |
 | `tests/test_eml_dedup_rules.py` | 6 | `is_duplicate()` / normalize helpers |
@@ -843,7 +804,7 @@ Last run: **47 passed**.
 ### Performance
 - **Chunked queries:** All bulk operations (contacts lookup, call logs, bulk delete) use chunked IN queries (2000-5000 per chunk)
 - **Company caching:** During batch import, companies are cached per batch to avoid repeated lookups
-- **LLM caching:** In-memory LRU cache (500 entries) in both `api/parse_signature.py` and `services/llm_router.py`
+- **LLM caching:** capped 500-entry dict cache in `services/llm_router.py`
 - **Connection pooling:** pgBouncer-compatible settings (statement_cache_size=0, pool_size=5, max_overflow=10)
 - **LLM deadline budget:** `/eml/process` enforces a wall-clock deadline (default 45s) so the request finishes under the Cloudflare ~100s proxy timeout; `services/llm_router.py` makes **1 attempt per provider** (deliberate — retries blew the deadline; locked by `test_failing_provider_called_exactly_once`)
 - **Render keep-alive:** GitHub Actions cron pings `/health` every 10 min
@@ -880,7 +841,6 @@ From `requirements.txt`:
 fastapi==0.111.0              # Web framework
 uvicorn[standard]==0.29.0     # ASGI server
 python-multipart==0.0.9       # File upload handling
-openpyxl==3.1.2               # .xlsx file parsing
 xlrd==2.0.1                   # .xls file parsing
 reportlab==4.1.0              # PDF report generation
 python-dotenv==1.0.1          # .env file loading
@@ -889,8 +849,6 @@ sqlalchemy[asyncio]>=2.0.30   # ORM (async extras)
 supabase==2.4.5               # Supabase Python client (auth + EML store)
 slowapi==0.1.9                # Rate limiting
 asyncpg>=0.29.0               # PostgreSQL async driver
-pytest                        # Testing
-pytest-asyncio                # Async test support
 aiosqlite                     # SQLite async driver
 PyMuPDF                       # PDF parsing (via fitz)
 ```

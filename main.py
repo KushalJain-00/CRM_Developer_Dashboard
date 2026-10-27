@@ -12,7 +12,6 @@ load_dotenv()
 
 from api.auth    import router as auth_router
 from api.history import router as history_router
-from api.parse_signature import router as sig_router
 from api.parse import router as parse_router
 from api.export_pdf import router as pdf_router
 from api.contacts import router as contacts_router
@@ -128,7 +127,6 @@ app.include_router(contacts_router, prefix="/api", dependencies=[Depends(verify_
 app.include_router(calls_router, prefix="/api", dependencies=[Depends(verify_token)])
 app.include_router(auth_router, prefix="/api")
 app.include_router(history_router, prefix="/api", dependencies=[Depends(verify_token)])
-app.include_router(sig_router, prefix="/api", dependencies=[Depends(verify_token)])
 app.include_router(eml_new_router, prefix="/api", dependencies=[Depends(verify_token)])
 
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")

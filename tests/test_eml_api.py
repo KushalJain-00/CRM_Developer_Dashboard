@@ -79,7 +79,7 @@ def test_process_expired_budget_skips_llm(mock_store, monkeypatch):
         return '{"name": "Late"}'
     monkeypatch.setattr(llm_router, "_call_provider", fake_call)
     monkeypatch.setattr(llm_router, "RETRY_BACKOFF", [0, 0, 0])
-    llm_router._cache.cache.clear()
+    llm_router._cache.clear()
     mock_store.fetch_dedup_keys = AsyncMock(return_value=(set(), set()))
     mock_store.insert_email = AsyncMock(return_value="eml-4")
     mock_store.insert_contact = AsyncMock(return_value="ct-4")

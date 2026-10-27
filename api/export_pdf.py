@@ -1,10 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import Response
-from core.auth import verify_token
 from core.rate_limit import limiter
 from services.pdf_exporter import generate_pdf
 from pydantic import BaseModel
-from typing import Any, Optional
+from typing import Optional
 import re
 
 router = APIRouter()
@@ -25,7 +24,7 @@ class PDFRequest(BaseModel):
 
 @router.post("/export/pdf")
 @limiter.limit("10/minute")
-async def export_pdf(request: Request, body: PDFRequest, current_user = Depends(verify_token)):
+async def export_pdf(request: Request, body: PDFRequest):
     try:
         pdf_bytes = generate_pdf(body.model_dump())
     except Exception as e:

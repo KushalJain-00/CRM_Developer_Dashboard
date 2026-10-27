@@ -25,7 +25,7 @@ async def test_failover_to_second_provider(monkeypatch):
         return '{"name": "OK"}'
     monkeypatch.setattr(llm_router, "_call_provider", fake_call)
     monkeypatch.setattr(llm_router, "RETRY_BACKOFF", [0, 0, 0])
-    llm_router._cache.cache.clear()
+    llm_router._cache.clear()
     chain = [
         ChainEntry(provider="gemini", model="m", api_key="k"),
         ChainEntry(provider="groq", model="m", api_key="k"),
@@ -52,7 +52,7 @@ async def test_failing_provider_called_exactly_once(monkeypatch):
         raise Exception("boom")
     monkeypatch.setattr(llm_router, "_call_provider", fake_call)
     monkeypatch.setattr(llm_router, "RETRY_BACKOFF", [0, 0, 0])
-    llm_router._cache.cache.clear()
+    llm_router._cache.clear()
     chain = [ChainEntry(provider="groq", model="m", api_key="k")]
     out = await extract_json(chain, "p")
     assert out is None
@@ -66,7 +66,7 @@ async def test_expired_deadline_skips_all_providers(monkeypatch):
         return '{"name": "X"}'
     monkeypatch.setattr(llm_router, "_call_provider", fake_call)
     monkeypatch.setattr(llm_router, "RETRY_BACKOFF", [0, 0, 0])
-    llm_router._cache.cache.clear()
+    llm_router._cache.clear()
     chain = [ChainEntry(provider="groq", model="m", api_key="k")]
     out = await extract_json(chain, "deadline-prompt", deadline=0)
     assert out is None
@@ -80,7 +80,7 @@ async def test_cache_hit(monkeypatch):
         return '{"name": "CACHED"}'
     monkeypatch.setattr(llm_router, "_call_provider", fake_call)
     monkeypatch.setattr(llm_router, "RETRY_BACKOFF", [0, 0, 0])
-    llm_router._cache.cache.clear()
+    llm_router._cache.clear()
     chain = [ChainEntry(provider="groq", model="m", api_key="k")]
     a = await extract_json(chain, "same-prompt")
     b = await extract_json(chain, "same-prompt")

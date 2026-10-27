@@ -1,7 +1,6 @@
 fastapi==0.111.0
 uvicorn[standard]==0.29.0
 python-multipart==0.0.9
-openpyxl==3.1.2
 xlrd==2.0.1
 reportlab==4.1.0
 python-dotenv==1.0.1
@@ -10,7 +9,5 @@ sqlalchemy[asyncio]>=2.0.30
 supabase==2.4.5
 slowapi==0.1.9
 asyncpg>=0.29.0
-pytest
-pytest-asyncio
 aiosqlite
 PyMuPDF

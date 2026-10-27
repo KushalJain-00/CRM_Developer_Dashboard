@@ -38,7 +38,6 @@ This document contains technical details for maintaining, developing, and deploy
 - `/main.py` — FastAPI entry point.
 - `/api/` — Route handlers (auth, contacts, calls, history, parse, export).
 - `/core/` — Utilities (Auth, rate limiters).
-- `/crud/` — Database operations.
 - `/db/` — SQLAlchemy engine and models.
 - `/services/` — Business logic (EML processing, LLM routing, PDF generation).
 - `/frontend/` — Static assets (HTML, JS, CSS).

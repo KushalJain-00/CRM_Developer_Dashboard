@@ -1,7 +1,6 @@
 # services/llm_router.py
 """Multi-provider LLM chain: ordered failover, retries, JSON-only extraction."""
 import hashlib, json, re, asyncio, logging, time
-from collections import OrderedDict
 from typing import Optional
 from pydantic import BaseModel
 import httpx
@@ -29,22 +28,9 @@ PROVIDERS = {
     "gemini": None,  # URL built per-call with model (key sent via header)
 }
 
-class LRUCache:
-    def __init__(self, capacity: int):
-        self.cache = OrderedDict()
-        self.capacity = capacity
-    def get(self, key):
-        if key not in self.cache:
-            return None
-        self.cache.move_to_end(key)
-        return self.cache[key]
-    def put(self, key, value):
-        self.cache[key] = value
-        self.cache.move_to_end(key)
-        if len(self.cache) > self.capacity:
-            self.cache.popitem(last=False)
-
-_cache = LRUCache(500)
+# ponytail: FIFO-capped dict cache (not functools.lru_cache — can't wrap async def)
+_CACHE_MAX = 500
+_cache: dict = {}
 _client: Optional[httpx.AsyncClient] = None
 
 def _http() -> httpx.AsyncClient:
@@ -133,7 +119,9 @@ async def extract_json(chain: list[ChainEntry], user_prompt: str, deadline: Opti
                                            EXTRACTION_SYSTEM_PROMPT, user_prompt)
                 parsed = parse_llm_json(raw)
                 if parsed is not None:
-                    _cache.put(cache_key, parsed)
+                    if len(_cache) >= _CACHE_MAX:
+                        _cache.pop(next(iter(_cache)))
+                    _cache[cache_key] = parsed
                     return parsed
                 last_err = "invalid JSON"
             except Exception as e:

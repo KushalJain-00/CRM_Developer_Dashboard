@@ -1,7 +1,7 @@
 """
 Contacts CRUD API — Handles batch import from parser, listing, editing, and deletion.
 """
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -11,7 +11,6 @@ from typing import Optional, List
 from collections import defaultdict
 import re
 
-from core.auth import verify_token
 from core.rate_limit import limiter
 from db.database import get_db
 from db.models import Company, Contact, SessionData, Record, User
@@ -47,25 +46,6 @@ class BatchImportRequest(BaseModel):
     mapping: dict
     contacts: List[ContactIn]
     user_email: Optional[str] = None
-
-
-class ContactUpdate(BaseModel):
-    company_name: Optional[str] = None
-    contact_name: Optional[str] = None
-    email_primary: Optional[str] = None
-    email_secondary: Optional[str] = None
-    phone_primary: Optional[str] = None
-    phone_secondary: Optional[str] = None
-    phone_country: Optional[str] = None
-    whatsapp: Optional[str] = None
-    address: Optional[str] = None
-    city: Optional[str] = None
-    pincode: Optional[str] = None
-    website: Optional[str] = None
-    industry: Optional[str] = None
-    product: Optional[str] = None
-    position: Optional[str] = None
-    files: Optional[str] = None
 
 
 # ── Helpers ───────────────────────────────────────────────────────────
@@ -121,31 +101,6 @@ async def _find_or_create_company(db: AsyncSession, name: str, data: ContactIn) 
     return company
 
 
-def _contact_to_dict(contact: Contact, company: Company = None) -> dict:
-    return {
-        "id": contact.id,
-        "company_id": contact.company_id,
-        "company_name": company.name if company else None,
-        "name": contact.name,
-        "email_primary": contact.email_primary,
-        "email_secondary": contact.email_secondary,
-        "phone_primary": contact.phone_primary,
-        "phone_secondary": contact.phone_secondary,
-        "phone_country": contact.phone_country if hasattr(contact, 'phone_country') else "IN",
-        "whatsapp": contact.whatsapp,
-        "position": contact.position,
-        "address": company.address if company else None,
-        "city": company.city if company else None,
-        "pincode": company.pincode if company else None,
-        "website": company.website if company else None,
-        "industry": company.industry if company else None,
-        "product": company.product if company else None,
-        "files": contact.files if hasattr(contact, 'files') else None,
-        "created_at": contact.created_at.isoformat() if contact.created_at else None,
-        "updated_at": contact.updated_at.isoformat() if contact.updated_at else None,
-    }
-
-
 # ── Async chunked query helper ───────────────────────────────────────
 
 async def _chunked_query(db: AsyncSession, model, attr, values, chunk_size=3000):
@@ -165,7 +120,7 @@ async def _chunked_query(db: AsyncSession, model, attr, values, chunk_size=3000)
 
 @router.post("/contacts/batch")
 @limiter.limit("10/minute")
-async def batch_import(request: Request, body: BatchImportRequest, db: AsyncSession = Depends(get_db), current_user = Depends(verify_token)):
+async def batch_import(request: Request, body: BatchImportRequest, db: AsyncSession = Depends(get_db)):
     """
     Receives the cleaned, mapped contacts from the frontend after the user
     confirms the field mapping. Validates, filters, and persists to the DB.
@@ -175,7 +130,7 @@ async def batch_import(request: Request, body: BatchImportRequest, db: AsyncSess
     flagged_foreign = 0
 
     user_id = None
-    if hasattr(body, "user_email") and body.user_email:
+    if body.user_email:
         result = await db.execute(select(User).filter(User.email == body.user_email))
         u = result.scalars().first()
         if u: user_id = u.id
@@ -347,64 +302,8 @@ async def batch_import(request: Request, body: BatchImportRequest, db: AsyncSess
     })
 
 
-@router.get("/contacts")
-async def list_contacts(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(50, ge=1, le=500),
-    search: Optional[str] = Query(None),
-    city: Optional[str] = Query(None),
-    industry: Optional[str] = Query(None),
-    db: AsyncSession = Depends(get_db),
-):
-    """Paginated contact listing with optional search and filters."""
-    q = select(Contact, Company).outerjoin(Company, Contact.company_id == Company.id)
-
-    if search:
-        like = f"%{search}%"
-        q = q.filter(
-            (Contact.name.ilike(like)) |
-            (Contact.email_primary.ilike(like)) |
-            (Contact.phone_primary.ilike(like)) |
-            (Company.name.ilike(like))
-        )
-    if city:
-        q = q.filter(Company.city.ilike(f"%{city}%"))
-    if industry:
-        q = q.filter(Company.industry.ilike(f"%{industry}%"))
-
-    # Count
-    count_q = select(func.count()).select_from(q.subquery())
-    count_result = await db.execute(count_q)
-    total = count_result.scalar()
-
-    # Paginated rows
-    q = q.order_by(Contact.id.desc()).offset((page - 1) * page_size).limit(page_size)
-    result = await db.execute(q)
-    rows = result.all()
-
-    return JSONResponse(content={
-        "ok": True,
-        "total": total,
-        "page": page,
-        "page_size": page_size,
-        "contacts": [_contact_to_dict(c, co) for c, co in rows],
-    })
-
-
-@router.get("/contacts/{contact_id}")
-async def get_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(
-        select(Contact, Company).outerjoin(Company, Contact.company_id == Company.id)
-        .filter(Contact.id == contact_id)
-    )
-    row = result.first()
-    if not row:
-        raise HTTPException(404, "Contact not found")
-    return JSONResponse(content={"ok": True, "contact": _contact_to_dict(row[0], row[1])})
-
-
 @router.put("/contacts/{contact_id}")
-async def update_contact(contact_id: int, body: ContactUpdate, db: AsyncSession = Depends(get_db), current_user = Depends(verify_token)):
+async def update_contact(contact_id: int, body: ContactIn, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Contact).filter(Contact.id == contact_id))
     contact = result.scalars().first()
     if not contact:
@@ -482,7 +381,7 @@ async def update_contact(contact_id: int, body: ContactUpdate, db: AsyncSession 
 
 
 @router.delete("/contacts/{contact_id}")
-async def delete_contact(contact_id: int, db: AsyncSession = Depends(get_db), current_user = Depends(verify_token)):
+async def delete_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Contact).filter(Contact.id == contact_id))
     contact = result.scalars().first()
     if not contact:
@@ -493,7 +392,7 @@ async def delete_contact(contact_id: int, db: AsyncSession = Depends(get_db), cu
 
 
 @router.delete("/contacts")
-async def delete_multiple(ids: List[int] = Query(...), db: AsyncSession = Depends(get_db), current_user = Depends(verify_token)):
+async def delete_multiple(ids: List[int] = Query(...), db: AsyncSession = Depends(get_db)):
     """Delete multiple contacts at once."""
     if not ids:
         return JSONResponse(content={"ok": True, "deleted": 0})
@@ -508,47 +407,3 @@ async def delete_multiple(ids: List[int] = Query(...), db: AsyncSession = Depend
         total_deleted += result.rowcount
     await db.commit()
     return JSONResponse(content={"ok": True, "deleted": total_deleted})
-
-
-@router.get("/contacts/stats/summary")
-async def contact_stats(db: AsyncSession = Depends(get_db)):
-    """Quick summary stats for the dashboard."""
-    total_r = await db.execute(select(func.count(Contact.id)))
-    total = total_r.scalar()
-
-    email_r = await db.execute(select(func.count(Contact.id)).filter(Contact.email_primary.isnot(None)))
-    with_email = email_r.scalar()
-
-    phone_r = await db.execute(select(func.count(Contact.id)).filter(Contact.phone_primary.isnot(None)))
-    with_phone = phone_r.scalar()
-
-    comp_r = await db.execute(select(func.count(Company.id)))
-    companies = comp_r.scalar()
-
-    # City breakdown (top 10)
-    city_q = select(Company.city, func.count(Contact.id)).outerjoin(
-        Contact, Contact.company_id == Company.id
-    ).filter(Company.city.isnot(None)).group_by(Company.city).order_by(
-        func.count(Contact.id).desc()
-    ).limit(10)
-    city_result = await db.execute(city_q)
-    city_rows = city_result.all()
-
-    # Industry breakdown (top 10)
-    ind_q = select(Company.industry, func.count(Contact.id)).outerjoin(
-        Contact, Contact.company_id == Company.id
-    ).filter(Company.industry.isnot(None)).group_by(Company.industry).order_by(
-        func.count(Contact.id).desc()
-    ).limit(10)
-    ind_result = await db.execute(ind_q)
-    ind_rows = ind_result.all()
-
-    return JSONResponse(content={
-        "ok": True,
-        "total_contacts": total,
-        "with_email": with_email,
-        "with_phone": with_phone,
-        "total_companies": companies,
-        "top_cities": [{"city": c, "count": n} for c, n in city_rows],
-        "top_industries": [{"industry": i, "count": n} for i, n in ind_rows],
-    })

@@ -1,17 +1,15 @@
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
+from reportlab.lib.enums import TA_CENTER, TA_RIGHT
 from reportlab.lib import colors
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    HRFlowable, KeepTogether, PageBreak
+    HRFlowable, PageBreak
 )
-from reportlab.graphics.shapes import Drawing, Rect, String
-from reportlab.graphics import renderPDF
+from reportlab.graphics.shapes import Drawing, Rect
 from io import BytesIO
 from datetime import datetime
-from typing import Any
 
 
 NAVY    = colors.HexColor("#0F172A")

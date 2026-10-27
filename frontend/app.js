@@ -15,8 +15,7 @@ const S = {
   filtered:[], page:1, pageSize:50, sortCol:null, sortDir:1,
   charts:[], currentView:'upload',
   dupGroups:[],
-  validation: {dropped:0, invalidEmails:0, landlines:0, foreign:0, total:0},
-  dbContacts: [], sessionId: null, userEmail: null,
+  sessionId: null, userEmail: null,
 };
 
 const FT = {
@@ -60,17 +59,27 @@ async function getAuthToken() {
   }
 }
 
+// Session dead (expired/revoked refresh token) — every /api/* route needs a
+// JWT, so silently sending unauthenticated requests just yields 403s that
+// look like "no data". Force a re-login instead.
+function forceRelogin() {
+  try { localStorage.removeItem('crm-session'); } catch {}
+  window.location.replace('signin.html');
+}
+
 async function apiHeaders() {
   const h = {'Content-Type':'application/json'};
   const token = await getAuthToken();
-  if (token) h['Authorization'] = `Bearer ${token}`;
+  if (!token) { forceRelogin(); return h; }
+  h['Authorization'] = `Bearer ${token}`;
   return h;
 }
 
 async function apiUploadHeaders() {
   const h = {};
   const token = await getAuthToken();
-  if (token) h['Authorization'] = `Bearer ${token}`;
+  if (!token) { forceRelogin(); return h; }
+  h['Authorization'] = `Bearer ${token}`;
   return h;
 }
 
@@ -189,7 +198,6 @@ async function syncAuthSession() {
     localStorage.setItem('crm-session', JSON.stringify(session));
 
     const API_BASE_URL = (window.CRM_API_BASE || '').replace(/\/$/, '');
-    const API_KEY = window.CRM_API_KEY || '';
     if (API_BASE_URL && user.email) {
       const h = await apiHeaders();
       fetch(`${API_BASE_URL}/api/auth/upsert`, {
@@ -237,9 +245,6 @@ function setTheme(name, skipCharts) {
   }
 }
 
-// Legacy compat
-function toggleTheme() { setTheme(isDarkTheme() ? 'nexus-light' : 'nexus-dark'); }
-
 async function signOut() {
   if (!confirm('Sign out of CRM Engine?')) return;
   if (crmClient) {
@@ -256,86 +261,100 @@ function toggleSidebar() {
   ov.classList.toggle('open');
 }
 
-async function handleFile(file) {
-  if (!file) return;
-  S.fileName = file.name;
+async function extractRows(file) {
   const ext = file.name.split('.').pop().toLowerCase();
 
   if (ext === 'txt') {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const lines = e.target.result.split('\n').map(l=>l.trim())
-        .filter(l => l && l.replace(/[\+\d\s\-]/g,'').length < 3);
-      if (!lines.length) { showError('No phone numbers detected in file.'); return; }
-      S.rawData = lines.map((l,i) => ({'SR': i+1, 'Phone Number': l}));
-      S.headers = ['SR','Phone Number'];
-      S.sheetName = 'Phone List';
-      buildMapping();
-    };
-    reader.readAsText(file);
-    return;
+    const text = await readFileAsText(file);
+    const lines = text.split('\n').map(l=>l.trim())
+      .filter(l => l && l.replace(/[\+\d\s\-]/g,'').length < 3);
+    if (!lines.length) throw new Error('No phone numbers detected in file.');
+    return { headers: ['SR','Phone Number'], rows: lines.map((l,i) => ({'SR': i+1, 'Phone Number': l})), sheetName: 'Phone List' };
   }
 
   if (ext === 'csv') {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const lines = e.target.result.split('\n').filter(l=>l.trim());
-      if (lines.length < 2) { showError('CSV appears empty.'); return; }
-      const headers = lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
-      const rows = lines.slice(1).map(line => {
-        const vals = line.split(',').map(v=>v.trim().replace(/^"|"$/g,''));
-        const obj = {};
-        headers.forEach((h,i) => obj[h] = vals[i] || '');
-        return obj;
-      }).filter(r => Object.values(r).some(v=>v));
-      S.rawData = rows; S.headers = headers; S.sheetName = 'CSV Data';
-      buildMapping();
-    };
-    reader.readAsText(file);
-    return;
+    const text = await readFileAsText(file);
+    const lines = text.split('\n').filter(l=>l.trim());
+    if (lines.length < 2) throw new Error('CSV appears empty.');
+    const headers = lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+    const rows = lines.slice(1).map(line => {
+      const vals = line.split(',').map(v=>v.trim().replace(/^"|"$/g,''));
+      const obj = {};
+      headers.forEach((h,i) => obj[h] = vals[i] || '');
+      return obj;
+    }).filter(r => Object.values(r).some(v=>v));
+    return { headers, rows, sheetName: 'CSV Data' };
   }
 
   if (ext === 'xlsx') {
-    const reader = new FileReader();
-    reader.onload = e => {
-      try {
-        const wb = XLSX.read(e.target.result, {type:'array', cellDates:true});
-        const validSheets = getValidSheets(wb);
-        if (!validSheets.length) { showError('No valid data sheets found.'); return; }
-        S.sheetName = validSheets.length > 1 ? validSheets.join(' + ') : validSheets[0];
-        let allJson = [], allHeaders = [];
-        validSheets.forEach(sn => {
-          const ws = wb.Sheets[sn];
-          const json = XLSX.utils.sheet_to_json(ws, {defval:null, raw:false});
-          if (!json.length) return;
-          const keys = Object.keys(json[0]);
-          const merged = mergeUnnamedCols(keys, json);
-          merged.forEach(h => {
-            if (!allHeaders.includes(h)) {
-              const vals = json.map(r=>r[h]).filter(v=>v!=null&&v!=='');
-              if (vals.length > 0 && !String(h).startsWith('__EMPTY')) allHeaders.push(h);
-            }
-          });
-          allJson = allJson.concat(json);
-        });
-        if (!allJson.length) { showError('All sheets appear empty.'); return; }
-        S.headers = allHeaders;
-        S.rawData = allJson;
-        buildMapping();
-      } catch(err) {
-        showError('Could not read file: ' + err.message);
-      }
-    };
-    reader.readAsArrayBuffer(file);
-    return;
+    let wb;
+    try {
+      const data = await readFileAsArrayBuffer(file);
+      wb = XLSX.read(data, {type:'array', cellDates:true});
+    } catch (err) {
+      throw new Error('Could not read file: ' + err.message);
+    }
+    const validSheets = getValidSheets(wb);
+    if (!validSheets.length) throw new Error('No valid data sheets found.');
+    let allJson = [], allHeaders = [];
+    validSheets.forEach(sn => {
+      const ws = wb.Sheets[sn];
+      const json = XLSX.utils.sheet_to_json(ws, {defval:null, raw:false});
+      if (!json.length) return;
+      const keys = Object.keys(json[0]);
+      const merged = mergeUnnamedCols(keys, json);
+      merged.forEach(h => {
+        if (!allHeaders.includes(h)) {
+          const vals = json.map(r=>r[h]).filter(v=>v!=null&&v!=='');
+          if (vals.length > 0 && !String(h).startsWith('__EMPTY')) allHeaders.push(h);
+        }
+      });
+      allJson = allJson.concat(json);
+    });
+    if (!allJson.length) throw new Error('All sheets appear empty.');
+    return { headers: allHeaders, rows: allJson, sheetName: validSheets.length > 1 ? validSheets.join(' + ') : validSheets[0] };
   }
 
   if (ext === 'xls' || ext === 'pdf') {
-    await handleViaBackend(file, ext);
-    return;
+    if (!API_BASE) throw new Error('Backend not configured. Set CRM_API_BASE in config.js');
+    showUploadProgress(true, ext);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const uploadH = await apiUploadHeaders();
+      const res = await fetch(`${API_BASE}/api/parse`, { method: 'POST', headers: uploadH, body: fd });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({detail: res.statusText}));
+        throw new Error(err.detail || 'Parse failed');
+      }
+      const data = await res.json();
+      return {
+        headers: data.headers.filter(h => h && !String(h).startsWith('__EMPTY')),
+        rows: data.rows,
+        sheetName: data.sheet,
+      };
+    } catch (err) {
+      throw new Error(`Could not parse file: ${err.message}`);
+    } finally {
+      showUploadProgress(false, ext);
+    }
   }
 
-  showError(`Unsupported file type: .${ext}`);
+  throw new Error(`Unsupported file type: .${ext}`);
+}
+
+async function handleFile(file) {
+  if (!file) return;
+  S.fileName = file.name;
+  try {
+    const { headers, rows, sheetName } = await extractRows(file);
+    S.headers = headers;
+    S.rawData = rows;
+    S.sheetName = sheetName;
+    buildMapping();
+  } catch (err) {
+    showError(err.message);
+  }
 }
 
 /* ── Multi-File Handler ────────────────────────────────────────────── */
@@ -348,58 +367,13 @@ async function handleMultipleFiles(fileList) {
 
   // Multiple files — merge them all
   let mergedRaw = [], mergedHeaders = [], fileNames = [];
-
   for (const file of files) {
-    const ext = file.name.split('.').pop().toLowerCase();
     fileNames.push(file.name);
-
     try {
-      if (ext === 'xlsx') {
-        const data = await readFileAsArrayBuffer(file);
-        const wb = XLSX.read(data, {type:'array', cellDates:true});
-        const validSheets = getValidSheets(wb);
-        validSheets.forEach(sn => {
-          const ws = wb.Sheets[sn];
-          const json = XLSX.utils.sheet_to_json(ws, {defval:null, raw:false});
-          if (!json.length) return;
-          const keys = Object.keys(json[0]);
-          const merged = mergeUnnamedCols(keys, json);
-          merged.forEach(h => {
-            if (!mergedHeaders.includes(h)) {
-              const vals = json.map(r=>r[h]).filter(v=>v!=null&&v!=='');
-              if (vals.length > 0 && !String(h).startsWith('__EMPTY')) mergedHeaders.push(h);
-            }
-          });
-          mergedRaw = mergedRaw.concat(json);
-        });
-      } else if (ext === 'csv') {
-        const text = await readFileAsText(file);
-        const lines = text.split('\n').filter(l=>l.trim());
-        if (lines.length < 2) continue;
-        const headers = lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
-        headers.forEach(h => { if (!mergedHeaders.includes(h)) mergedHeaders.push(h); });
-        const rows = lines.slice(1).map(line => {
-          const vals = line.split(',').map(v=>v.trim().replace(/^"|"$/g,''));
-          const obj = {};
-          headers.forEach((h,i) => obj[h] = vals[i] || '');
-          return obj;
-        }).filter(r => Object.values(r).some(v=>v));
-        mergedRaw = mergedRaw.concat(rows);
-      } else if (ext === 'xls' || ext === 'pdf') {
-        // These need backend parsing — handle one at a time via API
-        if (API_BASE) {
-          const fd = new FormData();
-          fd.append('file', file);
-          const uploadH = await apiUploadHeaders();
-          const res = await fetch(`${API_BASE}/api/parse`, { method:'POST', headers:uploadH, body:fd });
-          if (res.ok) {
-            const result = await res.json();
-            if (result.headers) result.headers.forEach(h => { if (!mergedHeaders.includes(h)) mergedHeaders.push(h); });
-            if (result.rows) mergedRaw = mergedRaw.concat(result.rows);
-          }
-        }
-      }
-    } catch(err) {
+      const { headers, rows } = await extractRows(file);
+      headers.forEach(h => { if (!mergedHeaders.includes(h)) mergedHeaders.push(h); });
+      mergedRaw = mergedRaw.concat(rows);
+    } catch (err) {
       console.warn(`Failed to parse ${file.name}:`, err);
     }
   }
@@ -430,37 +404,6 @@ function readFileAsText(file) {
     r.onerror = reject;
     r.readAsText(file);
   });
-}
-
-async function handleViaBackend(file, ext) {
-  if (!API_BASE) {
-    showError('Backend not configured. Set CRM_API_BASE in config.js');
-    return;
-  }
-  showUploadProgress(true, ext);
-  const fd = new FormData();
-  fd.append('file', file);
-  try {
-    const uploadH = await apiUploadHeaders();
-    const res = await fetch(`${API_BASE}/api/parse`, {
-      method: 'POST',
-      headers: uploadH,
-      body: fd,
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({detail: res.statusText}));
-      throw new Error(err.detail || 'Parse failed');
-    }
-    const data = await res.json();
-    S.sheetName = data.sheet;
-    S.headers   = data.headers.filter(h => h && !String(h).startsWith('__EMPTY'));
-    S.rawData   = data.rows;
-    buildMapping();
-  } catch (err) {
-    showError(`Could not parse file: ${err.message}`);
-  } finally {
-    showUploadProgress(false, ext);
-  }
 }
 
 function showUploadProgress(on, ext) {
@@ -563,34 +506,8 @@ function buildMapping() {
   });
 }
 
-async function startProcessing() {
+function startProcessing() {
   showView('processing');
-  const steps = [
-    [10,'Parsing raw data structure...'],
-    [25,'Running adaptive field detection...'],
-    [42,'Cleaning & normalizing values...'],
-    [58,'Merging multi-value cells...'],
-    [70,'Running deduplication analysis...'],
-    [82,'Computing analytics & metrics...'],
-    [92,'Building charts and insights...'],
-    [100,'Dashboard ready!'],
-  ];
-  document.getElementById('procSteps').innerHTML = '';
-  const stepEls = steps.map(([,msg]) => {
-    const div = document.createElement('div');
-    div.className = 'ps-row';
-    div.innerHTML = `<div class="ps-dot"></div>${msg}`;
-    document.getElementById('procSteps').appendChild(div);
-    return div;
-  });
-  for (let i = 0; i < steps.length; i++) {
-    const [pct, msg] = steps[i];
-    document.getElementById('progFill').style.width = pct + '%';
-    document.getElementById('procSub').textContent = msg;
-    if (stepEls[i-1]) stepEls[i-1].className = 'ps-row done';
-    stepEls[i].className = 'ps-row active';
-    await sleep(240);
-  }
   processData();
   findDuplicates();
   buildAllViews();
@@ -604,7 +521,6 @@ async function startProcessing() {
 
 function processData() {
   const keep = keepCols();
-  S.validation = {dropped:0, invalidEmails:0, landlines:0, foreign:0, total:S.rawData.length};
 
   // Step 1: Clean & normalize values
   const cleaned = S.rawData.map(row => {
@@ -624,10 +540,7 @@ function processData() {
           out[h] = v.toLowerCase().replace(/\s+/g,'');
         }
         // Strict email validation — discard invalid
-        if (out[h] && !isValidEmail(out[h])) {
-          out[h] = '';
-          S.validation.invalidEmails++;
-        }
+        if (out[h] && !isValidEmail(out[h])) out[h] = '';
         if (out[h+'_2'] && !isValidEmail(out[h+'_2'])) out[h+'_2'] = '';
       } else if (type === 'phone' || type === 'whatsapp') {
         const sep = v.includes('/') ? '/' : v.includes(',') ? ',' : v.includes(' & ') ? '&' : null;
@@ -638,12 +551,7 @@ function processData() {
           const cls = classifyPhone(n);
           if (cls.valid) {
             validNums.push(n);
-            if (cls.type !== 'IN') {
-              out._phoneCountry = cls.type;
-              S.validation.foreign++;
-            }
-          } else if (cls.type === 'LANDLINE') {
-            S.validation.landlines++;
+            if (cls.type !== 'IN') out._phoneCountry = cls.type;
           }
         });
         out[h] = validNums[0] || '';
@@ -664,15 +572,10 @@ function processData() {
   // Step 2: Enforce mandatory rule — must have email OR valid mobile
   const emailCols = colsByType('email');
   const phoneCols = [...colsByType('phone'), ...colsByType('whatsapp')];
-  S.clean = cleaned.filter(row => {
-    const hasEmail = emailCols.some(c => row[c] && row[c] !== '' && isValidEmail(row[c]));
-    const hasPhone = phoneCols.some(c => row[c] && row[c] !== '');
-    if (!hasEmail && !hasPhone) {
-      S.validation.dropped++;
-      return false;
-    }
-    return true;
-  });
+  S.clean = cleaned.filter(row =>
+    emailCols.some(c => row[c] && row[c] !== '' && isValidEmail(row[c])) ||
+    phoneCols.some(c => row[c] && row[c] !== '')
+  );
 
   // Step 3: Normalize to standard 10 fields (auto-detect, sheet-name independent)
   normalizeToStandardFields();
@@ -796,7 +699,6 @@ function findDuplicates() {
 
 function keepCols()    { return S.headers.filter(h=>S.mapping[h]&&S.mapping[h].keep&&S.mapping[h].type!=='skip'); }
 function colsByType(t) { return S.headers.filter(h=>S.mapping[h]&&S.mapping[h].type===t&&S.mapping[h].keep); }
-function hasType(t)    { return colsByType(t).length > 0; }
 function firstCol(t)   { return colsByType(t)[0]; }
 function countFilled(col) { return S.clean.filter(r=>r[col]&&r[col]!=='').length; }
 function countWithAny(cols){ return S.clean.filter(r=>cols.some(c=>r[c]&&r[c]!=='')).length; }
@@ -811,7 +713,6 @@ function groupBy(col, limit=10) {
   return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,limit);
 }
 function toTitle(s) { return s.replace(/\w\S*/g, w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()); }
-function sleep(ms)  { return new Promise(r=>setTimeout(r,ms)); }
 
 /* ── Validation Helpers (Phase 2) ──────────────────────────────────── */
 const INDIAN_MOBILE_RE = /^(\+91[\s\-]?)?[6-9]\d{9}$/;
@@ -825,7 +726,7 @@ function isValidEmail(v) {
 /** Escape HTML special characters to prevent XSS in innerHTML injections */
 function escapeHTML(str) {
   if (!str) return '';
-  return typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(String(str)) : String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function classifyPhone(v) {
@@ -1246,97 +1147,112 @@ function killCharts() {
   ['chartsRow1','chartsRow2','analyticsContent'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=''; });
 }
 
-async function downloadPDF() {
-  if (!S.clean.length) { showNotification('No data to export.', 'error'); return; }
-  const btn = document.getElementById('btnPDF');
-  if (btn) { btn.innerHTML = '<span class="spinner-inline"></span> Generating…'; btn.disabled = true; }
+// ── Export builders (shared by downloadPDF/Excel/VCF/Zip) ──
 
-  const keep      = keepCols();
-  const total     = S.clean.length;
+function exportCols() {
+  const cols = [];
+  keepCols().forEach(c => {
+    cols.push(c);
+    if (S.clean.some(r => r[c + '_2'])) cols.push(c + '_2');
+  });
+  return cols;
+}
+
+function buildWorkbook() {
+  const wb = XLSX.utils.book_new();
+  const cols = exportCols();
+  const headers = cols.map(c => c.endsWith('_2') ? c.replace(/_2$/, '') + ' 2' : c);
+  const rows = S.clean.map(row => cols.map(c => (row[c] !== undefined && row[c] !== null) ? row[c] : ''));
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  ws['!cols'] = cols.map(c => {
+    const base = c.replace(/_2$/, '');
+    const t = S.mapping[base] ? S.mapping[base].type : 'other';
+    return { wch: t === 'address' || t === 'product' ? 55 : t === 'company' ? 35 : t === 'phone' ? 20 : t === 'email' ? 35 : t === 'website' ? 40 : t === 'id' ? 8 : 22 };
+  });
+  XLSX.utils.book_append_sheet(wb, ws, 'Data');
+  return wb;
+}
+
+function buildVCF() {
+  const companyCols = colsByType('company');
+  const contactCols = colsByType('contact');
+  const emailCols = colsByType('email');
+  const phoneCols = [...colsByType('phone'), ...colsByType('whatsapp')];
+  const addressCols = colsByType('address');
+  const cityCols = colsByType('city');
+  const webCols = colsByType('website');
+
+  let vcf = '';
+  S.clean.forEach(row => {
+    const name = contactCols.length ? row[contactCols[0]] || '' : '';
+    const company = companyCols.length ? row[companyCols[0]] || '' : '';
+    const email = emailCols.length ? row[emailCols[0]] || '' : '';
+    const phone = phoneCols.length ? row[phoneCols[0]] || '' : '';
+    const phone2 = phoneCols.length && row[phoneCols[0]+'_2'] ? row[phoneCols[0]+'_2'] : '';
+    const addr = addressCols.length ? row[addressCols[0]] || '' : '';
+    const city = cityCols.length ? row[cityCols[0]] || '' : '';
+    const web = webCols.length ? row[webCols[0]] || '' : '';
+
+    const displayName = name || company || 'Unknown';
+    const parts = displayName.split(' ');
+    const firstName = parts[0] || '';
+    const lastName = parts.slice(1).join(' ') || '';
+
+    vcf += 'BEGIN:VCARD\n';
+    vcf += 'VERSION:3.0\n';
+    vcf += `N:${lastName};${firstName};;;\n`;
+    vcf += `FN:${displayName}\n`;
+    if (company) vcf += `ORG:${company}\n`;
+    if (phone) vcf += `TEL;TYPE=CELL:${phone}\n`;
+    if (phone2) vcf += `TEL;TYPE=CELL:${phone2}\n`;
+    if (email) vcf += `EMAIL;TYPE=INTERNET:${email}\n`;
+    if (addr || city) vcf += `ADR;TYPE=WORK:;;${addr};${city};;;;\n`;
+    if (web) vcf += `URL:${web}\n`;
+    vcf += 'END:VCARD\n\n';
+  });
+  return vcf;
+}
+
+function buildPdfPayload() {
+  const keep = keepCols();
+  const total = S.clean.length;
   const emailCols = colsByType('email');
   const phoneCols = [...colsByType('phone'), ...colsByType('whatsapp')];
   const withEmail = emailCols.length ? countWithAny(emailCols) : null;
   const withPhone = phoneCols.length ? countWithAny(phoneCols) : null;
   const completeness = Math.round(S.clean.reduce((sum,row)=>{ const f=keep.filter(c=>row[c]&&row[c]!=='').length; return sum+f/keep.length; },0)/total*100);
   const fieldQuality = keep.map(col=>{ const filled=S.clean.filter(r=>r[col]&&r[col]!=='').length; const ft=FT[S.mapping[col].type]; return {label:`${ft?ft.icon:''} ${col}`,pct:Math.round(filled/total*100)}; });
+  return { fileName: S.fileName, sheetName: S.sheetName, total, fields: keep.length, completeness, withEmail, withPhone, fieldQuality, records: S.clean, columns: keep.slice(0, 8) };
+}
 
-  if (API_BASE) {
-    try {
-      const pdfH = await apiHeaders();
-      const res = await fetch(`${API_BASE}/api/export/pdf`, {
-        method: 'POST',
-        headers: pdfH,
-        body: JSON.stringify({
-          fileName: S.fileName,
-          sheetName: S.sheetName,
-          total, fields: keep.length, completeness,
-          withEmail, withPhone,
-          fieldQuality,
-          records: S.clean,
-          columns: keep.slice(0, 8),
-        }),
-      });
-      if (!res.ok) throw new Error(await res.text());
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = S.fileName.replace(/\.[^.]+$/,'') + '_CRM_Report.pdf';
-      a.click(); URL.revokeObjectURL(url);
-    } catch (err) {
-      console.warn('Backend PDF failed, falling back to print:', err);
-      _printPDFFallback(keep, total, withEmail, withPhone, completeness);
-    }
-  } else {
-    _printPDFFallback(keep, total, withEmail, withPhone, completeness);
+async function downloadPDF() {
+  if (!S.clean.length) { showNotification('No data to export.', 'error'); return; }
+  if (!API_BASE) { showNotification('Backend not configured. Set CRM_API_BASE in config.js', 'error'); return; }
+  const btn = document.getElementById('btnPDF');
+  if (btn) { btn.innerHTML = '<span class="spinner-inline"></span> Generating…'; btn.disabled = true; }
+  try {
+    const pdfH = await apiHeaders();
+    const res = await fetch(`${API_BASE}/api/export/pdf`, {
+      method: 'POST',
+      headers: pdfH,
+      body: JSON.stringify(buildPdfPayload()),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = S.fileName.replace(/\.[^.]+$/,'') + '_CRM_Report.pdf';
+    a.click(); URL.revokeObjectURL(url);
+  } catch (err) {
+    showNotification('PDF export failed: ' + err.message, 'error');
   }
   if (btn) { btn.innerHTML = '📄 PDF'; btn.disabled = false; }
 }
 
-function _printPDFFallback(keep, total, withEmail, withPhone, completeness) {
-  const dispCols=keep.slice(0,7);
-  const tableRows=S.clean.slice(0,300).map(row=>`<tr>${dispCols.map(c=>`<td>${escapeHTML((row[c]||'').toString().slice(0,50))}</td>`).join('')}</tr>`).join('');
-  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CRM Report — ${escapeHTML(S.fileName)}</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;color:#0F172A;font-size:11px}.cover{background:linear-gradient(135deg,#0F172A,#1E3A8A);color:white;padding:48px;page-break-after:always}.cover h1{font-size:28px;font-weight:900;margin-bottom:8px}.cover-sub{font-size:11px;opacity:.6;margin-bottom:32px}.kpis{display:flex;gap:12px}.kpi{background:rgba(255,255,255,.1);border-radius:8px;padding:14px 18px;flex:1;text-align:center}.kpi strong{font-size:22px;display:block}.kpi span{font-size:9px;opacity:.7;text-transform:uppercase}.section{padding:32px 48px}.h2{font-size:13px;font-weight:800;color:#1E3A8A;border-left:4px solid #3B82F6;padding-left:10px;margin-bottom:14px}.qual-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:10px}.qual-label{width:140px}.qual-bg{flex:1;background:#F1F5F9;border-radius:3px;height:6px;overflow:hidden}.qual-fill{height:100%;border-radius:3px}.qual-val{width:32px;text-align:right;font-weight:700}table{width:100%;border-collapse:collapse;font-size:9px}thead th{background:#0F172A;color:white;padding:7px 9px;text-align:left;font-size:8px;text-transform:uppercase}tbody tr:nth-child(even){background:#F8FAFC}tbody td{padding:6px 9px;border-bottom:1px solid #E2E8F0}@media print{@page{margin:0;size:A4}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>
-  <div class="cover"><div style="font-size:9px;opacity:.5;margin-bottom:12px;letter-spacing:1.5px;text-transform:uppercase">CRM Intelligence · Export Report</div><h1>📊 ${escapeHTML(S.fileName)}</h1><div class="cover-sub">Sheet: ${escapeHTML(S.sheetName)} · Generated: ${new Date().toLocaleString()}</div><div class="kpis"><div class="kpi"><strong>${total.toLocaleString()}</strong><span>Records</span></div><div class="kpi"><strong>${keep.length}</strong><span>Fields</span></div>${withEmail!==null?`<div class="kpi"><strong>${withEmail}</strong><span>With Email</span></div>`:''} ${withPhone!==null?`<div class="kpi"><strong>${withPhone}</strong><span>With Phone</span></div>`:''}<div class="kpi"><strong>${completeness}%</strong><span>Quality</span></div></div></div>
-  <div class="section"><div class="h2">Data Quality by Field</div>${keep.map(col=>{const filled=S.clean.filter(r=>r[col]&&r[col]!=='').length,pct=Math.round(filled/total*100),color=pct>75?'#10B981':pct>40?'#F59E0B':'#F43F5E';return `<div class="qual-row"><div class="qual-label">${escapeHTML(col)}</div><div class="qual-bg"><div class="qual-fill" style="width:${pct}%;background:${color}"></div></div><div class="qual-val" style="color:${color}">${pct}%</div></div>`;}).join('')}</div>
-  <div class="section"><div class="h2">CRM Data (first 300 records)</div><table><thead><tr>${dispCols.map(c=>`<th>${escapeHTML(c)}</th>`).join('')}</tr></thead><tbody>${tableRows}</tbody></table></div>
-  </body></html>`;
-  const w=window.open('','_blank'); w.document.write(html); w.document.close(); w.focus(); setTimeout(()=>w.print(),900);
-}
-
 function downloadExcel() {
   if (!S.clean.length) { showNotification('No data to export.', 'error'); return; }
-
-  const wb = XLSX.utils.book_new();
-
-  // Build columns to export (all kept cols + secondary _2 variants if present)
-  const keep = keepCols();
-  const cols = [];
-  keep.forEach(c => {
-    cols.push(c);
-    if (S.clean.some(r => r[c + '_2'])) cols.push(c + '_2');
-  });
-
-  // Use original column headers; secondary columns get a " 2" suffix
-  const headers = cols.map(c => c.endsWith('_2') ? c.replace(/_2$/, '') + ' 2' : c);
-
-  // Build data rows — empty string for missing values
-  const rows = S.clean.map(row => cols.map(c => (row[c] !== undefined && row[c] !== null) ? row[c] : ''));
-
-  // Single sheet with original-style headers + cleaned data
-  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-
-  // Auto-width columns by field type
-  ws['!cols'] = cols.map(c => {
-    const base = c.replace(/_2$/, '');
-    const t = S.mapping[base] ? S.mapping[base].type : 'other';
-    return { wch: t === 'address' || t === 'product' ? 55 : t === 'company' ? 35 : t === 'phone' ? 20 : t === 'email' ? 35 : t === 'website' ? 40 : t === 'id' ? 8 : 22 };
-  });
-
-  XLSX.utils.book_append_sheet(wb, ws, 'Data');
-
-  // File name: original name + _cleaned
   const outName = S.fileName.replace(/\.(xlsx?|xls|csv|txt)$/i, '') + '_cleaned.xlsx';
-  XLSX.writeFile(wb, outName);
+  XLSX.writeFile(buildWorkbook(), outName);
 }
 
 function downloadCSV() {
@@ -1397,13 +1313,10 @@ function showView(id) {
 function resetApp() {
   S.rawData=[];S.headers=[];S.mapping={};S.clean=[];S.fileName='';S.sheetName='';
   S.filtered=[];S.page=1;S.sortCol=null;S.sortDir=1;S.dupGroups=[];
-  S.validation={dropped:0,invalidEmails:0,landlines:0,foreign:0,total:0};
   killCharts();
   document.getElementById('fileInput').value='';
   document.getElementById('topActions').style.display='none';
   document.getElementById('sbFileCard').classList.add('hidden');
-  document.getElementById('procSteps').innerHTML='';
-  document.getElementById('progFill').style.width='0%';
   showView('upload');
 }
 
@@ -1920,44 +1833,7 @@ async function addCallLogFromPanel() {
 /* ── VCF Export ───────────────────────────────────────────────────── */
 function downloadVCF() {
   if (!S.clean.length) { showNotification('No data to export.', 'error'); return; }
-  const companyCols = colsByType('company');
-  const contactCols = colsByType('contact');
-  const emailCols = colsByType('email');
-  const phoneCols = [...colsByType('phone'), ...colsByType('whatsapp')];
-  const addressCols = colsByType('address');
-  const cityCols = colsByType('city');
-  const webCols = colsByType('website');
-
-  let vcf = '';
-  S.clean.forEach(row => {
-    const name = contactCols.length ? row[contactCols[0]] || '' : '';
-    const company = companyCols.length ? row[companyCols[0]] || '' : '';
-    const email = emailCols.length ? row[emailCols[0]] || '' : '';
-    const phone = phoneCols.length ? row[phoneCols[0]] || '' : '';
-    const phone2 = phoneCols.length && row[phoneCols[0]+'_2'] ? row[phoneCols[0]+'_2'] : '';
-    const addr = addressCols.length ? row[addressCols[0]] || '' : '';
-    const city = cityCols.length ? row[cityCols[0]] || '' : '';
-    const web = webCols.length ? row[webCols[0]] || '' : '';
-
-    const displayName = name || company || 'Unknown';
-    const parts = displayName.split(' ');
-    const firstName = parts[0] || '';
-    const lastName = parts.slice(1).join(' ') || '';
-
-    vcf += 'BEGIN:VCARD\n';
-    vcf += 'VERSION:3.0\n';
-    vcf += `N:${lastName};${firstName};;;\n`;
-    vcf += `FN:${displayName}\n`;
-    if (company) vcf += `ORG:${company}\n`;
-    if (phone) vcf += `TEL;TYPE=CELL:${phone}\n`;
-    if (phone2) vcf += `TEL;TYPE=CELL:${phone2}\n`;
-    if (email) vcf += `EMAIL;TYPE=INTERNET:${email}\n`;
-    if (addr || city) vcf += `ADR;TYPE=WORK:;;${addr};${city};;;;\n`;
-    if (web) vcf += `URL:${web}\n`;
-    vcf += 'END:VCARD\n\n';
-  });
-
-  const blob = new Blob([vcf], {type: 'text/vcard;charset=utf-8'});
+  const blob = new Blob([buildVCF()], {type: 'text/vcard;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -1975,90 +1851,21 @@ async function downloadZip() {
   try {
     const zip = new window.JSZip();
     const baseName = (S.fileName || 'export').replace(/\.[^.]+$/, '');
-    
-    // 1. Generate Excel Blob
-    const wb = XLSX.utils.book_new();
-    const keep = keepCols();
-    const cols = [];
-    keep.forEach(c => { cols.push(c); if (S.clean.some(r => r[c + '_2'])) cols.push(c + '_2'); });
-    const headers = cols.map(c => c.endsWith('_2') ? c.replace(/_2$/, '') + ' 2' : c);
-    const rows = S.clean.map(row => cols.map(c => (row[c] !== undefined && row[c] !== null) ? row[c] : ''));
-    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-    ws['!cols'] = cols.map(c => {
-      const base = c.replace(/_2$/, '');
-      const t = S.mapping[base] ? S.mapping[base].type : 'other';
-      return { wch: t === 'address' || t === 'product' ? 55 : t === 'company' ? 35 : t === 'phone' ? 20 : t === 'email' ? 35 : t === 'website' ? 40 : t === 'id' ? 8 : 22 };
-    });
-    XLSX.utils.book_append_sheet(wb, ws, 'Data');
-    const excelBuf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+
+    const excelBuf = XLSX.write(buildWorkbook(), { bookType: 'xlsx', type: 'array' });
     zip.file(`${baseName}_CRM_Export.xlsx`, excelBuf);
-    
-    // 2. Generate VCF String
-    const companyCols = colsByType('company');
-    const contactCols = colsByType('contact');
-    const emailCols = colsByType('email');
-    const phoneCols = [...colsByType('phone'), ...colsByType('whatsapp')];
-    const addressCols = colsByType('address');
-    const cityCols = colsByType('city');
-    const webCols = colsByType('website');
+    zip.file(`${baseName}_Contacts.vcf`, buildVCF());
 
-    let vcf = '';
-    S.clean.forEach(row => {
-      const name = contactCols.length ? row[contactCols[0]] || '' : '';
-      const company = companyCols.length ? row[companyCols[0]] || '' : '';
-      const email = emailCols.length ? row[emailCols[0]] || '' : '';
-      const phone = phoneCols.length ? row[phoneCols[0]] || '' : '';
-      const phone2 = phoneCols.length && row[phoneCols[0]+'_2'] ? row[phoneCols[0]+'_2'] : '';
-      const addr = addressCols.length ? row[addressCols[0]] || '' : '';
-      const city = cityCols.length ? row[cityCols[0]] || '' : '';
-      const web = webCols.length ? row[webCols[0]] || '' : '';
-
-      const displayName = name || company || 'Unknown';
-      const parts = displayName.split(' ');
-      const firstName = parts[0] || '';
-      const lastName = parts.slice(1).join(' ') || '';
-
-      vcf += 'BEGIN:VCARD\nVERSION:3.0\n';
-      vcf += `N:${lastName};${firstName};;;\nFN:${displayName}\n`;
-      if (company) vcf += `ORG:${company}\n`;
-      if (phone) vcf += `TEL;TYPE=CELL:${phone}\n`;
-      if (phone2) vcf += `TEL;TYPE=CELL:${phone2}\n`;
-      if (email) vcf += `EMAIL;TYPE=INTERNET:${email}\n`;
-      if (addr || city) vcf += `ADR;TYPE=WORK:;;${addr};${city};;;;\n`;
-      if (web) vcf += `URL:${web}\n`;
-      vcf += 'END:VCARD\n\n';
-    });
-    zip.file(`${baseName}_Contacts.vcf`, vcf);
-
-    // 3. Fetch PDF from backend
     if (API_BASE) {
-      const total = S.clean.length;
-      const completeness = Math.round(S.clean.reduce((sum,row)=>{ const f=keep.filter(c=>row[c]&&row[c]!=='').length; return sum+f/keep.length; },0)/total*100);
-      const fieldQuality = keep.map(col=>{ const filled=S.clean.filter(r=>r[col]&&r[col]!=='').length; const ft=FT[S.mapping[col].type]; return {label:`${ft?ft.icon:''} ${col}`,pct:Math.round(filled/total*100)}; });
-      const withEmail = emailCols.length ? countWithAny(emailCols) : null;
-      const withPhone = phoneCols.length ? countWithAny(phoneCols) : null;
-
       const crmPdfH = await apiHeaders();
       const res = await fetch(`${API_BASE}/api/export/pdf`, {
         method: 'POST',
         headers: crmPdfH,
-        body: JSON.stringify({
-          fileName: S.fileName,
-          sheetName: S.sheetName,
-          total, fields: keep.length, completeness,
-          withEmail, withPhone,
-          fieldQuality,
-          records: S.clean,
-          columns: keep.slice(0, 8),
-        }),
+        body: JSON.stringify(buildPdfPayload()),
       });
-      if (res.ok) {
-        const pdfBlob = await res.blob();
-        zip.file(`${baseName}_Report.pdf`, pdfBlob);
-      }
+      if (res.ok) zip.file(`${baseName}_Report.pdf`, await res.blob());
     }
-    
-    // Generate ZIP file
+
     const zipBlob = await zip.generateAsync({ type: 'blob' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(zipBlob);

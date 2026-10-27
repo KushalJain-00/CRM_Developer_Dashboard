@@ -178,7 +178,7 @@ def extract_local_fields(parsed: ParsedEml) -> dict:
     if phones:
         fields["phone_primary"] = phones[0].strip()
         if len(phones) > 1:
-            fields["phone_secondary"] = phones[1].strip()
+            fields["phone_secondary"] = ", ".join(p.strip() for p in phones[1:])
     cm = COMPANY_RE.search(zone)
     if cm:
         fields["company"] = cm.group(0).strip()

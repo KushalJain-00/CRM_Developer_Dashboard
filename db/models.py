@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, JSON
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from .database import Base
@@ -89,7 +89,6 @@ class SessionData(Base):
     sheet_name = Column(String(255))
     upload_date = Column(DateTime, default=_utcnow)
     mapping = Column(JSON)  # Store field mapping configuration
-    is_active = Column(Boolean, default=True)
     user_id       = Column(Integer, ForeignKey("users.id"), nullable=True)
     total_records = Column(Integer, default=0)
     imported      = Column(Integer, default=0)

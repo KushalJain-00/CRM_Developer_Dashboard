@@ -41,7 +41,11 @@
   async function authHeaders() {
     const h = {};
     if (window.getAuthToken) {
-      try { const t = await getAuthToken(); if (t) h['Authorization'] = `Bearer ${t}`; } catch {}
+      try {
+        const t = await getAuthToken();
+        if (!t) { forceRelogin(); return h; }
+        h['Authorization'] = `Bearer ${t}`;
+      } catch { forceRelogin(); }
     }
     return h;
   }
@@ -163,7 +167,12 @@
       state.contacts = data.items; state.contactTotal = data.total;
       state.selected = new Set();
       renderContacts();
-    } catch (err) { notify('Load contacts failed: ' + err.message, 'error'); }
+    } catch (err) {
+      notify('Load contacts failed: ' + err.message, 'error');
+      const table = document.getElementById('emlContactsTable');
+      if (table) table.querySelector('tbody').innerHTML =
+        `<tr><td colspan="16" style="padding:20px;text-align:center;color:var(--rose)">Load failed: ${e(err.message)}</td></tr>`;
+    }
   }
 
   function renderContacts() {
@@ -267,7 +276,11 @@
       if (!res.ok) throw new Error(data.detail || res.statusText);
       state.emails = data.items; state.emailTotal = data.total;
       renderEmails();
-    } catch (err) { notify('Load emails failed: ' + err.message, 'error'); }
+    } catch (err) {
+      notify('Load emails failed: ' + err.message, 'error');
+      const list = document.getElementById('emlEmailsList');
+      if (list) list.innerHTML = `<div style="padding:20px;text-align:center;color:var(--rose)">Load failed: ${e(err.message)}</div>`;
+    }
   }
 
   function renderEmails() {

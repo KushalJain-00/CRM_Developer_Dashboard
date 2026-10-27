@@ -88,3 +88,17 @@ def test_website_not_matched_from_email_only_body():
     f = extract_local_fields(p)
     assert f["email"] == "john@acme.com"
     assert f["website"] is None
+
+def test_secondary_phone_keeps_all_extra_phones():
+    raw = (b"From: John Doe <john@acme.com>\r\nTo: a@b.com\r\nSubject: hi\r\n\r\n"
+           b"-- \r\nJohn Doe\r\n"
+           b"+91 98765 43210\r\n"
+           b"+91 98765 43211\r\n"
+           b"+91 98765 43212\r\n"
+           b"john@acme.com\r\n")
+    p = parse_eml_bytes(raw, "phones.eml")
+    f = extract_local_fields(p)
+    assert "9876543210" in (f["phone_primary"] or "").replace(" ", "")
+    sec = (f["phone_secondary"] or "").replace(" ", "")
+    assert "9876543211" in sec
+    assert "9876543212" in sec

@@ -1,11 +1,8 @@
 import xlrd
-import openpyxl
-import io
 import re
 import time
 import os
 import fitz  # PyMuPDF
-from typing import Any
 
 
 def parse_xls(content: bytes) -> dict:
@@ -177,7 +174,6 @@ def _extract_contacts_from_text(text: str) -> list:
     # Strategy 1: Group lines into blocks separated by blank-ish gaps or numbering
     blocks = []
     current_block = []
-    prev_line = ""
     for line in lines:
         # Detect block boundaries: numbered entries, blank lines, or lines starting with SR/No
         is_boundary = (
@@ -187,7 +183,6 @@ def _extract_contacts_from_text(text: str) -> list:
             blocks.append('\n'.join(current_block))
             current_block = []
         current_block.append(line)
-        prev_line = line
 
     if current_block:
         blocks.append('\n'.join(current_block))
@@ -235,16 +230,7 @@ def _extract_contacts_from_text(text: str) -> list:
         if rows:
             return rows
 
-    # Strategy 3: Split by delimiters
-    rows = []
-    for line in lines:
-        parts = re.split(r'\s{2,}|\t', line)
-        if len(parts) >= 2:
-            row = {f"Col_{i}": p.strip() for i, p in enumerate(parts) if p.strip()}
-            if len(row) >= 2:
-                rows.append(row)
-
-    return rows
+    return []
 
 
 def _extract_fields_from_block(block: str, phone_re, intl_phone_re, email_re, url_re, pincode_re) -> dict:

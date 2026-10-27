@@ -42,6 +42,13 @@ def _sanitize_search(s: str) -> str:
     """Strip chars that break PostgREST or_ strings; keep alnum/space/@/./-/_."""
     return re.sub(r"[^a-zA-Z0-9 @.\-_]", "", s or "")
 
+def _crm_phone_secondary(v: Optional[str]) -> Optional[str]:
+    # ponytail: CRM Contact.phone_secondary is String(50) single-value; staged store keeps full list
+    if not v:
+        return None
+    first = v.split(",")[0].strip()
+    return first or None
+
 
 async def _merge_into_crm(db: AsyncSession, contact: dict) -> dict:
     """Merge-or-create a CRM contact. Returns {crm_id, action} where action is 'created'|'merged'|'skipped'."""
@@ -172,7 +179,7 @@ async def _merge_into_crm(db: AsyncSession, contact: dict) -> dict:
             contact_name=name or None,
             email_primary=email or None,
             phone_primary=phone or None,
-            phone_secondary=contact.get("phone_secondary"),
+            phone_secondary=_crm_phone_secondary(contact.get("phone_secondary")),
             address=contact.get("address"),
             city=contact.get("city"),
             pincode=contact.get("pincode"),
@@ -400,7 +407,7 @@ async def _push_one(db: AsyncSession, contact: dict) -> str:
         contact_name=contact.get("name"),
         email_primary=email or None,
         phone_primary=phone or None,
-        phone_secondary=contact.get("phone_secondary"),
+        phone_secondary=_crm_phone_secondary(contact.get("phone_secondary")),
         address=contact.get("address"),
         city=contact.get("city"),
         pincode=contact.get("pincode"),

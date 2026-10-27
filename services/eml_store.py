@@ -10,10 +10,13 @@ def get_eml_client() -> Client:
     global _client
     if _client is not None:
         return _client
-    url = os.getenv("EML_SUPABASE_URL") or os.getenv("SUPABASE_URL", "")
-    key = os.getenv("EML_SUPABASE_ANON_KEY") or os.getenv("SUPABASE_ANON_KEY", "")
+    # ruling: EML store is a SEPARATE Supabase project — never silently fall
+    # back to the CRM project, which has no eml_* tables (404s that look like
+    # "no contacts" instead of "misconfigured").
+    url = os.getenv("EML_SUPABASE_URL", "")
+    key = os.getenv("EML_SUPABASE_ANON_KEY", "")
     if not url or not key:
-        raise RuntimeError("EML Supabase not configured (missing SUPABASE_URL / SUPABASE_ANON_KEY)")
+        raise RuntimeError("EML_SUPABASE_URL / EML_SUPABASE_ANON_KEY not set on server")
     _client = create_client(url, key)
     return _client
 

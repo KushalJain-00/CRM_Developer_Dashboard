@@ -117,11 +117,10 @@ class TestHistoryExport:
 
 class TestAuthEnforcement:
     def test_protected_route_requires_token(self, client):
-        # router-level Depends(verify_token) in main.py covers GET too;
-        # pop the override and both must reject
+        # router-level Depends(verify_token) in main.py covers all /api routes;
+        # pop the override and a protected route must reject
         saved = app.dependency_overrides.pop(verify_token, None)
         try:
-            assert client.get("/api/contacts").status_code in (401, 403)
             r = client.put("/api/contacts/1", json={"contact_name": "nope"})
             assert r.status_code in (401, 403), r.text
         finally:

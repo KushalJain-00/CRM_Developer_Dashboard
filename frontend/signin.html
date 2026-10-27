@@ -468,11 +468,10 @@
 
     async function upsertAuthUser(user) {
       const API_BASE = (window.CRM_API_BASE || '').replace(/\/$/, '');
-      const API_KEY = window.CRM_API_KEY || '';
       if (!API_BASE || !user?.email) return;
       await fetch(`${API_BASE}/api/auth/upsert`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json', 'X-API-Key': API_KEY},
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           email: user.email,
           name: user.user_metadata?.full_name || user.email,

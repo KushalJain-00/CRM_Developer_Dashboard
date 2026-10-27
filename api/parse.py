@@ -1,12 +1,14 @@
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Request
+from fastapi import APIRouter, UploadFile, File, HTTPException, Request
 from fastapi.responses import JSONResponse
 import sys
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core.auth import verify_token
 from core.rate_limit import limiter
 from services.parser import parse_xls, parse_pdf
 
@@ -38,7 +40,8 @@ async def parse_file(request: Request, file: UploadFile = File(...)):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(422, "Could not parse file")
+        logger.exception("parse failed for %s", file.filename)
+        raise HTTPException(422, f"Could not parse file: {e}")
 
     return JSONResponse(content={
         "ok": True,
